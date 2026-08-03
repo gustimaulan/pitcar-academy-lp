@@ -1,0 +1,68 @@
+---
+// SEO Head Component — Reusable for all pages
+interface Props {
+  title: string;
+  description: string;
+  image?: string;
+  url?: string;
+  type?: 'website' | 'article' | 'profile';
+}
+
+const {
+  title,
+  description,
+  image = '/og-image.png',
+  url = '/',
+  type = 'website',
+} = Astro.props;
+
+const siteName = 'Pitcar Academy';
+const siteUrl = Astro.site || 'https://academy.pitcar.co.id';
+const fullTitle = `${title} | ${siteName}`;
+const fullImage = `${siteUrl}${image}`;
+const fullUrl = `${siteUrl}${url}`;
+---
+
+<title>{fullTitle}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={fullUrl} />
+
+<!-- Open Graph -->
+<meta property="og:type" content={type} />
+<meta property="og:title" content={fullTitle} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={fullImage} />
+<meta property="og:url" content={fullUrl} />
+<meta property="og:site_name" content={siteName} />
+<meta property="og:locale" content="id_ID" />
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={fullTitle} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={fullImage} />
+
+<!-- Structured Data: EducationalOrganization -->
+<script type="application/ld+json" is:inline set:html={JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "EducationalOrganization",
+  "name": "Pitcar Academy",
+  "description": "Program pelatihan mekanik profesional dengan kurikulum terstruktur dan praktik langsung di bengkel Pitcar Service.",
+  "url": siteUrl,
+  "logo": `${siteUrl}/logo.png`,
+  "sameAs": [
+    "https://instagram.com/pitcaracademy",
+    "https://youtube.com/@pitcaracademy"
+  ],
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "Jakarta",
+    "addressCountry": "ID"
+  },
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "telephone": "+62-812-3456-7890",
+    "contactType": "customer service",
+    "availableLanguage": "Indonesian"
+  }
+})} />

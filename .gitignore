@@ -1,0 +1,25 @@
+# Output
+dist/
+node_modules/
+.cache/
+.astro/
+
+# Env
+.env
+.env.*
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+*.local
+nginx.conf
