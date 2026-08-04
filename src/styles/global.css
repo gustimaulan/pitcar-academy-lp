@@ -1,13 +1,42 @@
 /* ========================================
-   Pitcar Academy LP - Global Styles & Design System
-   Bold & Premium Visual Overhaul
+   Pitcar Design System - Global Styles
    ======================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import '@fontsource-variable/inter';
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --aw-color-primary: rgb(204 0 0);
+  --aw-color-secondary: rgb(170 0 0);
+  --aw-color-accent: rgb(204 0 0);
+  --aw-color-text-heading: rgb(0 0 0);
+  --aw-color-text-default: rgb(16 16 16);
+  --aw-color-text-muted: rgb(16 16 16 / 66%);
+  --aw-color-bg-page: rgb(255 255 255);
+}
+
+.dark {
+  --aw-color-primary: rgb(204 0 0);
+  --aw-color-secondary: rgb(170 0 0);
+  --aw-color-accent: rgb(204 0 0);
+  --aw-color-text-heading: rgb(247 248 248);
+  --aw-color-text-default: rgb(229 236 246);
+  --aw-color-text-muted: rgb(229 236 246 / 66%);
+  --aw-color-bg-page: rgb(8 8 8);
+}
+
+::selection {
+  background-color: rgb(204 0 0 / 30%);
+  color: #ffffff;
+}
+
+.dark ::selection {
+  background-color: rgb(204 0 0 / 40%);
+  color: #ffffff;
+}
 
 @layer base {
   * {
@@ -17,12 +46,18 @@
   }
   html {
     scroll-behavior: smooth;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    scroll-padding-top: 72px;
+    font-family: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  }
+  @media (min-width: 1536px) {
+    html {
+      font-size: 20px;
+    }
   }
   body {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    color: #0F172A;
-    background-color: #FFFFFF;
+    font-family: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+    color: var(--aw-color-text-default);
+    background-color: var(--aw-color-bg-page);
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -42,91 +77,66 @@
   /* ---- Container System ---- */
   .container-custom {
     width: 100%;
-    max-width: 80rem;
+    max-width: 80rem; /* 1280px / max-w-7xl */
     margin-left: auto;
     margin-right: auto;
-    padding-left: 1.25rem;
-    padding-right: 1.25rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
   @media (min-width: 640px) {
     .container-custom {
-      padding-left: 2rem;
-      padding-right: 2rem;
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
     }
   }
-  @media (min-width: 1024px) {
-    .container-custom {
-      padding-left: 2.5rem;
-      padding-right: 2.5rem;
+
+  /* ---- Headline Container ---- */
+  .headline-container {
+    max-width: 48rem; /* max-w-3xl */
+    margin-bottom: 2rem; /* mb-8 */
+    text-align: center;
+  }
+  @media (min-width: 768px) {
+    .headline-container {
+      margin-left: auto;
+      margin-right: auto;
+      margin-bottom: 3rem; /* md:mb-12 */
     }
   }
 
   /* ---- Section Padding ---- */
   .section-padding {
-    padding-top: 5rem;
-    padding-bottom: 5rem;
+    padding-top: 3rem; /* py-12 */
+    padding-bottom: 3rem;
   }
   @media (min-width: 768px) {
     .section-padding {
-      padding-top: 6.5rem;
-      padding-bottom: 6.5rem;
+      padding-top: 4rem; /* md:py-16 */
+      padding-bottom: 4rem;
     }
   }
   @media (min-width: 1024px) {
     .section-padding {
-      padding-top: 8rem;
-      padding-bottom: 8rem;
+      padding-top: 5rem; /* lg:py-20 */
+      padding-bottom: 5rem;
     }
   }
 
-  /* ---- Gradients ---- */
-  .hero-gradient {
-    background: linear-gradient(135deg, #0F172A 0%, #1E1B4B 50%, #0F172A 100%);
+  /* ---- Standard Buttons (Design System Section 3) ---- */
+  .btn {
+    @apply inline-flex items-center justify-center rounded-full border border-gray-400 bg-transparent font-medium text-center text-base leading-snug transition py-3.5 px-6 md:px-8 ease-in duration-200 focus:ring-blue-500 focus:ring-offset-blue-200 focus:ring-2 focus:ring-offset-2 hover:bg-gray-100 hover:border-gray-600 text-slate-900 dark:text-slate-300 dark:border-slate-500 dark:hover:bg-slate-800 dark:hover:border-slate-800 cursor-pointer;
   }
-  .gradient-bg {
-    background: linear-gradient(135deg, #0F172A 0%, #7F1D1D 50%, #0F172A 100%);
+  .btn-primary {
+    @apply btn font-semibold bg-primary text-white border-primary hover:bg-secondary hover:border-secondary hover:text-white dark:text-white dark:bg-primary dark:border-primary dark:hover:border-secondary dark:hover:bg-secondary;
   }
-  .gradient-text {
-    background: linear-gradient(135deg, #EF4444 0%, #F87171 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+  .btn-secondary {
+    @apply btn;
   }
-  .gradient-text-gold {
-    background: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+  .btn-tertiary {
+    @apply btn border-none shadow-none text-slate-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white;
   }
-
-  /* ---- Headings ---- */
-  .heading-xl {
-    font-size: 2.25rem;
-    line-height: 1.1;
-    font-weight: 900;
-    letter-spacing: -0.03em;
-  }
-  @media (min-width: 640px) {
-    .heading-xl { font-size: 3rem; }
-  }
-  @media (min-width: 768px) {
-    .heading-xl { font-size: 3.75rem; }
-  }
-  @media (min-width: 1024px) {
-    .heading-xl { font-size: 4.5rem; }
-  }
-
-  .heading-md {
-    font-size: 1.75rem;
-    line-height: 1.2;
-    font-weight: 800;
-    letter-spacing: -0.025em;
-  }
-  @media (min-width: 768px) {
-    .heading-md { font-size: 2.25rem; }
-  }
-  @media (min-width: 1024px) {
-    .heading-md { font-size: 2.75rem; }
+  .btn-link {
+    @apply cursor-pointer hover:text-primary transition-colors;
   }
 
   /* ---- WhatsApp Primary CTA Button ---- */
@@ -139,7 +149,7 @@
     color: #FFFFFF !important;
     font-weight: 800;
     padding: 1rem 2rem;
-    border-radius: 1rem;
+    border-radius: 9999px;
     font-size: 1.0625rem;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow:
@@ -175,6 +185,31 @@
     box-shadow: 0 8px 20px -5px rgba(37, 211, 102, 0.4);
   }
 
+  /* ---- Gradients & Visual Utilities ---- */
+  .hero-gradient {
+    background: linear-gradient(135deg, #080808 0%, #170000 50%, #080808 100%);
+  }
+  .gradient-text {
+    background: linear-gradient(135deg, #cc0000 0%, #ff6464 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* ---- Standard Heading Classes (Design System Section 1) ---- */
+  .hero-title {
+    @apply text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black leading-[1.05] tracking-tight font-heading uppercase;
+  }
+  .heading-primary {
+    @apply text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black leading-[1.1] tracking-tight font-heading uppercase text-heading;
+  }
+  .section-tagline {
+    @apply text-base font-bold tracking-wide uppercase text-secondary dark:text-blue-200;
+  }
+  .section-subtitle {
+    @apply text-xl text-muted dark:text-slate-300;
+  }
+
   /* ---- Card Hover ---- */
   .card-hover {
     transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
@@ -182,46 +217,25 @@
   .card-hover:hover {
     transform: translateY(-6px);
     box-shadow:
-      0 25px 50px -12px rgba(15, 23, 42, 0.18),
-      0 0 0 1px rgba(15, 23, 42, 0.05);
+      0 25px 50px -12px rgba(0, 0, 0, 0.25),
+      0 0 0 1px rgba(204, 0, 0, 0.15);
   }
 
-  /* ---- Text Glow Utility ---- */
-  .text-glow-red {
-    text-shadow: 0 0 30px rgba(239, 68, 68, 0.3);
-  }
-  .text-glow-amber {
-    text-shadow: 0 0 30px rgba(245, 158, 11, 0.3);
-  }
   .text-glow-white {
     text-shadow: 0 0 40px rgba(255, 255, 255, 0.15);
   }
 }
 
-/* ---- Entrance Animations ---- */
+/* ---- Entrance Animations (Design System Section 5) ---- */
 @keyframes fadeInUp {
-  from {
+  0% {
     opacity: 0;
-    transform: translateY(24px);
+    transform: translateY(2rem);
   }
-  to {
+  100% {
     opacity: 1;
     transform: translateY(0);
   }
-}
-@keyframes fadeInLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-24px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-@keyframes shimmer {
-  0% { background-position: -200% center; }
-  100% { background-position: 200% center; }
 }
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
@@ -237,14 +251,7 @@
 }
 
 .animate-fade-in-up {
-  animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-.animate-fade-in-left {
-  animation: fadeInLeft 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-.animate-shimmer {
-  background-size: 200% auto;
-  animation: shimmer 3s linear infinite;
+  animation: fadeInUp 1s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 .animate-float {
   animation: float 4s ease-in-out infinite;

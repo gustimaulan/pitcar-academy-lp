@@ -10,6 +10,7 @@ interface Props {
   description: string;
   image?: string;
   canonical?: string;
+  whatsappNumber?: string;
 }
 
 const {
@@ -17,6 +18,7 @@ const {
   description,
   image = '/og-image.png',
   canonical = '/',
+  whatsappNumber = '6285190950381',
 } = Astro.props;
 
 const siteUrl = Astro.site || 'https://academy.pitcar.co.id';
@@ -42,12 +44,12 @@ const siteUrl = Astro.site || 'https://academy.pitcar.co.id';
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   </head>
-  <body class="bg-white text-pitcar-gray-800 antialiased">
-    <Header />
+  <body class="bg-page text-default antialiased tracking-tight selection:bg-primary/30 selection:text-white">
+    <Header whatsappNumber={whatsappNumber} />
     <main id="main-content">
       <slot />
     </main>
-    <Footer />
-    <WhatsAppButton />
+    <Footer whatsappNumber={whatsappNumber} />
+    <WhatsAppButton number={whatsappNumber} />
   </body>
 </html>

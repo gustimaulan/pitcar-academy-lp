@@ -4,42 +4,44 @@ export default {
   theme: {
     extend: {
       colors: {
-        'pitcar': {
-          red: {
-            DEFAULT: '#E53E3E',
-            dark: '#C53030',
-            light: '#FC8181',
-          },
-          darkred: '#C53030',
-          lightred: '#FC8181',
-          'red-dark': '#C53030',
-          'red-light': '#FC8181',
-          black: '#1A1A2E',
-          dark: '#16213E',
-          gray: {
-            50: '#F7FAFC',
-            100: '#EDF2F7',
-            200: '#E2E8F0',
-            300: '#CBD5E0',
-            400: '#A0AEC0',
-            500: '#718096',
-            600: '#4A5568',
-            700: '#2D3748',
-            800: '#1A202C',
-            900: '#171923',
-          },
-          gold: '#D69E2E',
-          goldlight: '#F6E05E',
+        primary: 'var(--aw-color-primary, rgb(204 0 0))',
+        secondary: 'var(--aw-color-secondary, rgb(170 0 0))',
+        accent: 'var(--aw-color-accent, rgb(204 0 0))',
+        heading: 'var(--aw-color-text-heading, rgb(0 0 0))',
+        default: 'var(--aw-color-text-default, rgb(16 16 16))',
+        muted: 'var(--aw-color-text-muted, rgb(16 16 16 / 66%))',
+        page: 'var(--aw-color-bg-page, rgb(255 255 255))',
+        'brand': {
+          50:  '#fff1f1',
+          100: '#ffe0e0',
+          200: '#ffc7c7',
+          300: '#ff9e9e',
+          400: '#ff6464',
+          500: '#ff2d2d',
+          600: '#cc0000',  // Main brand color
+          700: '#aa0000',  // Darker brand red (#AA0000)
+          800: '#990000',
+          900: '#7a0000',
+          950: '#440000',
         },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ["'Inter Variable'", 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        heading: ["'Inter Variable'", 'ui-sans-serif', 'system-ui', 'sans-serif'],
+      },
+      lineHeight: {
+        tighter: '1.15',
       },
       animation: {
+        fade: 'fadeInUp 1s both',
         'bounce-subtle': 'bounceSubtle 2s infinite',
         float: 'floatAnim 3s ease-in-out infinite',
       },
       keyframes: {
+        fadeInUp: {
+          '0%': { opacity: '0', transform: 'translateY(2rem)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
         bounceSubtle: {
           '0%, 100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(-6px)' },

@@ -13,7 +13,7 @@ export const whatsappConfig = {
       'Halo, saya tertarik dengan PAKET BASIC Maintenance Mobil EFI - Rp 5.000.000. Bagaimana cara daftarnya?'
     ),
     packageAdvanced: encodeURIComponent(
-      'Halo, saya tertarik dengan PAKET ADVANCED General Repair Mobil EFI - Rp 5.000.000. Bagaimana cara daftarnya?'
+      'Halo, saya tertarik dengan PAKET ADVANCE General Repair Mobil EFI - Rp 5.000.000. Bagaimana cara daftarnya?'
     ),
     packageProfessional: encodeURIComponent(
       'Halo, saya tertarik dengan PAKET PROFESSIONAL Level 1&2 Maintenance & General Repair - Rp 8.500.000. Bagaimana cara daftarnya?'
@@ -35,9 +35,11 @@ export interface PackageItem {
   id: string;
   level: string;
   name: string;
+  subtitle: string;
   description: string;
   price: string;
   priceDisplay: string;
+  savingsNote?: string;
   duration: string;
   hours: string;
   ojt: string;
@@ -52,107 +54,96 @@ export interface PackageItem {
 export const packages: PackageItem[] = [
   {
     id: 'basic',
-    level: 'LEVEL 1',
-    name: 'MAINTENANCE MOBIL BENSIN EFI',
+    level: 'BASIC',
+    name: 'Mechanic Level 1 — Maintenance',
+    subtitle: 'Cocok untuk kamu yang ingin membangun fundamental sebagai mekanik.',
     description:
-      'Program dasar untuk menjadi mekanik handal di bidang perawatan berkala dan sistem EFI. Cocok untuk pemula yang ingin memulai karier di dunia otomotif.',
+      'Program dasar untuk membangun kompetensi perawatan berkala, tune up, dan diagnosa dasar EFI.',
     price: '5000000',
-    priceDisplay: 'Rp 5.000.000,-',
+    priceDisplay: 'Rp 5.000.000',
     duration: '1 Bulan',
     hours: '104 Jam',
-    ojt: '2 Bulan',
-    certificate: 'PITCAR CERTIFIED MECHANIC LEVEL 1',
-    kickOff: 'OKTOBER 2026',
+    ojt: '2 Bulan OJT Bengkel',
+    certificate: 'Sertifikat Kompetensi Level 1 Pitcar Academy',
+    kickOff: 'Oktober 2026',
     image: '/pkg-basic.png',
     materials: [
-      'Tune Up & Perawatan Berkala',
-      'Sistem Bahan Bakar EFI',
-      'Sistem Pengapian',
-      'Sistem Pendingin Mesin',
-      'Sistem Pelumasan',
-      'Sistem Rem Dasar',
-      'Scanner EFI Dasar',
-      'SOP & Pelayanan Customer',
+      'Maintenance Mobil Bensin EFI',
+      'Tune Up Mesin',
+      'Service Berkala & SOP',
+      'Sistem Rem',
+      'Sistem Pendingin',
+      'Basic EFI & Scanner',
     ],
     outcomes: [
-      'Melakukan perawatan berkala',
-      'Melakukan tune up mesin bensin EFI',
-      'Mengganti komponen rutin',
-      'Menggunakan scanner dasar',
-      'Membaca keluhan dasar',
-      'Menerapkan SOP kerja bengkel',
-      'Melayani customer dengan profesional',
+      'Memahami kerja kendaraan & komponen utama',
+      'Melakukan perawatan berkala & tune up',
+      'Menggunakan alat pemeriksaan & scanner dasar',
+      'Memiliki etos kerja & standar bengkel nyata',
     ],
   },
   {
     id: 'advanced',
-    level: 'LEVEL 2',
-    name: 'GENERAL REPAIR MOBIL EFI',
+    level: 'ADVANCE',
+    name: 'Mechanic Level 2 — General Repair',
+    subtitle: 'Untuk kamu yang sudah memiliki fundamental otomotif dan ingin meningkatkan kemampuan.',
     description:
-      'Tingkat lanjutan untuk mekanik yang ingin menguasai perbaikan komponen dan sistem kendaraan secara lebih mendalam.',
+      'Fokus pada pekerjaan general repair, sistem mekanikal utama, dan overhaul mesin.',
     price: '5000000',
-    priceDisplay: 'Rp 5.000.000,-',
+    priceDisplay: 'Rp 5.000.000',
     duration: '1 Bulan',
     hours: '104 Jam',
-    ojt: '2 Bulan',
-    certificate: 'PITCAR CERTIFIED MECHANIC LEVEL 2',
-    kickOff: 'NOVEMBER 2026',
+    ojt: '2 Bulan OJT Bengkel',
+    certificate: 'Sertifikat Kompetensi Level 2 Pitcar Academy',
+    kickOff: 'November 2026',
     image: '/pkg-advanced.png',
     materials: [
-      'Sistem Engine & Komponen',
-      'Overhaul Engine',
+      'General Repair Kendaraan',
       'Sistem Transmisi',
-      'Sistem Rem Lanjutan',
-      'Sistem Suspensi & Steering',
-      'Sistem Kelistrikan Dasar',
-      'Analisa Kerusakan',
-      'Penggunaan Alat Khusus',
-      'Troubleshooting Komponen Kendaraan',
+      'Sistem Kemudi (Steering)',
+      'Sistem Suspensi',
+      'Overhaul Engine',
+      'Troubleshooting Lanjutan',
     ],
     outcomes: [
-      'Melakukan overhaul & perbaikan mesin',
-      'Memperbaiki sistem transmisi',
-      'Melakukan diagnosa kerusakan',
-      'Menggunakan alat special tools',
-      'Memperbaiki rem, suspensi & steering',
-      'Melakukan troubleshooting komponen',
+      'Menganalisis & merawat sistem general repair',
+      'Melakukan overhaul engine sesuai standar',
+      'Melakukan troubleshooting komponen mekanikal',
+      'Siap menangani problem perbaikan di bengkel',
     ],
   },
   {
     id: 'professional',
-    level: 'LEVEL 1 & 2',
-    name: 'MAINTENANCE & GENERAL REPAIR',
+    level: 'PROFESSIONAL',
+    name: 'Mechanic Level 1 + Level 2',
+    subtitle: 'Program lengkap untuk membangun kompetensi Maintenance dan General Repair sekaligus.',
     description:
-      'Program lengkap untuk menjadi mekanik profesional yang menguasai perawatan dan perbaikan kendaraan secara menyeluruh. Siap kerja, siap bersaing!',
+      'Mencakup seluruh materi Level 1 & Level 2 untuk menguasai kompetensi mekanik secara menyeluruh.',
     price: '8500000',
-    priceDisplay: 'Rp 8.500.000,-',
+    priceDisplay: 'Rp 8.500.000',
+    savingsNote: 'Hemat Rp1.500.000 dibanding mengambil Level 1 & Level 2 secara terpisah.',
     duration: '2 Bulan',
     hours: '208 Jam',
-    ojt: '2 Bulan',
-    certificate: 'PITCAR PROFESSIONAL TECHNICIAN',
-    kickOff: 'OKTOBER 2026',
+    ojt: '2 Bulan OJT Bengkel',
+    certificate: 'Sertifikat Professional Mechanic Pitcar Academy',
+    kickOff: 'Oktober 2026',
     image: '/pkg-professional.png',
     materials: [
-      'Semua materi Level 1 (Maintenance)',
-      'Semua materi Level 2 (General Repair)',
-      'Diagnosa Lanjutan',
-      'Efisiensi & Quality Control',
-      'Teknik Problem Solving',
-      'Komunikasi & Pelayanan Customer',
-      'Bengkel Profesional',
+      'Seluruh Materi Level 1 Maintenance',
+      'Seluruh Materi Level 2 General Repair',
+      'Diagnosa Kompleks & Troubleshooting',
+      'Pembentukan Karakter & Disiplin Industri',
     ],
     outcomes: [
-      'Menguasai perawatan dan perbaikan menyeluruh',
-      'Melakukan diagnosa & troubleshooting tingkat lanjut',
-      'Menggunakan alat teknologi bengkel modern',
-      'Bekerja mandiri dan profesional',
-      'Siap kerja di jaringan Pitcar atau bengkel mitra',
+      'Menguasai maintenance & general repair menyeluruh',
+      'Memiliki 2 bulan pengalaman OJT langsung di bengkel',
+      'Siap mengikuti seleksi rekrutmen jaringan PITCAR',
     ],
     highlight: true,
   },
 ];
 
-// Advantage / Keunggulan data
+// Advantage / USP data matching draft-revision.md
 export interface AdvantageItem {
   icon: string;
   title: string;
@@ -161,33 +152,38 @@ export interface AdvantageItem {
 
 export const advantages: AdvantageItem[] = [
   {
-    icon: 'cog',
-    title: 'Trainer Profesional',
-    description: 'Dibimbing langsung oleh trainer berpengalaman di industri otomotif.',
-  },
-  {
     icon: 'wrench',
-    title: 'Praktik Langsung',
-    description: 'OJT di bengkel Pitcar berstandar tinggi dengan peralatan modern.',
+    title: 'Belajar dari Praktisi Bengkel',
+    description: 'Materi & metode dikembangkan dari pengalaman operasional PITCAR menangani kendaraan pelanggan sehari-hari.',
   },
   {
-    icon: 'shield',
-    title: 'Sertifikasi Resmi',
-    description: 'Sertifikat bertahap sesuai kompetensi yang dicapai.',
+    icon: 'cog',
+    title: 'Praktik Intensif',
+    description: 'Porsi pembelajaran dirancang agar peserta memegang alat, melakukan pemeriksaan, dan mengerjakan kendaraan langsung.',
+  },
+  {
+    icon: 'clock',
+    title: '2 Bulan On The Job Training',
+    description: 'Setelah kelas, jalani 2 bulan OJT di lingkungan bengkel PITCAR untuk merasakan ritme dan standar pekerjaan nyata.',
   },
   {
     icon: 'users',
-    title: 'Pelatihan Karakter',
-    description: 'Disiplin, jujur, dan berorientasi layanan pelanggan.',
+    title: 'Trainer Berpengalaman',
+    description: 'Belajar bersama trainer yang memahami pekerjaan mekanik secara praktis dan berpengalaman di industri bengkel.',
   },
   {
-    icon: 'briefcase',
-    title: 'Peluang Karier',
-    description: 'Terhubung langsung dengan jaringan Pitcar Service dan mitra.',
+    icon: 'shield',
+    title: 'Sertifikasi Kompetensi',
+    description: 'Peserta yang memenuhi standar kelulusan mendapatkan sertifikat Pitcar Academy sesuai level kompetensinya.',
+  },
+  {
+    icon: 'trending-up',
+    title: 'Tidak Hanya Hard Skill',
+    description: 'Disiplin, tanggung jawab, komunikasi, problem solving, dan etos kerja menjadi bagian inti dari pembelajaran.',
   },
 ];
 
-// FAQ data
+// FAQ data matching draft-revision.md
 export interface FaqItem {
   question: string;
   answer: string;
@@ -195,33 +191,34 @@ export interface FaqItem {
 
 export const faqs: FaqItem[] = [
   {
-    question: 'Apakah boleh ikut tanpa background otomotif?',
+    question: 'Apakah harus lulusan SMK Otomotif?',
     answer:
-      'Boleh! Program Basic dirancang khusus untuk pemula yang belum pernah belajar otomotif. Anda akan belajar dari nol hingga mampu mengerjakan perawatan dasar mobil.',
+      'Tidak. Program Basic dapat diikuti oleh siapa saja yang ingin memulai dan membangun fundamental otomotif dari awal.',
   },
   {
-    question: 'Berapa lama total waktu pelatihan?',
+    question: 'Apa perbedaan Basic dan Advance?',
     answer:
-      'Basic 1 bulan kelas + 2 bulan OJT. Advanced 1 bulan kelas + 2 bulan OJT. Professional 2 bulan kelas + 2 bulan OJT. Total ada 3 bulan termasuk praktik di bengkel.',
+      'Program Basic berfokus pada Maintenance (Perawatan Berkala, Tune Up, EFI Dasar), sedangkan Advance berfokus pada General Repair (Overhaul, Transmisi, Suspensi, Steering).',
   },
   {
-    question: 'Bagaimana sistem pembelajaran?',
+    question: 'Saya ingin belajar keduanya. Program mana yang sebaiknya dipilih?',
     answer:
-      'Kombinasi teori dan praktik. Sesi belajar di dalam kelas dilanjutkan dengan Praktik Kerja Lapangan (OJT) langsung di bengkel Pitcar Service selama 2 bulan.',
+      'Program Professional mencakup Level 1 dan Level 2 sekaligus dengan total 208 jam pembelajaran dan 2 bulan OJT, serta lebih hemat Rp1.500.000.',
   },
   {
-    question: 'Apa yang didapat setelah lulus?',
+    question: 'Di mana OJT dilakukan?',
     answer:
-      'Anda mendapat sertifikat resmi dari Pitcar Academy, kemampuan teknis sesuai level, pengalaman praktik di bengkel, dan kesempatan bergabung di jaringan Pitcar.',
+      'OJT dilaksanakan langsung di lingkungan bengkel yang ditentukan oleh jaringan Pitcar Academy.',
   },
   {
-    question: 'Apakah bisa cicilan?',
+    question: 'Apakah setelah lulus pasti bekerja di PITCAR?',
     answer:
-      'Untuk info program pembayaran cicilan, silakan hubungi kami melalui WhatsApp. Kami memiliki beberapa pilihan payment plan yang bisa disesuaikan.',
+      'Tidak ada jaminan langsung diterima kerja. Namun peserta dengan kompetensi, attitude, dan performa yang memenuhi standar dapat memperoleh prioritas kesempatan mengikuti proses rekrutmen sesuai kebutuhan jaringan PITCAR.',
   },
   {
-    question: 'Dimana lokasi bengkel untuk OJT?',
+    question: 'Apakah bisa mencicil biaya pendidikan?',
     answer:
-      'OJT dilaksanakan di bengkel-bengkel Pitcar Service yang tersebar di berbagai lokasi strategis. Detail lokasi akan disampaikan saat konfirmasi pendaftaran.',
+      'Skema dan pilihan pembayaran dapat ditanyakan langsung kepada tim pendaftaran kami via WhatsApp.',
   },
 ];
+

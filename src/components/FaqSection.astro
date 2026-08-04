@@ -10,18 +10,18 @@ interface Props {
 const { faqs } = Astro.props;
 ---
 
-<section id="faq" class="section-padding bg-white border-t border-slate-200/60 overflow-hidden" aria-label="Pertanyaan Umum">
-  <div class="container-custom max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<section id="faq" class="section-padding bg-page border-t border-slate-200/60 dark:border-slate-800 overflow-hidden" aria-label="Pertanyaan Umum">
+  <div class="container-custom">
     {/* Header */}
-    <div class="text-center max-w-3xl mx-auto mb-16">
-      <span class="inline-flex items-center gap-2 bg-red-50 text-red-700 font-bold text-xs uppercase tracking-wider px-4 py-2 rounded-full border border-red-200/80 mb-5">
-        <span class="w-2 h-2 rounded-full bg-red-600"></span>
+    <div class="headline-container">
+      <span class="inline-flex items-center gap-2 bg-brand-50 text-secondary font-bold text-xs uppercase tracking-wider px-4 py-2 rounded-full border border-brand-200 mb-5">
+        <span class="w-2 h-2 rounded-full bg-primary"></span>
         FAQ
       </span>
-      <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black leading-[1.1] text-slate-900 mb-5 tracking-tight">
-        Pertanyaan Yang Sering <span class="bg-gradient-to-r from-red-600 to-red-500 bg-clip-text text-transparent">Ditanyakan</span>
+      <h2 class="heading-primary mb-5">
+        Pertanyaan Yang Sering <span class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent italic">Ditanyakan</span>
       </h2>
-      <p class="text-slate-500 text-lg leading-relaxed">Temukan jawaban untuk pertanyaan umum seputar program pelatihan kami.</p>
+      <p class="section-subtitle">Temukan jawaban untuk pertanyaan umum seputar program pelatihan kami.</p>
     </div>
 
     {/* FAQ List */}
