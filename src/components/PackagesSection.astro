@@ -1,0 +1,43 @@
+---
+import PackageCard from './PackageCard.astro';
+import { packages } from '../content.config.ts';
+
+interface Props {
+  whatsappNumber: string;
+}
+
+const { whatsappNumber } = Astro.props;
+---
+
+<section
+  id="packages"
+  class="section-padding bg-slate-950 overflow-hidden"
+  aria-label="Program Pelatihan"
+>
+  <div class="container-custom">
+    <div class="headline-container">
+      <span
+        class="inline-flex items-center gap-2 bg-white/[0.06] text-brand-300 font-bold text-xs uppercase tracking-wider px-4 py-2 rounded-full border border-white/10 mb-5"
+      >
+        <span class="w-2 h-2 rounded-full bg-primary"></span>
+        Pilih Program Sesuai Tujuanmu
+      </span>
+      <h2 class="heading-primary text-white mb-5">
+        Program Pelatihan <span
+          class="bg-gradient-to-r from-brand-400 to-brand-300 bg-clip-text text-transparent"
+          >Pitcar Academy</span>
+      </h2>
+      <p class="section-subtitle">
+        Dari fundamental maintenance hingga general repair lengkap + 2 bulan
+        OJT bengkel.
+      </p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {
+        packages.map((pkg) => (
+          <PackageCard pkg={pkg} whatsappNumber={whatsappNumber} />
+        ))
+      }
+    </div>
+  </div>
+</section>

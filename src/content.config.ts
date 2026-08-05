@@ -39,7 +39,9 @@ export interface PackageItem {
   description: string;
   price: string;
   priceDisplay: string;
+  strikePriceDisplay?: string;
   savingsNote?: string;
+  scarcityNote?: string;
   duration: string;
   hours: string;
   ojt: string;
@@ -61,6 +63,9 @@ export const packages: PackageItem[] = [
       'Program dasar untuk membangun kompetensi perawatan berkala, tune up, dan diagnosa dasar EFI.',
     price: '5000000',
     priceDisplay: 'Rp 5.000.000',
+    strikePriceDisplay: 'Rp 7.500.000',
+    savingsNote: 'Promo Early Bird Agustus',
+    scarcityNote: 'Harga naik Rp 500.000 di bulan September!',
     duration: '1 Bulan',
     hours: '104 Jam',
     ojt: '2 Bulan OJT Bengkel',
@@ -91,6 +96,9 @@ export const packages: PackageItem[] = [
       'Fokus pada pekerjaan general repair, sistem mekanikal utama, dan overhaul mesin.',
     price: '5000000',
     priceDisplay: 'Rp 5.000.000',
+    strikePriceDisplay: 'Rp 7.500.000',
+    savingsNote: 'Promo Early Bird Agustus',
+    scarcityNote: 'Harga naik Rp 500.000 di bulan September!',
     duration: '1 Bulan',
     hours: '104 Jam',
     ojt: '2 Bulan OJT Bengkel',
@@ -121,7 +129,9 @@ export const packages: PackageItem[] = [
       'Mencakup seluruh materi Level 1 & Level 2 untuk menguasai kompetensi mekanik secara menyeluruh.',
     price: '8500000',
     priceDisplay: 'Rp 8.500.000',
-    savingsNote: 'Hemat Rp1.500.000 dibanding mengambil Level 1 & Level 2 secara terpisah.',
+    strikePriceDisplay: 'Rp 10.000.000',
+    savingsNote: 'Hemat Rp1.500.000 + Early Bird Agustus',
+    scarcityNote: 'Harga naik Rp 500.000 di bulan September!',
     duration: '2 Bulan',
     hours: '208 Jam',
     ojt: '2 Bulan OJT Bengkel',
