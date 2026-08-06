@@ -36,6 +36,7 @@ export default {
         fade: 'fadeInUp 1s both',
         'bounce-subtle': 'bounceSubtle 2s infinite',
         float: 'floatAnim 3s ease-in-out infinite',
+        wobble: 'wobble 1.5s ease-in-out infinite',
       },
       keyframes: {
         fadeInUp: {
@@ -49,6 +50,14 @@ export default {
         floatAnim: {
           '0%, 100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(-10px)' },
+        },
+        wobble: {
+          '0%, 100%': { transform: 'scale(1) rotate(0deg)' },
+          '10%': { transform: 'scale(1.05) rotate(-3deg)' },
+          '20%': { transform: 'scale(1.05) rotate(3deg)' },
+          '30%': { transform: 'scale(1.05) rotate(-3deg)' },
+          '40%': { transform: 'scale(1.05) rotate(3deg)' },
+          '50%': { transform: 'scale(1) rotate(0deg)' },
         },
       },
     },
