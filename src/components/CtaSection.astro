@@ -61,6 +61,7 @@ const waMessage = encodeURIComponent('Halo Pitcar Academy, saya ingin mendaftar 
       href={`https://wa.me/${waNum}?text=${waMessage}`}
       target="_blank"
       rel="noopener noreferrer"
+      data-umami-event="WhatsApp Click"
       onclick="if(typeof zaraz !== 'undefined') zaraz.track('AddToCart');"
       class="btn-whatsapp text-lg px-10 py-5 shadow-2xl animate-wobble wa-pulse-cta relative"
     >
