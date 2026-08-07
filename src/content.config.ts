@@ -230,5 +230,10 @@ export const faqs: FaqItem[] = [
     answer:
       'Skema dan pilihan pembayaran dapat ditanyakan langsung kepada tim pendaftaran kami via WhatsApp.',
   },
+  {
+    question: 'Apakah disediakan Mess?',
+    answer:
+      'Free Mess hanya berlaku untuk 10 pendaftar tercepat saja. Segera daftarkan diri Anda melalui WhatsApp untuk memastikan kuota.',
+  },
 ];
 
