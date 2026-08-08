@@ -4,7 +4,7 @@ export const collections = {
 
 // WhatsApp configuration (not a collection, just exported config)
 export const whatsappConfig = {
-  phoneNumber: '6281234567890', // Ganti dengan nomor official WA
+  phoneNumber: '6285742228865', // Ganti dengan nomor official WA
   messages: {
     hero: encodeURIComponent(
       'Halo Pitcar Academy, saya tertarik dengan program pelatihan mekanik. Bisa info lebih lanjut?'
