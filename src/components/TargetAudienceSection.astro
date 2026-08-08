@@ -4,7 +4,8 @@ interface Props {
   whatsappNumber?: string;
 }
 
-const { whatsappNumber = '6281234567890' } = Astro.props;
+import { whatsappConfig } from "../content.config";
+const { whatsappNumber = whatsappConfig.phoneNumber } = Astro.props;
 const waMessage = encodeURIComponent('Halo Pitcar Academy, saya mau konsultasi program mana yang cocok untuk latar belakang saya.');
 ---
 

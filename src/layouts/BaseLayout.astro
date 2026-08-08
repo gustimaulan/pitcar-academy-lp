@@ -13,12 +13,13 @@ interface Props {
   whatsappNumber?: string;
 }
 
+import { whatsappConfig } from "../content.config";
 const {
   title,
   description,
   image = '/og-image.png',
   canonical = '/',
-  whatsappNumber = '6285190950381',
+  whatsappNumber = whatsappConfig.phoneNumber,
 } = Astro.props;
 
 const siteUrl = Astro.site || 'https://academy.pitcar.co.id';

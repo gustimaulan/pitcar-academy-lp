@@ -1,13 +1,13 @@
 ---
 // PackageCard.astro — Clean, High-Contrast Pricing Card with brand colors
-import type { PackageItem } from '../content.config';
+import { whatsappConfig, type PackageItem } from '../content.config';
 
 interface Props {
   pkg: PackageItem;
   whatsappNumber?: string;
 }
 
-const { pkg, whatsappNumber = '6281234567890' } = Astro.props;
+const { pkg, whatsappNumber = whatsappConfig.phoneNumber } = Astro.props;
 
 const waMessage = encodeURIComponent(
   `Halo Pitcar Academy, saya tertarik dengan PROGRAM ${pkg.level} (${pkg.name}) - ${pkg.priceDisplay}. Bagaimana cara pendaftarannya?`

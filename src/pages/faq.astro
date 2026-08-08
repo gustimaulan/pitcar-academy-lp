@@ -1,9 +1,9 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import FaqSection from '../components/FaqSection.astro';
-import { faqs } from '../content.config.ts';
+import { faqs, whatsappConfig } from '../content.config.ts';
 
-const whatsappNumber = '6285190950381';
+const whatsappNumber = whatsappConfig.phoneNumber;
 ---
 
 <BaseLayout

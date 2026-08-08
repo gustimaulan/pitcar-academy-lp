@@ -5,8 +5,9 @@ interface Props {
   whatsappNumberDisplay?: string;
 }
 
+import { whatsappConfig } from "../content.config";
 const {
-  whatsappNumber = '6285190950381',
+  whatsappNumber = whatsappConfig.phoneNumber,
   whatsappMessage = encodeURIComponent('Halo Pitcar Academy, saya ingin mendaftar program pelatihan mekanik Batch Perdana!'),
   whatsappNumberDisplay = '+62 851-9095-0381',
 } = Astro.props;

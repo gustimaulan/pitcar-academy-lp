@@ -6,12 +6,13 @@ interface Props {
   whatsappNumber?: string;
 }
 
+import { whatsappConfig } from "../content.config";
 const {
   description = 'Mulai perjalananmu bersama Pitcar Academy. Batch Perdana — Oktober 2026. Kuota peserta terbatas untuk menjaga kualitas pembelajaran dan praktik.',
   whatsappNumber,
 } = Astro.props;
 
-const waNum = whatsappNumber ?? '6285190950381';
+const waNum = whatsappNumber ?? whatsappConfig.phoneNumber;
 const waMessage = encodeURIComponent('Halo Pitcar Academy, saya ingin mendaftar program pelatihan mekanik Batch Perdana!');
 ---
 

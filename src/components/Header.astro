@@ -2,7 +2,8 @@
 interface Props {
   whatsappNumber?: string;
 }
-const { whatsappNumber = "6285190950381" } = Astro.props;
+import { whatsappConfig } from "../content.config";
+const { whatsappNumber = whatsappConfig.phoneNumber } = Astro.props;
 
 const navLinks = [
   { href: "#about", label: "Tentang" },

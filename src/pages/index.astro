@@ -11,9 +11,9 @@ import TargetAudienceSection from "../components/TargetAudienceSection.astro";
 import EcosystemGallerySection from "../components/EcosystemGallerySection.astro";
 import FaqSection from "../components/FaqSection.astro";
 import CtaSection from "../components/CtaSection.astro";
-import { faqs } from "../content.config.ts";
+import { faqs, whatsappConfig } from "../content.config.ts";
 
-const whatsappNumber = "6285190950381";
+const whatsappNumber = whatsappConfig.phoneNumber;
 const heroMessage = encodeURIComponent(
   "Halo Pitcar Academy, saya tertarik dengan program pelatihan mekanik Batch Perdana (Oktober 2026). Bisa info lebih lanjut?",
 );
