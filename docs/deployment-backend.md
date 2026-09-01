@@ -39,6 +39,14 @@ sebelum meminta sertifikat SSL.
 ## 2. Server
 
 Butuh PHP **8.3+** (Laravel 13), Composer, nginx, dan sebuah database.
+Periksa dulu apa yang sudah ada — server ini juga menjalankan aplikasi lain:
+
+```bash
+php -v
+systemctl is-active mysql mariadb postgresql
+```
+
+Kalau PHP belum ada, ganti `8.3` di bawah dengan versi yang kamu pasang:
 
 ```bash
 sudo apt update
@@ -46,6 +54,13 @@ sudo apt install -y nginx php8.3-fpm php8.3-cli php8.3-mbstring php8.3-xml \
   php8.3-curl php8.3-zip php8.3-intl php8.3-mysql unzip git
 curl -sS https://getcomposer.org/installer | php
 sudo mv composer.phar /usr/local/bin/composer
+```
+
+**Versi PHP menentukan path socket FPM di konfigurasi nginx nanti.** Jangan
+menebak — baca dari sistem:
+
+```bash
+ls /run/php/
 ```
 
 **Pakai MySQL atau PostgreSQL, bukan SQLite.** Lokal memakai SQLite karena
@@ -60,19 +75,40 @@ GRANT ALL PRIVILEGES ON pitcar_academy.* TO 'pitcar'@'localhost';
 FLUSH PRIVILEGES;
 ```
 
-## 3. Ambil kode
+## 3. Kode dan pemisahan document root
 
-Backend berada di dalam repo frontend, jadi yang di-clone tetap satu repo dan
-document root diarahkan ke `backend/public`.
+Repo sudah ada di server, di `/var/www/pitcar-academy-lp`. Backend tinggal
+dipasang dependensinya:
 
 ```bash
-sudo mkdir -p /var/www/pitcar && sudo chown $USER /var/www/pitcar
-git clone <url-repo> /var/www/pitcar
-cd /var/www/pitcar/backend
+cd /var/www/pitcar-academy-lp/backend
 composer install --no-dev --optimize-autoloader
 ```
 
 `--no-dev` penting: tanpa itu Pint, PHPUnit, dan Faker ikut terpasang di server.
+
+### Periksa dulu document root frontend
+
+Satu direktori kini memuat dua hal: file statis landing page di `dist/`, dan
+seluruh source code termasuk `backend/.env` yang sebentar lagi berisi password
+database.
+
+```bash
+grep -rn "root .*pitcar-academy-lp" /etc/nginx/sites-enabled/
+```
+
+Yang benar hanya ini:
+
+```nginx
+root /var/www/pitcar-academy-lp/dist;
+```
+
+Kalau tertulis `root /var/www/pitcar-academy-lp;` tanpa `/dist`, **perbaiki
+sebelum membuat `.env`**. Tanpa `/dist`, seluruh isi repo dapat diunduh siapa
+pun — `backend/.env`, `.git/`, source code — cukup dengan menebak nama file.
+
+Aturan `location ~ /\. { deny all; }` di blok frontend menutup `.env` dan
+`.git`, tapi itu jaring pengaman, bukan pengganti document root yang benar.
 
 ## 4. Environment
 
@@ -98,10 +134,18 @@ DB_PASSWORD=<password kuat>
 # Hanya origin yang benar-benar memanggil API. Tanpa localhost di produksi.
 LEAD_ALLOWED_ORIGINS=https://academy.pitcar.co.id
 
-LEAD_FALLBACK_CONSULTANT_WHATSAPP=6285190950381
+LEAD_FALLBACK_CONSULTANT_WHATSAPP=6285742228865
 LEAD_SCORING_VERSION=2026-03
 LEAD_RATE_LIMIT_PER_IP=10
 LEAD_RATE_LIMIT_PER_WHATSAPP=3
+
+# Webhook Cekat AI. Dipanggil dari job setelah lead tersimpan, bukan dari
+# browser — jadi tidak ada preflight dan tidak ada URL yang bocor ke bundle.
+LEAD_WEBHOOK_URL=https://workflows.cekat.ai/webhook-test/wa-academy
+
+# Queue wajib database. Dengan `sync`, job berjalan di dalam request dan
+# webhook yang lambat ikut memperlambat balasan ke pengunjung.
+QUEUE_CONNECTION=database
 
 # Kosongkan sampai kebijakan privasi diputuskan; command retensi jadi no-op.
 LEAD_RETENTION_DAYS=
@@ -131,10 +175,10 @@ Tabel yang kosong berarti semua lead jatuh ke nomor fallback.
 ## 6. Izin file
 
 ```bash
-sudo chown -R www-data:www-data /var/www/pitcar/backend/storage \
-                                /var/www/pitcar/backend/bootstrap/cache
-sudo chmod -R 775 /var/www/pitcar/backend/storage \
-                  /var/www/pitcar/backend/bootstrap/cache
+sudo chown -R www-data:www-data /var/www/pitcar-academy-lp/backend/storage \
+                                /var/www/pitcar-academy-lp/backend/bootstrap/cache
+sudo chmod -R 775 /var/www/pitcar-academy-lp/backend/storage \
+                  /var/www/pitcar-academy-lp/backend/bootstrap/cache
 ```
 
 ## 7. nginx
@@ -143,7 +187,7 @@ sudo chmod -R 775 /var/www/pitcar/backend/storage \
 server {
     listen 80;
     server_name api-academy.pitcar.co.id;
-    root /var/www/pitcar/backend/public;
+    root /var/www/pitcar-academy-lp/backend/public;
 
     index index.php;
     charset utf-8;
@@ -159,14 +203,19 @@ server {
     }
 
     location ~ \.php$ {
-        fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
+        # Samakan dengan hasil `ls /run/php/`.
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
         fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
         include fastcgi_params;
     }
 
     # Jangan pernah menyajikan file tersembunyi; .env ada di atas root tapi
     # aturan ini menutup kesalahan konfigurasi di kemudian hari.
-    location ~ /\. { deny all; }
+    #
+    # `(?!well-known)` wajib: tanpa itu certbot tidak bisa menyajikan
+    # tantangan HTTP-01 dari /.well-known/acme-challenge/ dan penerbitan
+    # sertifikat gagal dengan 403 yang membingungkan.
+    location ~ /\.(?!well-known).* { deny all; }
 }
 ```
 
@@ -175,6 +224,29 @@ sudo ln -s /etc/nginx/sites-available/api-academy /etc/nginx/sites-enabled/
 sudo nginx -t && sudo systemctl reload nginx
 sudo certbot --nginx -d api-academy.pitcar.co.id
 ```
+
+### Kalau domainnya di belakang Cloudflare
+
+Periksa dulu — kalau `getent hosts api-academy.pitcar.co.id` mengembalikan
+alamat Cloudflare (`104.16.x.x`, `172.64.x.x`, `2606:4700::/32`) dan bukan IP
+server, TLS diterminasi di Cloudflare.
+
+**Jangan jalankan certbot.** Origin cukup melayani HTTP di port 80, sama seperti
+frontend. Tantangan HTTP-01 lewat proxy bisa gagal, dan sertifikatnya pun tidak
+akan dipakai siapa pun.
+
+Yang wajib ada gantinya: aplikasi harus mempercayai proxy itu. Sudah
+dikonfigurasi di `bootstrap/app.php` lewat `CloudflareProxies::all()`.
+Tanpa itu dua hal rusak diam-diam:
+
+- Semua pengunjung terlihat sebagai satu alamat Cloudflare, jadi
+  `LEAD_RATE_LIMIT_PER_IP` berlaku global — pengunjung sah saling memblokir
+- Skema terbaca `http`, jadi Filament menyisipkan URL `http://` ke halaman
+  `https://` dan login bisa redirect-loop
+
+Daftar rentangnya sengaja eksplisit, bukan `*`: IP origin tetap bisa dihubungi
+langsung, dan `*` akan membuat `X-Forwarded-For` palsu cukup untuk melewati
+rate limit. Diuji di `tests/Feature/TrustedProxyTest.php`.
 
 ## 8. Queue worker — wajib
 
@@ -194,7 +266,7 @@ After=network.target
 User=www-data
 Restart=always
 RestartSec=5
-WorkingDirectory=/var/www/pitcar/backend
+WorkingDirectory=/var/www/pitcar-academy-lp/backend
 ExecStart=/usr/bin/php artisan queue:work --sleep=3 --tries=3 --max-time=3600
 
 [Install]
@@ -213,7 +285,7 @@ sudo crontab -u www-data -e
 ```
 
 ```cron
-* * * * * cd /var/www/pitcar/backend && php artisan schedule:run >> /dev/null 2>&1
+* * * * * cd /var/www/pitcar-academy-lp/backend && php artisan schedule:run >> /dev/null 2>&1
 ```
 
 Belum ada tugas terjadwal yang aktif. Ini disiapkan untuk
@@ -232,12 +304,14 @@ Ulangi setiap kali `.env` berubah — nilai lama akan tetap terpakai kalau tidak
 
 ## 11. Sambungkan frontend
 
-Di build environment landing page:
+Landing page dibangun oleh GitHub Actions, jadi nilainya masuk sebagai
+**repository secret** (Settings → Secrets and variables → Actions), bukan file
+`.env` di server — server hanya menerima hasil build:
 
 ```dotenv
 PUBLIC_LEAD_API_BASE_URL=https://api-academy.pitcar.co.id
-PUBLIC_EDUCATION_CONSULTANT_WHATSAPP=6285190950381
-PUBLIC_GA_ID=G-XXXXXXXXXX
+PUBLIC_EDUCATION_CONSULTANT_WHATSAPP=6285742228865
+PUBLIC_GA_ID=G-FNT01JRZN7
 SITE_URL=https://academy.pitcar.co.id
 ```
 
@@ -320,7 +394,7 @@ sebelum lead pertama masuk.
 ## Deploy berikutnya
 
 ```bash
-cd /var/www/pitcar
+cd /var/www/pitcar-academy-lp
 git pull
 cd backend
 composer install --no-dev --optimize-autoloader
