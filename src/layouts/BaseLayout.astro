@@ -4,59 +4,91 @@ import Footer from '../components/Footer.astro';
 import WhatsAppButton from '../components/WhatsAppButton.astro';
 import SeoHead from '../components/SeoHead.astro';
 import GoogleAnalytics from '../components/GoogleAnalytics.astro';
+import FunnelAnalytics from '../components/FunnelAnalytics.astro';
 import '../styles/global.css';
 
 interface Props {
   title: string;
   description: string;
-  image?: string;
-  canonical?: string;
-  whatsappNumber?: string;
+  image?: string | URL;
+  canonical?: string | URL;
+  preloadImage?: string;
+  /** Viewports where `preloadImage` is actually the LCP element. */
+  preloadImageMedia?: string;
+  structuredData?: Record<string, unknown>[];
   gaId?: string;
+  /** Keeps a page out of search results while its content is still a draft. */
+  noindex?: boolean;
 }
 
-import { whatsappConfig } from "../content.config";
 const {
   title,
   description,
-  image = '/og-image.png',
-  canonical = '/',
-  whatsappNumber = whatsappConfig.phoneNumber,
-  gaId = 'G-FNT01JRZN7',
+  image = '/og-image.jpg',
+  canonical = Astro.url.pathname,
+  preloadImage,
+  preloadImageMedia = '(min-width: 1024px)',
+  structuredData = [],
+  // Defaulted so a build without the variable still reports to the live
+  // property. Losing analytics silently is worse than being hard to change.
+  gaId = import.meta.env.PUBLIC_GA_ID ?? 'G-FNT01JRZN7',
+  noindex = false,
 } = Astro.props;
-
-const siteUrl = Astro.site || 'https://academy.pitcar.co.id';
 ---
 
 <!doctype html>
-<html lang="id" class="scroll-smooth">
+<html lang="id">
   <head>
+    <meta charset="UTF-8" />
+    <script is:inline>
+      // Runs before paint. Light is the default; only an explicit choice
+      // stored by the toggle switches to dark.
+      try {
+        if (localStorage.getItem('pitcar-theme') === 'dark') {
+          document.documentElement.classList.add('dark');
+        }
+      } catch (error) {
+        // Blocked storage just means the default theme.
+      }
+    </script>
+
     <!-- Google Analytics -->
     <GoogleAnalytics id={gaId} />
 
-    <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta id="theme-color" name="theme-color" content="#FAFAF9" />
+    {/* Real PITCAR mark. 32/48 keep the transparent cut-out for browser tabs;
+        the Apple icon is flattened onto white because iOS renders a
+        transparent background as black. */}
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <meta name="generator" content={Astro.generator} />
+    {/* Only fetched where the image is the LCP. On phones the hero image sits
+        below the fold and the H1 is the LCP, so a high-priority image preload
+        there would compete with the font that heading needs. */}
+    {preloadImage && (
+      <link rel="preload" as="image" href={preloadImage} fetchpriority="high" media={preloadImageMedia} />
+    )}
 
     <!-- SEO -->
     <SeoHead
       title={title}
       description={description}
-      image={`${siteUrl}${image}`}
-      url={`${siteUrl}${canonical}`}
+      image={image}
+      url={canonical}
+      structuredData={structuredData}
+      noindex={noindex}
     />
-
-    <!-- Preconnect for performance -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   </head>
-  <body class="bg-page text-default antialiased tracking-tight selection:bg-primary/30 selection:text-white">
-    <Header whatsappNumber={whatsappNumber} />
+  <body class="antialiased">
+    <FunnelAnalytics />
+    <a class="skip-link" href="#main-content">Lewati ke konten utama</a>
+    <Header />
     <main id="main-content">
       <slot />
     </main>
-    <Footer whatsappNumber={whatsappNumber} />
-    <WhatsAppButton number={whatsappNumber} />
+    <Footer />
+    <WhatsAppButton />
   </body>
 </html>
