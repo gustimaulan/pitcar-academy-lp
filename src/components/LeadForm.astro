@@ -235,14 +235,16 @@ const readiness = [
   }
 
   /**
-   * The same conversion also reaches Meta from the server. `eventID` is the
-   * visitor's own submission id, which is what tells Meta the two are one
-   * event — without it every lead would be counted twice.
+   * Both conversions also reach Meta from the server. `eventID` ties each
+   * browser event to its matching server event, preventing duplicate counts.
    */
   function trackMetaLead(payload: LeadPayload): void {
     window.fbq?.('track', 'Lead', {
       content_name: payload.program_interest,
     }, { eventID: payload.submission_id });
+    window.fbq?.('track', 'CompleteRegistration', {
+      content_name: payload.program_interest,
+    }, { eventID: `${payload.submission_id}:complete_registration` });
   }
 
   function getAnalyticsContext(payload?: LeadPayload): Record<string, string | null> {

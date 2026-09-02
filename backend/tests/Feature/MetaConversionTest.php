@@ -89,6 +89,20 @@ class MetaConversionTest extends TestCase
         $this->assertSame($lead->score, $event['custom_data']['lead_score']);
     }
 
+    public function test_it_reports_lead_and_registration_events(): void
+    {
+        $this->fakeGraph();
+
+        $payload = $this->leadPayload();
+        $this->postJson('/api/leads', $payload)->assertCreated();
+        $events = $this->graphPayload()['data'];
+
+        $this->assertCount(3, $events);
+        $this->assertSame(['Lead', 'AddToCart', 'CompleteRegistration'], array_column($events, 'event_name'));
+        $this->assertSame($payload['submission_id'].':add_to_cart', $events[1]['event_id']);
+        $this->assertSame($payload['submission_id'].':complete_registration', $events[2]['event_id']);
+    }
+
     public function test_it_forwards_the_meta_cookies_unhashed(): void
     {
         $this->fakeGraph();

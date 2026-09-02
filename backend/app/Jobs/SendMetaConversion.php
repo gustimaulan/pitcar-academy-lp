@@ -59,7 +59,11 @@ class SendMetaConversion implements ShouldQueue
                 array_filter([
                     'access_token' => $token,
                     'test_event_code' => config('services.meta.test_event_code'),
-                    'data' => [$this->event($lead)],
+                    'data' => [
+                        $this->event($lead, 'Lead', $lead->submission_id),
+                        $this->event($lead, 'AddToCart', $lead->submission_id.':add_to_cart'),
+                        $this->event($lead, 'CompleteRegistration', $lead->submission_id.':complete_registration'),
+                    ],
                 ]),
             );
 
@@ -81,13 +85,13 @@ class SendMetaConversion implements ShouldQueue
     /**
      * @return array<string, mixed>
      */
-    private function event(Lead $lead): array
+    private function event(Lead $lead, string $eventName, string $eventId): array
     {
         return array_filter([
-            'event_name' => 'Lead',
+            'event_name' => $eventName,
             'event_time' => $lead->created_at?->getTimestamp() ?? now()->getTimestamp(),
             // Shared with the browser pixel so the two are deduplicated.
-            'event_id' => $lead->submission_id,
+            'event_id' => $eventId,
             'event_source_url' => $lead->landing_page,
             'action_source' => 'website',
             'user_data' => $this->userData($lead),
