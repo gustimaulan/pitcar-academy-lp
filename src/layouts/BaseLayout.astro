@@ -21,6 +21,13 @@ interface Props {
   gaId?: string;
   /** Keeps a page out of search results while its content is still a draft. */
   noindex?: boolean;
+  /** Overrides for pages that sell something other than the offline program. */
+  header?: {
+    links?: { href: string; label: string }[];
+    cta?: { href: string; label: string; sourceCta: string };
+    showAnnouncement?: boolean;
+  };
+  floatingCta?: { href: string; label: string; sourceCta: string; icon?: boolean };
 }
 
 const {
@@ -35,6 +42,8 @@ const {
   // property. Losing analytics silently is worse than being hard to change.
   gaId = import.meta.env.PUBLIC_GA_ID ?? 'G-FNT01JRZN7',
   noindex = false,
+  header,
+  floatingCta,
 } = Astro.props;
 
 // Site id, not a credential — it ships in the page either way. Defaulted for
@@ -98,11 +107,11 @@ const metaPixelId = import.meta.env.PUBLIC_META_PIXEL_ID ?? '1364110365687038';
   <body class="antialiased">
     <FunnelAnalytics />
     <a class="skip-link" href="#main-content">Lewati ke konten utama</a>
-    <Header />
+    <Header {...header} />
     <main id="main-content">
       <slot />
     </main>
     <Footer />
-    <WhatsAppButton />
+    <WhatsAppButton {...floatingCta} />
   </body>
 </html>

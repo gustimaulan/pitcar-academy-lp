@@ -1,5 +1,18 @@
 ---
-const href = Astro.url.pathname === '/' ? '#konsultasi' : '/#konsultasi';
+interface Props {
+  href?: string;
+  label?: string;
+  sourceCta?: string;
+  /** The chat bubble only fits a consultation; a buy button reads fine without it. */
+  icon?: boolean;
+}
+
+const {
+  href = Astro.url.pathname === '/' ? '#konsultasi' : '/#konsultasi',
+  label = 'Konsultasi gratis',
+  sourceCta = 'floating_consultation',
+  icon = true,
+} = Astro.props;
 ---
 
 <!-- Brand red, not WhatsApp green: this opens the consultation form, and a
@@ -7,12 +20,14 @@ const href = Astro.url.pathname === '/' ? '#konsultasi' : '/#konsultasi';
 <a
   href={href}
   data-lead-cta
-  data-source-cta="floating_consultation"
+  data-source-cta={sourceCta}
   data-floating-consultation
   class="btn btn-primary pointer-events-none fixed bottom-4 right-4 z-40 translate-y-2 px-5 py-3 text-sm opacity-0 shadow-lg transition duration-200 sm:bottom-6 sm:right-6"
 >
-  <svg aria-hidden="true" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"></path><path d="M8 9h8"></path><path d="M8 13h5"></path></svg>
-  Konsultasi gratis
+  {icon && (
+    <svg aria-hidden="true" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"></path><path d="M8 9h8"></path><path d="M8 13h5"></path></svg>
+  )}
+  {label}
 </a>
 
 <script>
@@ -21,7 +36,7 @@ const href = Astro.url.pathname === '/' ? '#konsultasi' : '/#konsultasi';
   // page has one in most sections, and a floating button that sits on top of
   // the card it duplicates is worse than no floating button.
   const anchors = [
-    ...document.querySelectorAll<HTMLElement>('[data-lead-cta]:not([data-floating-consultation])'),
+    ...document.querySelectorAll<HTMLElement>('[data-lead-cta]:not([data-floating-consultation]), [data-checkout]'),
     ...document.querySelectorAll<HTMLElement>('#konsultasi'),
   ];
   const visibility = new Map<Element, boolean>();

@@ -1,10 +1,17 @@
 ---
 interface Props {
   faqs: Array<{ question: string; answer: string }>;
+  /** Defaults to the offline consultation; a product page points at its own checkout. */
+  cta?: { note: string; href: string; label: string; sourceCta: string };
 }
 
 const { faqs } = Astro.props;
-const consultationHref = Astro.url.pathname === '/' ? '#konsultasi' : '/#konsultasi';
+const cta = Astro.props.cta ?? {
+  note: 'Belum terjawab? Tanyakan langsung ke Education Consultant.',
+  href: Astro.url.pathname === '/' ? '#konsultasi' : '/#konsultasi',
+  label: 'Konsultasi Program Gratis',
+  sourceCta: 'faq_consultation',
+};
 ---
 
 <section id="faq" class="band band-alt border-t border-line scroll-mt-28" aria-labelledby="faq-title">
@@ -13,11 +20,9 @@ const consultationHref = Astro.url.pathname === '/' ? '#konsultasi' : '/#konsult
       <div class="lg:col-span-4">
         <p class="eyebrow text-accent">FAQ</p>
         <h2 id="faq-title" class="display-2 mt-6">Pertanyaan yang sering muncul</h2>
-        <p class="lead mt-5 text-muted">
-          Belum terjawab? Tanyakan langsung ke Education Consultant.
-        </p>
-        <a href={consultationHref} data-lead-cta data-source-cta="faq_consultation" class="btn btn-ghost mt-7">
-          Konsultasi Program Gratis
+        <p class="lead mt-5 text-muted">{cta.note}</p>
+        <a href={cta.href} data-lead-cta data-source-cta={cta.sourceCta} class="btn btn-ghost mt-7">
+          {cta.label}
         </a>
       </div>
 

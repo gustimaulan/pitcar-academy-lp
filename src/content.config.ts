@@ -718,6 +718,155 @@ export const digitalFaqs: FaqItem[] = [
 ];
 
 /* ============================================================================
+   KELAS INSPEKSI MOBIL BEKAS
+   Produk digital pertama yang benar-benar dijual. Halaman: /kelas-online-inspeksi/
+   ========================================================================== */
+
+export interface InspectionCourse {
+  /**
+   * Link checkout platform pembayaran. Selama null, tombol beli membuka
+   * WhatsApp dengan pesan yang sudah terisi — pembelian tetap bisa terjadi,
+   * hanya belum otomatis.
+   */
+  checkoutUrl: string | null;
+  name: string;
+  /** Angka tanpa format, untuk structured data dan event analytics. */
+  price: number;
+  priceDisplay: string;
+  strikePriceDisplay: string;
+  priceLabel: string;
+  headline: string;
+  subheadline: string;
+  tagline: string;
+  includes: { title: string; description: string }[];
+  /**
+   * Area yang tercantum di form inspeksi, sesuai yang tampak di materi promosi.
+   * !! VERIFY terhadap form final sebelum materi berubah.
+   */
+  inspectionAreas: { title: string; description: string }[];
+  steps: { title: string; description: string }[];
+  audience: string[];
+  notFor: string[];
+  refundNote: string;
+}
+
+export const inspectionCourse: InspectionCourse = {
+  checkoutUrl: 'https://pitcar-academy.myscalev.com/p/kelas-inspeksi-mobil-bekas-cek-sebelum-beli',
+  name: 'Kelas Inspeksi Mobil Bekas',
+  price: 149000,
+  priceDisplay: 'Rp149.000',
+  strikePriceDisplay: 'Rp299.000',
+  priceLabel: 'Harga launch',
+  headline: 'Jangan beli mobil bekas dalam kondisi buta.',
+  subheadline:
+    'Pelajari cara mengecek mobil bekas secara sistematis — apa yang perlu dicek, apa yang perlu diwaspadai, dan kapan sebuah temuan perlu dibawa ke mekanik — sebelum kamu mengeluarkan uang puluhan hingga ratusan juta.',
+  tagline: 'Cek dulu. Pahami kondisinya. Baru putuskan.',
+
+  includes: [
+    {
+      title: 'Video pembelajaran',
+      description: 'Materi inspeksi mobil bekas yang bisa kamu putar ulang sebelum berangkat melihat unit.',
+    },
+    {
+      title: 'Form Inspeksi Mobil Bekas',
+      description: 'Checklist dan scoring kendaraan dalam satu form. Dibawa saat cek unit, diisi di tempat.',
+    },
+    {
+      title: 'Ringkasan red flag',
+      description: 'Daftar tanda bahaya yang tidak boleh kamu abaikan, dalam format yang cepat dibaca.',
+    },
+    {
+      title: 'Lifetime access',
+      description: 'Sekali bayar. Berguna lagi saat kamu, keluarga, atau teman mencari mobil berikutnya.',
+    },
+    {
+      title: 'Akses langsung',
+      description: 'Materi terbuka otomatis setelah pembayaran. Tidak perlu menunggu jadwal kelas.',
+    },
+  ],
+
+  inspectionAreas: [
+    { title: 'Eksterior', description: 'Bodi, cat, celah panel, kaca, lampu, dan ban.' },
+    { title: 'Interior', description: 'Jok, dashboard, AC, fitur kabin, dan tanda pemakaian.' },
+    { title: 'Mesin', description: 'Kondisi ruang mesin, kebocoran, suara, dan asap.' },
+    { title: 'Transmisi', description: 'Perpindahan gigi, hentakan, dan respons saat jalan.' },
+    { title: 'Kaki-kaki', description: 'Suspensi, kemudi, dan bunyi saat melewati jalan tidak rata.' },
+    { title: 'Elektrikal', description: 'Lampu indikator, aki, kelistrikan, dan fitur elektronik.' },
+  ],
+
+  steps: [
+    {
+      title: 'Pelajari materinya',
+      description: 'Tonton videonya dulu di rumah. Pahami urutan pengecekan dan apa arti setiap temuan.',
+    },
+    {
+      title: 'Bawa form saat cek unit',
+      description: 'Isi checklist area demi area. Tidak ada bagian yang terlewat karena terburu-buru atau terbawa suasana.',
+    },
+    {
+      title: 'Lihat skor dan red flag',
+      description: 'Scoring membantu membandingkan unit secara objektif. Red flag memberi tahu kapan harus berhenti atau minta pemeriksaan lanjutan.',
+    },
+    {
+      title: 'Putuskan dengan tenang',
+      description: 'Lanjut, tawar dengan dasar yang jelas, bawa ke mekanik untuk cek mendalam, atau tinggalkan.',
+    },
+  ],
+
+  audience: [
+    'Calon pembeli mobil bekas',
+    'First-time buyer yang baru pertama kali membeli mobil',
+    'Pemula yang belum tahu harus mulai mengecek dari mana',
+    'Penghobi otomotif',
+    'Siswa atau pemula otomotif yang ingin memahami dasar inspeksi kendaraan',
+  ],
+
+  // Ditulis terang-terangan: pembeli produk digital tanpa refund berhak tahu
+  // batasnya sebelum membayar, bukan sesudah.
+  notFor: [
+    'Tidak menjadikan kamu inspector profesional.',
+    'Tidak menggantikan pemeriksaan teknis mendalam oleh mekanik atau inspector profesional.',
+    'Tidak menjamin sebuah kendaraan bebas dari masalah.',
+  ],
+
+  refundNote:
+    'Karena produk digital dapat langsung diakses setelah pembayaran, pembelian bersifat final dan tidak dapat direfund.',
+};
+
+export const inspectionFaqs: FaqItem[] = [
+  {
+    question: 'Saya tidak paham mesin sama sekali. Apakah bisa mengikuti?',
+    answer:
+      'Bisa. Kelas ini disusun untuk pemula dan first-time buyer. Fokusnya adalah apa yang perlu dicek dan apa yang perlu diwaspadai, bukan cara memperbaiki kendaraan.',
+  },
+  {
+    question: 'Bagaimana cara mengakses materinya?',
+    answer:
+      'Akses materi terbuka otomatis setelah pembayaran berhasil. Kamu tidak perlu menunggu jadwal kelas atau konfirmasi manual.',
+  },
+  {
+    question: 'Berapa lama saya bisa mengakses kelasnya?',
+    answer:
+      'Selamanya. Sekali bayar, kamu bisa membuka materi dan form inspeksi kapan saja, termasuk saat mencari mobil berikutnya.',
+  },
+  {
+    question: 'Apa itu Form Inspeksi Mobil Bekas?',
+    answer:
+      'Form yang menggabungkan checklist dan scoring kendaraan. Kamu mengisinya saat melihat unit, area demi area, sehingga hasil pengecekan tercatat dan bisa dibandingkan antar-unit.',
+  },
+  {
+    question: 'Setelah ikut kelas ini, apakah saya tidak perlu lagi membawa mekanik?',
+    answer:
+      'Tidak begitu. Kelas ini membantu pengecekan awal secara lebih sistematis dan membantu kamu tahu kapan sebuah temuan perlu diperiksa lebih lanjut. Untuk pemeriksaan teknis mendalam, tetap libatkan mekanik atau inspector profesional.',
+  },
+  {
+    question: 'Apakah bisa refund?',
+    answer:
+      'Tidak. Karena produk digital dapat langsung diakses setelah pembayaran, pembelian bersifat final dan tidak dapat direfund. Baca dulu isi dan batasan kelas di halaman ini sebelum membeli.',
+  },
+];
+
+/* ============================================================================
    PROFIL SISWA — PROTOTIPE
    Data contoh. Belum ada autentikasi, jadi peserta di-hardcode.
    ========================================================================== */
