@@ -755,7 +755,7 @@ export const inspectionCourse: InspectionCourse = {
   name: 'Kelas Inspeksi Mobil Bekas',
   price: 149000,
   priceDisplay: 'Rp149.000',
-  strikePriceDisplay: 'Rp299.000',
+  strikePriceDisplay: 'Rp300.000',
   priceLabel: 'Harga launch',
   headline: 'Jangan beli mobil bekas dalam kondisi buta.',
   subheadline:
