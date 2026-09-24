@@ -2,7 +2,7 @@ import type { APIRoute } from 'astro';
 
 export const GET: APIRoute = ({ site }) => {
   const origin = site ?? new URL('https://academy.pitcar.co.id');
-  const pages = ['/', '/faq/'];
+  const pages = ['/', '/faq/', '/kelas-online-inspeksi/'];
   const urls = pages
     .map((pathname) => `  <url><loc>${new URL(pathname, origin).href}</loc></url>`)
     .join('\n');

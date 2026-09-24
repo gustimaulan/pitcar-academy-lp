@@ -2,19 +2,29 @@
 import ThemeToggle from './ThemeToggle.astro';
 import { announcement } from '../content.config';
 
+interface Props {
+  /** Replaces the program nav — a product page has its own sections. */
+  links?: { href: string; label: string }[];
+  /** Replaces the consultation button with the page's own primary action. */
+  cta?: { href: string; label: string; sourceCta: string };
+  /** The bar sells the offline batch; off where that would be a distraction. */
+  showAnnouncement?: boolean;
+}
+
 const homePrefix = Astro.url.pathname === '/' ? '' : '/';
 
-const navLinks = [
+const navLinks = Astro.props.links ?? [
   { href: `${homePrefix}#metode`, label: 'Metode' },
   { href: `${homePrefix}#program`, label: 'Program' },
   { href: `${homePrefix}#perjalanan`, label: 'Perjalanan Belajar' },
   { href: `${homePrefix}#faq`, label: 'FAQ' },
 ];
-const consultationHref = `${homePrefix}#konsultasi`;
+const cta = Astro.props.cta ?? { href: `${homePrefix}#konsultasi`, label: 'Konsultasi Gratis', sourceCta: 'header' };
+const showAnnouncement = (Astro.props.showAnnouncement ?? true) && announcement.publish;
 ---
 
 <header class="fixed inset-x-0 top-0 z-50">
-  {announcement.publish && (
+  {showAnnouncement && (
     <a
       href={homePrefix + announcement.href}
       data-lead-cta
@@ -49,8 +59,8 @@ const consultationHref = `${homePrefix}#konsultasi`;
           </a>
         ))}
         <ThemeToggle />
-        <a href={consultationHref} data-lead-cta data-source-cta="header_desktop" class="btn btn-primary min-h-11 px-5 py-2.5 text-sm">
-          Konsultasi Gratis
+        <a href={cta.href} data-lead-cta data-source-cta={`${cta.sourceCta}_desktop`} class="btn btn-primary min-h-11 px-5 py-2.5 text-sm">
+          {cta.label}
         </a>
       </div>
 
@@ -78,8 +88,8 @@ const consultationHref = `${homePrefix}#konsultasi`;
           {link.label}
         </a>
       ))}
-      <a href={consultationHref} data-lead-cta data-source-cta="header_mobile" class="mobile-nav-link btn btn-primary mt-3 w-full">
-        Konsultasi Gratis
+      <a href={cta.href} data-lead-cta data-source-cta={`${cta.sourceCta}_mobile`} class="mobile-nav-link btn btn-primary mt-3 w-full">
+        {cta.label}
       </a>
     </div>
   </div>
