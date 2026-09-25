@@ -751,7 +751,7 @@ export interface InspectionCourse {
 }
 
 export const inspectionCourse: InspectionCourse = {
-  checkoutUrl: 'https://pitcar-academy.myscalev.com/p/kelas-inspeksi-mobil-bekas-cek-sebelum-beli',
+  checkoutUrl: 'https://pitcar-academy.myscalev.com/checkout-kelas-inspeksi',
   name: 'Kelas Inspeksi Mobil Bekas',
   price: 149000,
   priceDisplay: 'Rp149.000',
