@@ -62,20 +62,11 @@ const checkoutAttrs = {
   image="/kelas-inspeksi/og.jpg"
   preloadImage="/kelas-inspeksi/cover.webp"
   structuredData={structuredData}
-  header={{
-    showAnnouncement: false,
-    links: [
-      { href: '#isi-kelas', label: 'Isi Kelas' },
-      { href: '#cara-pakai', label: 'Cara Pakai' },
-      { href: '#harga', label: 'Harga' },
-      { href: '#faq', label: 'FAQ' },
-    ],
-    cta: { href: '#harga', label: `Beli ${c.priceDisplay}`, sourceCta: 'inspeksi_header' },
-  }}
+  bare
   floatingCta={{ href: '#harga', label: `Beli kelas — ${c.priceDisplay}`, sourceCta: 'inspeksi_floating', icon: false }}
 >
   <!-- 1. HERO — masalah, janji, harga, dan tombol beli dalam satu layar -->
-  <section class="band pt-32 md:pt-40" aria-labelledby="hero-title">
+  <section class="band pt-16 md:pt-24" aria-labelledby="hero-title">
     <div class="shell">
       <div class="grid gap-12 lg:grid-cols-12 lg:items-center lg:gap-16">
         <div class="lg:col-span-7">
