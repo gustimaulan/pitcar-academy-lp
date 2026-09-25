@@ -28,6 +28,8 @@ interface Props {
     showAnnouncement?: boolean;
   };
   floatingCta?: { href: string; label: string; sourceCta: string; icon?: boolean };
+  /** Drops the site header and footer so a sales page has no exits but the buy button. */
+  bare?: boolean;
 }
 
 const {
@@ -44,6 +46,7 @@ const {
   noindex = false,
   header,
   floatingCta,
+  bare = false,
 } = Astro.props;
 
 // Site id, not a credential — it ships in the page either way. Defaulted for
@@ -107,11 +110,11 @@ const metaPixelId = import.meta.env.PUBLIC_META_PIXEL_ID ?? '1364110365687038';
   <body class="antialiased">
     <FunnelAnalytics />
     <a class="skip-link" href="#main-content">Lewati ke konten utama</a>
-    <Header {...header} />
+    {!bare && <Header {...header} />}
     <main id="main-content">
       <slot />
     </main>
-    <Footer />
+    {!bare && <Footer />}
     <WhatsAppButton {...floatingCta} />
   </body>
 </html>
