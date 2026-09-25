@@ -323,9 +323,21 @@ const checkoutAttrs = {
   // trackFunnelEvent; module scripts are done by DOMContentLoaded.
   document.addEventListener('DOMContentLoaded', () => window.trackFunnelEvent?.('view_item', commerce));
 
+  // Scalev reads these off its own URL, so carrying them across keeps the
+  // ad source attached to the order.
+  const attributionParams = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'gclid', 'ttclid', 'fbclid'];
+
   document.addEventListener('click', (event) => {
     const link = event.target?.closest?.('[data-checkout]');
     if (!link) return;
+    if (link.hostname.endsWith('myscalev.com')) {
+      const from = new URLSearchParams(window.location.search);
+      const to = new URL(link.href);
+      for (const key of attributionParams) {
+        if (from.has(key) && !to.searchParams.has(key)) to.searchParams.set(key, from.get(key));
+      }
+      link.href = to.toString();
+    }
     window.trackFunnelEvent?.('begin_checkout', { ...commerce, source_cta: link.dataset.sourceCta || 'unknown' });
     window.fbq?.('track', 'InitiateCheckout', { value: price, currency: 'IDR', content_name: itemName, content_ids: [item.item_id], content_type: 'product' });
   });
