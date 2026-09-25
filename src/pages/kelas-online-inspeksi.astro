@@ -1,5 +1,11 @@
 ---
 import { Image } from 'astro:assets';
+import sneakpeek1 from '../assets/kelas-inspeksi/sneakpeek-1.jpg';
+import sneakpeek2 from '../assets/kelas-inspeksi/sneakpeek-2.jpg';
+import sneakpeek3 from '../assets/kelas-inspeksi/sneakpeek-3.jpg';
+import sneakpeek4 from '../assets/kelas-inspeksi/sneakpeek-4.jpg';
+import sneakpeek5 from '../assets/kelas-inspeksi/sneakpeek-5.jpg';
+import sneakpeek6 from '../assets/kelas-inspeksi/sneakpeek-6.jpg';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import FaqSection from '../components/FaqSection.astro';
 import { contact, inspectionCourse as c, inspectionFaqs } from '../content.config';
@@ -207,13 +213,12 @@ const checkoutAttrs = {
         <p class="lead mt-5">Beberapa capture materi video, checklist, dan scoring yang akan kamu gunakan saat mengecek mobil bekas.</p>
       </div>
       <div class="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {[1, 2, 3, 4, 5, 6].map((number) => (
+        {[sneakpeek1, sneakpeek2, sneakpeek3, sneakpeek4, sneakpeek5, sneakpeek6].map((image, index) => (
           <figure class="overflow-hidden border border-line bg-surface">
             <Image
-              src={`/kelas-inspeksi/sneakpeek-${number}.jpg`}
-              width={1200}
-              height={750}
-              alt={`Capture materi kelas inspeksi mobil bekas ${number}`}
+              src={image}
+              format="webp"
+              alt={`Capture materi kelas inspeksi mobil bekas ${index + 1}`}
               class="h-auto w-full"
               loading="lazy"
             />
