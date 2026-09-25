@@ -1,4 +1,5 @@
 ---
+import { Image } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import FaqSection from '../components/FaqSection.astro';
 import { contact, inspectionCourse as c, inspectionFaqs } from '../content.config';
@@ -73,6 +74,11 @@ const checkoutAttrs = {
           <p class="eyebrow">Kelas online · Cek sebelum beli</p>
           <h1 id="hero-title" class="display-1 mt-6 max-w-[14ch]">{c.headline}</h1>
           <p class="lead mt-6 max-w-prose">{c.subheadline}</p>
+          <span id="learning-time-sentinel" class="block h-px w-px" aria-hidden="true"></span>
+          <p id="learning-time" class="course-learning-time mt-5 flex items-center gap-2 border-l-2 border-accent-fill pl-3 text-sm font-semibold">
+            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+            <span><strong class="text-accent">Tidak sampai 1 jam</strong> untuk memahami dasar inspeksi mobil bekas.</span>
+          </p>
 
           <ul class="mt-8 grid gap-x-6 gap-y-3 border-y border-line py-5 text-sm font-semibold sm:grid-cols-2">
             {['Video pembelajaran', 'Form inspeksi + scoring', 'Ringkasan red flag', 'Lifetime access'].map((item) => (
@@ -163,9 +169,25 @@ const checkoutAttrs = {
         </p>
       </div>
       <ol class="divide-y divide-line border-y border-line lg:col-span-7">
-        {c.includes.map((item, i) => (
+        {c.includes.map((item) => (
           <li class="grid grid-cols-[2.5rem_1fr] gap-4 py-6">
-            <span class="font-display text-sm font-semibold uppercase tracking-[0.14em] text-accent">{String(i + 1).padStart(2, '0')}</span>
+            <span class="flex h-8 w-8 shrink-0 items-center justify-center text-accent" aria-hidden="true">
+              {item.title === 'Video pembelajaran' && (
+                <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="m10 9 5 3-5 3z"></path></svg>
+              )}
+              {item.title === 'Form Inspeksi Mobil Bekas' && (
+                <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"></rect><path d="M9 3.5h6M9 9h6M9 13h6M9 17h3"></path></svg>
+              )}
+              {item.title === 'Ringkasan red flag' && (
+                <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 9 17H3z"></path><path d="M12 9v4M12 17h.01"></path></svg>
+              )}
+              {item.title === 'Lifetime access' && (
+                <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+              )}
+              {item.title === 'Akses langsung' && (
+                <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m13 2-8 12h7l-1 8 8-12h-7z"></path></svg>
+              )}
+            </span>
             <div>
               <h3 class="display-3">{item.title}</h3>
               <p class="mt-1.5 text-muted">{item.description}</p>
@@ -176,7 +198,32 @@ const checkoutAttrs = {
     </div>
   </section>
 
-  <!-- 4. AREA INSPEKSI — isi form, sesuai materi promosi -->
+  <!-- 4. SNEAK PEEK MATERI -->
+  <section id="sneakpeek" class="band border-t border-line" aria-labelledby="sneakpeek-title">
+    <div class="shell">
+      <div class="max-w-3xl">
+        <p class="eyebrow">Sneak peek</p>
+        <h2 id="sneakpeek-title" class="display-2 mt-6">Lihat isi kelas sebelum membeli.</h2>
+        <p class="lead mt-5">Beberapa capture materi video, checklist, dan scoring yang akan kamu gunakan saat mengecek mobil bekas.</p>
+      </div>
+      <div class="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {[1, 2, 3, 4, 5, 6].map((number) => (
+          <figure class="overflow-hidden border border-line bg-surface">
+            <Image
+              src={`/kelas-inspeksi/sneakpeek-${number}.jpg`}
+              width={1200}
+              height={750}
+              alt={`Capture materi kelas inspeksi mobil bekas ${number}`}
+              class="h-auto w-full"
+              loading="lazy"
+            />
+          </figure>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. AREA INSPEKSI — isi form, sesuai materi promosi -->
   <section class="band band-alt border-t border-line" aria-labelledby="areas-title">
     <div class="shell">
       <div class="max-w-3xl">
@@ -302,6 +349,37 @@ const checkoutAttrs = {
     </div>
   </section>
 </BaseLayout>
+
+<style>
+  .course-learning-time.is-floating {
+    position: fixed;
+    inset-inline: 0;
+    top: 0;
+    z-index: 60;
+    justify-content: center;
+    margin-top: 0;
+    border: 0;
+    background-color: #cc0000;
+    color: #ffffff;
+    padding: 0.75rem 1rem;
+  }
+
+  .course-learning-time.is-floating svg,
+  .course-learning-time.is-floating .text-accent {
+    color: #ffffff;
+  }
+</style>
+
+<script>
+  const learningTime = document.getElementById('learning-time');
+  const learningTimeSentinel = document.getElementById('learning-time-sentinel');
+  if (learningTime && learningTimeSentinel && 'IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(([entry]) => {
+      learningTime.classList.toggle('is-floating', !entry.isIntersecting);
+    }, { threshold: 0, rootMargin: '-80px 0px 0px' });
+    observer.observe(learningTimeSentinel);
+  }
+</script>
 
 <script define:vars={{ price: c.price, itemName: c.name }}>
   // GA4 ecommerce shape, so the purchase funnel can be built on standard
