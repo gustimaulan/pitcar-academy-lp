@@ -753,9 +753,9 @@ export interface InspectionCourse {
 export const inspectionCourse: InspectionCourse = {
   checkoutUrl: 'https://pitcar-academy.myscalev.com/checkout-kelas-inspeksi',
   name: 'Kelas Inspeksi Mobil Bekas',
-  price: 149000,
-  priceDisplay: 'Rp149.000',
-  strikePriceDisplay: 'Rp300.000',
+  price: 99000,
+  priceDisplay: 'Rp99.000',
+  strikePriceDisplay: 'Rp499.000',
   priceLabel: 'Harga launch',
   headline: 'Jangan beli mobil bekas dalam kondisi buta.',
   subheadline:
