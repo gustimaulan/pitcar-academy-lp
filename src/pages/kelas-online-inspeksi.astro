@@ -77,7 +77,7 @@ const checkoutAttrs = {
     <div class="shell">
       <div class="grid gap-12 lg:grid-cols-12 lg:items-center lg:gap-16">
         <div class="lg:col-span-7">
-          <p class="eyebrow">Kelas online · Cek sebelum beli</p>
+          <p class="eyebrow">Ceklis beli mobil bekas agar tidak rugi</p>
           <h1 id="hero-title" class="display-1 mt-6 max-w-[14ch]">{c.headline}</h1>
           <p class="lead mt-6 max-w-prose">{c.subheadline}</p>
           <span id="learning-time-sentinel" class="block h-px w-px" aria-hidden="true"></span>
@@ -121,6 +121,44 @@ const checkoutAttrs = {
           />
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- RISIKO FINANSIAL — akibat membeli tanpa basic inspeksi -->
+  <section class="band border-t border-line" aria-labelledby="loss-title">
+    <div class="shell grid gap-12 lg:grid-cols-12 lg:gap-16">
+      <div class="lg:col-span-5">
+        <p class="eyebrow">Risiko tanpa basic inspeksi</p>
+        <h2 id="loss-title" class="display-2 mt-6">Yang tidak terlihat saat membeli bisa jadi tagihan setelah mobil dibawa pulang.</h2>
+        <p class="lead mt-5">
+          Tanpa basic inspeksi, kamu tidak punya cukup informasi untuk menilai risiko, menawar harga,
+          atau memutuskan kapan harus meninggalkan sebuah unit.
+        </p>
+      </div>
+
+      <ol class="border-y border-line lg:col-span-7">
+        <li class="grid gap-3 border-b border-line py-7 sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] sm:gap-8">
+          <h3 class="display-3 flex items-start gap-3"><span aria-hidden="true">❌</span><span>Kerusakan mahal terlewat</span></h3>
+          <p class="leading-relaxed text-muted">
+            Gejala pada mesin, transmisi, kaki-kaki, atau elektrikal bisa tampak sepele saat pengecekan singkat,
+            lalu berubah menjadi biaya perbaikan jutaan rupiah.
+          </p>
+        </li>
+        <li class="grid gap-3 border-b border-line py-7 sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] sm:gap-8">
+          <h3 class="display-3 flex items-start gap-3"><span aria-hidden="true">❌</span><span>Harga beli terlalu tinggi</span></h3>
+          <p class="leading-relaxed text-muted">
+            Tanpa catatan temuan, kamu kehilangan dasar untuk menawar. Kekurangan unit tidak masuk perhitungan,
+            tetapi biaya perbaikannya tetap kamu tanggung.
+          </p>
+        </li>
+        <li class="grid gap-3 py-7 sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] sm:gap-8">
+          <h3 class="display-3 flex items-start gap-3"><span aria-hidden="true">❌</span><span>Salah unit, sulit kembali</span></h3>
+          <p class="leading-relaxed text-muted">
+            Setelah transaksi selesai, masalah tersembunyi menjadi tanggung jawabmu. Uang keluar untuk bengkel,
+            waktu habis untuk perbaikan, dan nilai jual kembali ikut turun.
+          </p>
+        </li>
+      </ol>
     </div>
   </section>
 

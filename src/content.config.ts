@@ -757,7 +757,7 @@ export const inspectionCourse: InspectionCourse = {
   priceDisplay: 'Rp99.000',
   strikePriceDisplay: 'Rp499.000',
   priceLabel: 'Harga launch',
-  headline: 'Jangan beli mobil bekas dalam kondisi buta.',
+  headline: 'Salah Pilih Mobil Bekas Bisa Bikin Rugi Jutaan Rupiah.',
   subheadline:
     'Pelajari cara mengecek mobil bekas secara sistematis — apa yang perlu dicek, apa yang perlu diwaspadai, dan kapan sebuah temuan perlu dibawa ke mekanik — sebelum kamu mengeluarkan uang puluhan hingga ratusan juta.',
   tagline: 'Cek dulu. Pahami kondisinya. Baru putuskan.',
