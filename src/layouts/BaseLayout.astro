@@ -4,6 +4,7 @@ import Footer from '../components/Footer.astro';
 import WhatsAppButton from '../components/WhatsAppButton.astro';
 import SeoHead from '../components/SeoHead.astro';
 import GoogleAnalytics from '../components/GoogleAnalytics.astro';
+import GoogleTagManager from '../components/GoogleTagManager.astro';
 import Hotjar from '../components/Hotjar.astro';
 import MetaPixel from '../components/MetaPixel.astro';
 import FunnelAnalytics from '../components/FunnelAnalytics.astro';
@@ -52,6 +53,7 @@ const {
 // Site id, not a credential — it ships in the page either way. Defaulted for
 // the same reason as the analytics property: silently losing measurement is
 // worse than being hard to change.
+const gtmId = import.meta.env.PUBLIC_GTM_ID ?? 'GTM-WRX9JBBT';
 const hotjarId = import.meta.env.PUBLIC_HOTJAR_ID ?? '6772321';
 
 // Pixel id only. The Conversions API token is a credential and lives on the
@@ -64,6 +66,7 @@ const metaPixelId = import.meta.env.PUBLIC_META_PIXEL_ID ?? '1364110365687038';
 <html lang="id">
   <head>
     <meta charset="UTF-8" />
+    <GoogleTagManager id={gtmId} placement="head" />
     <script is:inline>
       // Runs before paint. Light is the default; only an explicit choice
       // stored by the toggle switches to dark.
@@ -108,6 +111,7 @@ const metaPixelId = import.meta.env.PUBLIC_META_PIXEL_ID ?? '1364110365687038';
     />
   </head>
   <body class="antialiased">
+    <GoogleTagManager id={gtmId} placement="body" />
     <FunnelAnalytics />
     <a class="skip-link" href="#main-content">Lewati ke konten utama</a>
     {!bare && <Header {...header} />}

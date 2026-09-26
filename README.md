@@ -97,6 +97,7 @@ Edit `src/content.config.ts` untuk mengubah konten bisnis tanpa menyentuh kompon
   backend Laravel setelah lead tersimpan, bukan dari browser — lihat
   `docs/deployment-backend.md`.
 - **Google Analytics**: `PUBLIC_GA_ID`, default `G-FNT01JRZN7` di kode.
+- **Google Tag Manager**: `PUBLIC_GTM_ID`, default `GTM-WRX9JBBT` di kode. GA4 tetap dimuat langsung; jangan konfigurasi properti GA4 yang sama di GTM.
 - **Paket Belajar**: Edit array `packages[]`
 - **Keunggulan**: Edit array `advantages[]`
 - **FAQ**: Edit array `faqs[]`
@@ -110,6 +111,7 @@ PUBLIC_LEAD_API_BASE_URL=https://api.example.com
 PUBLIC_EDUCATION_CONSULTANT_WHATSAPP=6281234567890
 PUBLIC_EDUCATION_CONSULTANT_WHATSAPP_DISPLAY=+62 812-3456-7890
 PUBLIC_GA_ID=G-XXXXXXXXXX
+PUBLIC_GTM_ID=GTM-XXXXXXX
 ```
 
 Semua `PUBLIC_*` terlihat di browser. Jangan menyimpan API key, token, atau credential Laravel/CRM di repository ini.
