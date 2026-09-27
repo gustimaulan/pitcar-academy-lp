@@ -6,6 +6,9 @@ import sneakpeek3 from '../assets/kelas-inspeksi/sneakpeek-3.jpg';
 import sneakpeek4 from '../assets/kelas-inspeksi/sneakpeek-4.jpg';
 import sneakpeek5 from '../assets/kelas-inspeksi/sneakpeek-5.jpg';
 import sneakpeek6 from '../assets/kelas-inspeksi/sneakpeek-6.jpg';
+import modulInspeksi from '../assets/kelas-inspeksi/modul-inspeksi.png';
+import formInspeksi from '../assets/kelas-inspeksi/form-inspeksi-dan-scoring.png';
+import heroImage from '../assets/kelas-inspeksi/kelas-inspeksi-mockup.png';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import FaqSection from '../components/FaqSection.astro';
 import { contact, inspectionCourse as c, inspectionFaqs } from '../content.config';
@@ -67,7 +70,7 @@ const checkoutAttrs = {
   description={`Pelajari cara mengecek mobil bekas secara sistematis sebelum membeli. Video, form inspeksi dengan scoring, ringkasan red flag, lifetime access. ${c.priceLabel} ${c.priceDisplay}.`}
   canonical="/kelas-online-inspeksi/"
   image="/kelas-inspeksi/og.jpg"
-  preloadImage="/kelas-inspeksi/cover.webp"
+  preloadImage={heroImage.src}
   structuredData={structuredData}
   bare
   floatingCta={{ href: '#harga', label: `Beli kelas — ${c.priceDisplay}`, sourceCta: 'inspeksi_floating', icon: false }}
@@ -87,7 +90,7 @@ const checkoutAttrs = {
           </p>
 
           <ul class="mt-8 grid gap-x-6 gap-y-3 border-y border-line py-5 text-sm font-semibold sm:grid-cols-2">
-            {['Video pembelajaran', 'Form inspeksi + scoring', 'Ringkasan red flag', 'Lifetime access'].map((item) => (
+            {['Video pembelajaran', 'Modul inspeksi mobil bekas', 'Form inspeksi dan scoring', 'Ringkasan red flag', 'Lifetime access'].map((item) => (
               <li class="flex items-center gap-2.5">
                 <svg aria-hidden="true" class="h-4 w-4 shrink-0 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                 {item}
@@ -109,15 +112,15 @@ const checkoutAttrs = {
         </div>
 
         <div class="lg:col-span-5">
-          <img
-            src="/kelas-inspeksi/cover.webp"
-            srcset="/kelas-inspeksi/cover-640.webp 640w, /kelas-inspeksi/cover.webp 1000w"
+          <Image
+            src={heroImage}
+            format="webp"
+            width={1254}
+            height={1254}
             sizes="(min-width: 1024px) 40vw, 100vw"
-            width="1000"
-            height="1000"
-            fetchpriority="high"
+            loading="eager"
             alt="Trainer Pitcar Academy di area bengkel, dengan form inspeksi berisi checklist eksterior, interior, mesin, transmisi, kaki-kaki, dan elektrikal."
-            class="w-full border border-line"
+            class="w-full"
           />
         </div>
       </div>
@@ -355,7 +358,7 @@ const checkoutAttrs = {
         <p class="mt-2 text-sm text-muted">Sekali bayar · Lifetime access · Akses langsung setelah pembayaran</p>
 
         <ul class="mt-8 space-y-3 border-t border-line pt-6">
-          {c.includes.map((item) => (
+          {c.includes.filter((item) => item.title !== 'Form Inspeksi Mobil Bekas').map((item) => (
             <li class="flex items-start gap-3">
               <svg aria-hidden="true" class="mt-1 h-4 w-4 shrink-0 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
               <span class="font-semibold">{item.title}</span>
@@ -374,6 +377,80 @@ const checkoutAttrs = {
         <p class="mt-6 border-t border-line pt-6 text-xs leading-relaxed text-muted">
           <strong class="text-body">Catatan:</strong> {c.refundNote}
         </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- BONUS PEMBELIAN — ditempatkan setelah harga agar bonus terlihat sebelum keputusan checkout -->
+  <section class="band band-alt border-t border-line" aria-labelledby="bonus-title">
+    <div class="shell">
+      <div class="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+        <div class="max-w-3xl">
+          <p class="eyebrow">Bonus khusus pembeli kelas</p>
+          <h2 id="bonus-title" class="display-2 mt-6">Jangan buru-buru membeli sebelum tahu bonus yang kamu dapatkan.</h2>
+          <p class="lead mt-5">
+            Setelah membeli kelas ini, kamu juga mendapatkan dua alat bantu inspeksi yang siap dipakai
+            saat melihat unit. Total senilai Rp138.000, tanpa biaya tambahan.
+          </p>
+        </div>
+        <p class="shrink-0 border-l-2 border-accent-fill pl-4 text-sm font-semibold md:max-w-[13rem]">
+          Total bonus senilai<br />
+          <span class="font-display text-3xl font-bold text-accent">Rp138.000</span>
+        </p>
+      </div>
+
+      <div class="mt-12 grid gap-6 lg:grid-cols-2">
+        <article class="bonus-card">
+          <div class="bonus-card-visual">
+            <Image
+              src={modulInspeksi}
+              format="webp"
+              alt="Preview modul inspeksi mobil bekas Pitcar Academy"
+              class="h-full w-full object-contain"
+            />
+          </div>
+          <div class="p-6 sm:p-8">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <p class="bonus-number">Bonus 01</p>
+                <h3 class="display-3 mt-3">Modul inspeksi mobil bekas</h3>
+              </div>
+              <span class="bonus-free">Free</span>
+            </div>
+            <p class="mt-4 text-muted">Panduan ringkas untuk menemani kamu mengecek bagian penting mobil bekas secara runtut.</p>
+            <div class="mt-6 flex flex-wrap items-baseline gap-x-3 gap-y-1 border-t border-line pt-5">
+              <span class="text-sm text-muted">Senilai</span>
+              <span class="font-display text-2xl font-bold">Rp79.000</span>
+              <span class="text-sm font-semibold text-accent">Free untuk pembeli kelas</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="bonus-card">
+          <div class="bonus-card-visual">
+            <Image
+              src={formInspeksi}
+              format="webp"
+              alt="Preview form inspeksi dan scoring mobil bekas Pitcar Academy"
+              class="h-full w-full object-contain"
+            />
+          </div>
+          <div class="p-6 sm:p-8">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <p class="bonus-number">Bonus 02</p>
+                <h3 class="display-3 mt-3">Form inspeksi dan scoring</h3>
+              </div>
+              <span class="bonus-free">Free</span>
+            </div>
+            <p class="mt-4 text-muted">Form siap pakai untuk mencatat temuan, memberi skor, dan membandingkan kondisi antar-unit.</p>
+            <div class="mt-6 flex flex-wrap items-baseline gap-x-3 gap-y-1 border-t border-line pt-5">
+              <span class="text-sm text-muted">Senilai</span>
+              <span class="font-display text-2xl font-bold">Rp59.000</span>
+              <span class="text-sm font-semibold text-accent">Free untuk pembeli kelas</span>
+            </div>
+          </div>
+        </article>
       </div>
     </div>
   </section>
@@ -397,6 +474,48 @@ const checkoutAttrs = {
 </BaseLayout>
 
 <style>
+  .bonus-card {
+    overflow: hidden;
+    border: 1px solid rgb(var(--line));
+    background: rgb(var(--surface));
+    box-shadow: 0 1rem 2.5rem rgb(var(--body) / 0.06);
+  }
+
+  .bonus-card-visual {
+    display: grid;
+    min-height: 18rem;
+    place-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid rgb(var(--line));
+    background: rgb(var(--ground));
+  }
+
+  .bonus-card-visual img {
+    height: 15rem;
+    width: 100%;
+  }
+
+  .bonus-number {
+    color: rgb(var(--accent));
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .bonus-free {
+    flex: none;
+    background: #cc0000;
+    padding: 0.4rem 0.65rem;
+    color: #fff;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
   .course-learning-time.is-floating {
     position: fixed;
     inset-inline: 0;
