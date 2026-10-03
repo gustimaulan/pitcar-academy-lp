@@ -70,7 +70,6 @@ const endpoint = apiBase ? `${apiBase}/api/purchases/recent` : '';
     var popup = document.getElementById('sales-popup');
     var nameEl = document.getElementById('sales-popup-name');
     var timeEl = document.getElementById('sales-popup-time');
-    var counterEls = document.querySelectorAll('[data-buyer-count]');
 
     // Tuning knobs. The popup loops for the whole visit: show → 5s gap → next.
     var FIRST_DELAY = 5000;
@@ -97,16 +96,6 @@ const endpoint = apiBase ? `${apiBase}/api/purchases/recent` : '';
         return res.ok ? res.json() : Promise.reject(new Error(String(res.status)));
       })
       .then(function (feed) {
-        var total = feed.total_purchases || 0;
-
-        // Buyer counter near the price: only when there is something to show.
-        if (total > 0) {
-          counterEls.forEach(function (el) {
-            el.textContent = total + ' pembeli sudah pakai form ini cek unit';
-            el.hidden = false;
-          });
-        }
-
         // Fresh-enough purchases only, oldest last.
         var queue = (feed.purchases || []).filter(function (p) {
           return relativeTime(p.purchased_at) !== null;
