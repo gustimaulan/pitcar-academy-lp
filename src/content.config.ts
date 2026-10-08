@@ -829,8 +829,10 @@ export const inspectionCourse: InspectionCourse = {
     'Tidak menjamin sebuah kendaraan bebas dari masalah.',
   ],
 
+  // Reassurance di titik CTA: hapus keraguan beli. Kebijakan no-refund tetap
+  // dijawab jujur di FAQ (lihat inspectionFaqs) dan notFor di atas.
   refundNote:
-    'Karena produk digital dapat langsung diakses setelah pembayaran, pembelian bersifat final dan tidak dapat direfund.',
+    'Akses langsung setelah bayar · Dibantu admin via WhatsApp jika ada kendala · Bayar dengan QRIS, transfer bank, atau e-wallet',
 };
 
 export const inspectionFaqs: FaqItem[] = [
