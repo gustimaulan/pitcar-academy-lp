@@ -76,6 +76,37 @@ const checkoutAttrs = {
   bare
   floatingCta={{ href: '#harga', label: `Beli kelas — ${c.priceDisplay}`, sourceCta: 'inspeksi_floating', icon: false }}
 >
+  <!-- Sticky CTA mobile: bottom bar biar ATC jalan saat scroll di HP (<sm). -->
+  <a
+    {...checkoutAttrs}
+    data-source-cta="inspeksi_mobile_sticky"
+    data-mobile-sticky-cta
+    class="btn btn-primary fixed inset-x-4 bottom-4 z-40 shadow-lg sm:hidden"
+  >
+    {checkoutLabel}
+  </a>
+  <script>
+    // Hide the sticky bar while a real CTA is already on screen — same logic
+    // as the desktop floating button, so it never duplicates a visible CTA.
+    const mobileStickyCta = document.querySelector('[data-mobile-sticky-cta]');
+    if (mobileStickyCta && 'IntersectionObserver' in window) {
+      const observed = [
+        ...document.querySelectorAll('[data-checkout]:not([data-mobile-sticky-cta]), [data-lead-cta]:not([data-mobile-sticky-cta])'),
+      ];
+      const visibility = new Map();
+      const update = () => {
+        const hide = [...visibility.values()].some(Boolean);
+        mobileStickyCta.classList.toggle('opacity-0', hide);
+        mobileStickyCta.classList.toggle('pointer-events-none', hide);
+      };
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => visibility.set(entry.target, entry.isIntersecting));
+        update();
+      }, { threshold: 0.05 });
+      observed.forEach((anchor) => observer.observe(anchor));
+    }
+  </script>
+
   <!-- 1. HERO — masalah, janji, harga, dan tombol beli dalam satu layar -->
   <section class="band pt-16 md:pt-24" aria-labelledby="hero-title">
     <div class="shell">
@@ -145,8 +176,9 @@ const checkoutAttrs = {
         <li class="grid gap-3 border-b border-line py-7 sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] sm:gap-8">
           <h3 class="display-3 flex items-start gap-3"><span aria-hidden="true">❌</span><span>Kerusakan mahal terlewat</span></h3>
           <p class="leading-relaxed text-muted">
-            Gejala pada mesin, transmisi, kaki-kaki, atau elektrikal bisa tampak sepele saat pengecekan singkat,
-            lalu berubah menjadi biaya perbaikan jutaan rupiah.
+            Gejala yang tampak sepele saat pengecekan singkat bisa berubah jadi tagihan bengkel yang besar:
+            indikasi turun mesin butuh <strong class="text-body">Rp8–15 juta</strong>, transmisi matic yang jebol
+            <strong class="text-body">Rp12–20 juta</strong>. Semua itu bisa terbaca dari inspeksi sistematis sebelum kamu mengeluarkan uangnya.
           </p>
         </li>
         <li class="grid gap-3 border-b border-line py-7 sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] sm:gap-8">
@@ -165,6 +197,20 @@ const checkoutAttrs = {
         </li>
       </ol>
 
+      <div class="mt-10 border-2 border-accent-fill bg-surface p-6 sm:p-8 lg:col-span-7 lg:col-start-6">
+        <p class="eyebrow">Temuan = senjata nego</p>
+        <h3 class="display-3 mt-3">Bukan cuma catatan — dasar untuk menawar.</h3>
+        <p class="mt-4 leading-relaxed text-muted">
+          Setiap temuan yang tercatat di form memberimu angka yang bisa kamu pakai saat nego. Contoh konkret:
+          inspeksimu menemukan indikasi turun mesin (perbaikan <strong class="text-body">Rp8–15 juta</strong>)?
+          Itu dasar tawaran yang jelas — atau alasan untuk meninggalkan unit dan mencari yang lain.
+          Informasi yang tadinya membuatmu ragu, justru yang membuat harga bisa turun.
+        </p>
+        <p class="mt-5 border-t border-line pt-5 text-sm font-semibold">
+          Perbaikan yang terbaca lewat inspeksi bisa jauh lebih besar daripada harga kelas
+          <span class="whitespace-nowrap text-accent">({c.priceDisplay} sekali bayar, lifetime)</span>.
+        </p>
+      </div>
     </div>
   </section>
 
@@ -178,6 +224,18 @@ const checkoutAttrs = {
           Bukan sekadar video. Form inspeksinya yang kamu bawa ke lokasi, supaya apa yang dipelajari
           benar-benar dipakai saat berhadapan dengan unitnya.
         </p>
+        <figure class="mt-8 overflow-hidden border border-line bg-surface">
+          <Image
+            src={formInspeksi}
+            format="webp"
+            alt="Screenshot form inspeksi dan scoring mobil bekas Pitcar Academy"
+            class="h-auto w-full"
+            loading="lazy"
+          />
+          <figcaption class="border-t border-line px-5 py-4 text-sm text-muted">
+            Form inspeksi + scoring — dicetak atau dibuka dari HP saat kamu cek unit di lokasi.
+          </figcaption>
+        </figure>
       </div>
       <ol class="divide-y divide-line border-y border-line lg:col-span-7">
         {c.includes.map((item) => (
@@ -415,6 +473,60 @@ const checkoutAttrs = {
           ))}
         </ul>
       </div>
+    </div>
+  </section>
+
+  <!-- 8b. BANDINGKAN — on-site inspection vs kelas, anchor harga -->
+  <section class="band border-t border-line" aria-labelledby="compare-title">
+    <div class="shell">
+      <div class="max-w-3xl">
+        <p class="eyebrow">Bandingkan sendiri</p>
+        <h2 id="compare-title" class="display-2 mt-6">Inspeksi di lokasi vs belajar inspeksi.</h2>
+        <p class="lead mt-5">
+          Membayar inspector profesional ke lokasi itu sah dan berguna. Tapi untuk memeriksa unit sendiri
+          saat pencarian harian, biaya sekali cek dibanding kelas lifetime jauh berbeda.
+        </p>
+      </div>
+
+      <div class="mt-12 overflow-x-auto">
+        <table class="w-full min-w-[36rem] border-collapse text-left">
+          <thead>
+            <tr class="border-b-2 border-line">
+              <th scope="col" class="py-4 pr-6 text-sm font-bold uppercase tracking-wider text-muted">Pilihan</th>
+              <th scope="col" class="border-l border-line py-4 pl-6 pr-6 text-sm font-bold uppercase tracking-wider">Inspeksi di lokasi oleh inspector profesional</th>
+              <th scope="col" class="border-l border-accent-fill/60 bg-surface py-4 pl-6 text-lg font-display text-accent">Kelas ini</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-line">
+            <tr>
+              <td class="py-4 pr-6 font-semibold">Biaya</td>
+              <td class="border-l border-line py-4 pl-6 text-muted">Rp300.000–500.000 per unit</td>
+              <td class="border-l border-accent-fill/60 bg-surface py-4 pl-6 font-bold">{c.priceDisplay} sekali, lifetime</td>
+            </tr>
+            <tr>
+              <td class="py-4 pr-6 font-semibold">Cakupan</td>
+              <td class="border-l border-line py-4 pl-6 text-muted">Satu unit, sekali kunjungan</td>
+              <td class="border-l border-accent-fill/60 bg-surface py-4 pl-6">Semua unit yang kamu cek, berkali-kali, kapan saja</td>
+            </tr>
+            <tr>
+              <td class="py-4 pr-6 font-semibold">Yang kamu dapat</td>
+              <td class="border-l border-line py-4 pl-6 text-muted">Laporan + rekomendasi dari inspector</td>
+              <td class="border-l border-accent-fill/60 bg-surface py-4 pl-6">Video, form + scoring, ringkasan red flag — untuk menilai sendiri</td>
+            </tr>
+            <tr>
+              <td class="py-4 pr-6 font-semibold">Akses</td>
+              <td class="border-l border-line py-4 pl-6 text-muted">Jadwal dan lokasi inspector</td>
+              <td class="border-l border-accent-fill/60 bg-surface py-4 pl-6">Langsung dari HP, begitu selesai bayar</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="mt-6 max-w-prose text-sm leading-relaxed text-muted">
+        Kelas ini <strong class="text-body">tidak menggantikan</strong> pemeriksaan teknis mendalam oleh inspector
+        profesional — itu tetap disarankan untuk keputusan besar. Namun untuk tahap penyaringan dan penawaran,
+        biaya belajar yang sekali bayar ini jauh lebih kecil daripada ongkos inspeksi tiap unit yang kamu cek.
+      </p>
     </div>
   </section>
 

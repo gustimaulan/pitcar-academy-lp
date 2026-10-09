@@ -759,7 +759,7 @@ export const inspectionCourse: InspectionCourse = {
   priceLabel: 'Harga launch',
   headline: 'Salah Pilih Mobil Bekas Bisa Bikin Rugi Jutaan Rupiah.',
   subheadline:
-    'Pelajari cara mengecek mobil bekas secara sistematis — apa yang perlu dicek, apa yang perlu diwaspadai, dan kapan sebuah temuan perlu dibawa ke mekanik — sebelum kamu mengeluarkan uang puluhan hingga ratusan juta.',
+    'Pelajari cara mengecek mobil bekas secara sistematis — apa yang perlu dicek, apa yang perlu diwaspadai, dan kapan sebuah temuan perlu dibawa ke mekanik — sebelum kamu mengeluarkan uang puluhan hingga ratusan juta. Kamu tidak perlu paham mesin dulu: kelas ini disusun untuk pemula dan first-time buyer.',
   tagline: 'Cek dulu. Pahami kondisinya. Baru putuskan.',
 
   includes: [
