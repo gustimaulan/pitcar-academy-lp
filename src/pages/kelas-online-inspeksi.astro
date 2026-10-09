@@ -64,6 +64,15 @@ const checkoutAttrs = {
   'data-checkout': '',
   ...(checkoutIsExternal && !c.checkoutUrl ? { target: '_blank', rel: 'noopener' } : {}),
 };
+
+// Perbandingan on-site inspection vs kelas — dirender sebagai baris yang
+// me-wrap (stack di mobile, 3 kolom di layar lebar), bukan tabel scroll.
+const inspectionCompare = [
+  { metric: 'Biaya', onsite: 'Rp300.000–500.000 per unit', course: `${c.priceDisplay} sekali bayar, lifetime` },
+  { metric: 'Cakupan', onsite: 'Satu unit, sekali kunjungan', course: 'Semua unit yang kamu cek, berkali-kali, kapan saja' },
+  { metric: 'Yang kamu dapat', onsite: 'Laporan + rekomendasi dari inspector', course: 'Video, form + scoring, ringkasan red flag — untuk menilai sendiri' },
+  { metric: 'Akses', onsite: 'Jadwal dan lokasi inspector', course: 'Langsung dari HP, begitu selesai bayar' },
+];
 ---
 
 <BaseLayout
@@ -488,39 +497,15 @@ const checkoutAttrs = {
         </p>
       </div>
 
-      <div class="mt-12 overflow-x-auto">
-        <table class="w-full min-w-[36rem] border-collapse text-left">
-          <thead>
-            <tr class="border-b-2 border-line">
-              <th scope="col" class="py-4 pr-6 text-sm font-bold uppercase tracking-wider text-muted">Pilihan</th>
-              <th scope="col" class="border-l border-line py-4 pl-6 pr-6 text-sm font-bold uppercase tracking-wider">Inspeksi di lokasi oleh inspector profesional</th>
-              <th scope="col" class="border-l border-accent-fill/60 bg-surface py-4 pl-6 text-lg font-display text-accent">Kelas ini</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-line">
-            <tr>
-              <td class="py-4 pr-6 font-semibold">Biaya</td>
-              <td class="border-l border-line py-4 pl-6 text-muted">Rp300.000–500.000 per unit</td>
-              <td class="border-l border-accent-fill/60 bg-surface py-4 pl-6 font-bold">{c.priceDisplay} sekali, lifetime</td>
-            </tr>
-            <tr>
-              <td class="py-4 pr-6 font-semibold">Cakupan</td>
-              <td class="border-l border-line py-4 pl-6 text-muted">Satu unit, sekali kunjungan</td>
-              <td class="border-l border-accent-fill/60 bg-surface py-4 pl-6">Semua unit yang kamu cek, berkali-kali, kapan saja</td>
-            </tr>
-            <tr>
-              <td class="py-4 pr-6 font-semibold">Yang kamu dapat</td>
-              <td class="border-l border-line py-4 pl-6 text-muted">Laporan + rekomendasi dari inspector</td>
-              <td class="border-l border-accent-fill/60 bg-surface py-4 pl-6">Video, form + scoring, ringkasan red flag — untuk menilai sendiri</td>
-            </tr>
-            <tr>
-              <td class="py-4 pr-6 font-semibold">Akses</td>
-              <td class="border-l border-line py-4 pl-6 text-muted">Jadwal dan lokasi inspector</td>
-              <td class="border-l border-accent-fill/60 bg-surface py-4 pl-6">Langsung dari HP, begitu selesai bayar</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <dl class="mt-12 space-y-4">
+        {inspectionCompare.map((row) => (
+          <div class="grid gap-px overflow-hidden border border-line bg-line sm:grid-cols-3">
+            <dt class="bg-surface p-5 text-sm font-bold uppercase tracking-wider text-muted">{row.metric}</dt>
+            <dd class="bg-surface p-5 text-muted">{row.onsite}</dd>
+            <dd class="border-l-2 border-accent-fill bg-surface p-5 font-bold">{row.course}</dd>
+          </div>
+        ))}
+      </dl>
 
       <p class="mt-6 max-w-prose text-sm leading-relaxed text-muted">
         Kelas ini <strong class="text-body">tidak menggantikan</strong> pemeriksaan teknis mendalam oleh inspector
