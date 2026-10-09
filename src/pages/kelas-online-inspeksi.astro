@@ -497,15 +497,28 @@ const inspectionCompare = [
         </p>
       </div>
 
-      <dl class="mt-12 space-y-4">
-        {inspectionCompare.map((row) => (
-          <div class="grid gap-px overflow-hidden border border-line bg-line sm:grid-cols-3">
-            <dt class="bg-surface p-5 text-sm font-bold uppercase tracking-wider text-muted">{row.metric}</dt>
-            <dd class="bg-surface p-5 text-muted">{row.onsite}</dd>
-            <dd class="border-l-2 border-accent-fill bg-surface p-5 font-bold">{row.course}</dd>
-          </div>
-        ))}
-      </dl>
+      <div class="mt-12 overflow-hidden border border-line bg-surface">
+        <table class="w-full border-collapse align-top text-sm">
+          <thead>
+            <tr class="text-left text-xs font-bold uppercase tracking-wider">
+              <th scope="col" class="w-1/4 py-3 pl-5 pr-4 text-muted">Pilihan</th>
+              <th scope="col" class="py-3 px-3 text-muted sm:px-4">Inspeksi di lokasi</th>
+              <th scope="col" class="border-l-2 border-accent-fill py-3 pl-3 pr-5 text-accent sm:pl-4">Kelas ini</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-line">
+            {inspectionCompare.map((row) => (
+              <tr>
+                <th scope="row" class="py-3 pl-5 pr-4 text-left text-xs font-bold uppercase tracking-wider text-muted">
+                  {row.metric}
+                </th>
+                <td class="py-3 px-3 text-muted sm:px-4">{row.onsite}</td>
+                <td class="border-l-2 border-accent-fill py-3 pl-3 pr-5 font-bold sm:pl-4">{row.course}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       <p class="mt-6 max-w-prose text-sm leading-relaxed text-muted">
         Kelas ini <strong class="text-body">tidak menggantikan</strong> pemeriksaan teknis mendalam oleh inspector
