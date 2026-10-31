@@ -6,6 +6,8 @@ interface Props {
   title: string;
   description: string;
   image?: string | URL;
+  /** Describes the share image; previews and screen readers show it. */
+  imageAlt?: string;
   url?: string | URL;
   type?: 'website' | 'article' | 'profile';
   structuredData?: Record<string, unknown>[];
@@ -16,6 +18,7 @@ const {
   title,
   description,
   image = '/og-image.jpg',
+  imageAlt = 'Peserta Pitcar Academy belajar langsung di lingkungan bengkel',
   url = '/',
   type = 'website',
   structuredData = [],
@@ -79,7 +82,7 @@ const schemas = [
 <meta property="og:image:type" content={imageType} />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
-<meta property="og:image:alt" content="Peserta Pitcar Academy belajar langsung di lingkungan bengkel" />
+<meta property="og:image:alt" content={imageAlt} />
 <meta property="og:url" content={fullUrl.href} />
 <meta property="og:site_name" content={siteName} />
 <meta property="og:locale" content="id_ID" />
@@ -89,7 +92,7 @@ const schemas = [
 <meta name="twitter:title" content={fullTitle} />
 <meta name="twitter:description" content={description} />
 <meta name="twitter:image" content={fullImage.href} />
-<meta name="twitter:image:alt" content="Peserta Pitcar Academy belajar langsung di lingkungan bengkel" />
+<meta name="twitter:image:alt" content={imageAlt} />
 
 <!-- Structured data is rendered in the document head so crawlers receive valid HTML. -->
 {schemas.map((schema) => (

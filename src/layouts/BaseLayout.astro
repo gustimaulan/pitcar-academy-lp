@@ -14,6 +14,7 @@ interface Props {
   title: string;
   description: string;
   image?: string | URL;
+  imageAlt?: string;
   canonical?: string | URL;
   preloadImage?: string;
   /** Viewports where `preloadImage` is actually the LCP element. */
@@ -37,6 +38,7 @@ const {
   title,
   description,
   image = '/og-image.jpg',
+  imageAlt,
   canonical = Astro.url.pathname,
   preloadImage,
   preloadImageMedia = '(min-width: 1024px)',
@@ -105,6 +107,7 @@ const metaPixelId = import.meta.env.PUBLIC_META_PIXEL_ID ?? '1364110365687038';
       title={title}
       description={description}
       image={image}
+      imageAlt={imageAlt}
       url={canonical}
       structuredData={structuredData}
       noindex={noindex}
