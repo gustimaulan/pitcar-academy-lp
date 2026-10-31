@@ -80,6 +80,7 @@ const inspectionCompare = [
   description={`Pelajari cara mengecek mobil bekas secara sistematis sebelum membeli. Video, form inspeksi dengan scoring, ringkasan red flag, lifetime access. ${c.priceLabel} ${c.priceDisplay}.`}
   canonical="/kelas-online-inspeksi/"
   image="/kelas-inspeksi/og.jpg"
+  imageAlt="Kelas Inspeksi Mobil Bekas — Cek Sebelum Beli: trainer Pitcar Academy di bengkel dengan form checklist inspeksi."
   preloadImage={heroImage.src}
   structuredData={structuredData}
   bare
@@ -533,7 +534,7 @@ const inspectionCompare = [
     </div>
   </section>
 
-  <SalesPopup productName={c.name} />
+  <SalesPopup productName={c.name} product="inspeksi" />
 </BaseLayout>
 
 <style>

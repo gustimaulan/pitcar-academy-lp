@@ -1,6 +1,8 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import FaqSection from '../components/FaqSection.astro';
+import AcDeviceMockup from '../components/AcDeviceMockup.astro';
+import SalesPopup from '../components/SalesPopup.astro';
 import { acCourse as c, acFaqs, contact, trustNumbers } from '../content.config';
 
 // Same shape as the inspection sales page: every buy button goes straight to
@@ -63,7 +65,8 @@ const trustIcons = [
   description={`Kelas online dasar AC mobil: cara kerja komponen, pemeriksaan dengan manifold gauge, troubleshooting elektrikal, dan cuci AC tanpa bongkar. 4 video, modul PDF, akses selamanya. ${c.priceLabel} ${c.priceDisplay}.`}
   canonical="/kelas-online-ac/"
   image="/kelas-ac/og.jpg"
-  preloadImage="/kelas-ac/cover.webp"
+  imageAlt="Kelas Dasar Pemeriksaan & Perawatan AC Mobil: mekanik PITCAR bersedekap di bengkel, belajar sistem kerja AC, pemeriksaan, troubleshooting, sampai cuci AC tanpa bongkar."
+  preloadImage="/kelas-ac/screen-laptop.webp"
   structuredData={structuredData}
   bare
   floatingCta={{ href: c.checkoutUrl, label: checkoutLabel, sourceCta: 'ac_floating', icon: false, checkout: true }}
@@ -71,11 +74,11 @@ const trustIcons = [
   <!-- 1. HERO — hook, janji, harga, dan tombol beli dalam satu layar -->
   <section class="band pt-16 md:pt-24" aria-labelledby="hero-title">
     <div class="shell">
-      <div class="grid gap-12 lg:grid-cols-12 lg:items-center lg:gap-16">
+      <div class="grid gap-12 lg:grid-cols-12 lg:items-center lg:gap-12">
         <!-- Flex column so the phone order can differ: there the price and
              the buy button come straight after the subhead, and the
              checklist moves below them, keeping the button above the fold. -->
-        <div class="flex flex-col lg:col-span-7">
+        <div class="flex flex-col lg:col-span-6">
           <p class="eyebrow">Kelas online · Kelas dasar AC mobil</p>
           <h1 id="hero-title" class="display-1 mt-6 max-w-[14ch]">{c.headline}</h1>
           <p class="lead mt-6 max-w-prose">{c.subheadline}<span class="hidden sm:inline"> {c.subheadlineNote}</span></p>
@@ -104,16 +107,10 @@ const trustIcons = [
           </div>
         </div>
 
-        <div class="lg:col-span-5">
-          <img
-            src="/kelas-ac/cover.webp"
-            srcset="/kelas-ac/cover-640.webp 640w, /kelas-ac/cover.webp 754w"
-            sizes="(min-width: 1024px) 40vw, 100vw"
-            width="754"
-            height="754"
-            fetchpriority="high"
-            alt="Poster Kelas Dasar Pemeriksaan & Perawatan AC Mobil: mekanik PITCAR di bengkel dan empat video, dari mengenal komponen sampai cuci AC tanpa bongkar."
-            class="w-full border border-line"
+        <div class="mx-auto w-full max-w-xl lg:col-span-6 lg:max-w-none">
+          <AcDeviceMockup
+            modules={c.modules}
+            alt="Kelas Dasar Pemeriksaan & Perawatan AC Mobil diputar di laptop dan HP: poster kelas dengan mekanik PITCAR, dan daftar empat video dari mengenal komponen AC sampai cuci AC tanpa bongkar."
           />
         </div>
       </div>
@@ -353,6 +350,7 @@ const trustIcons = [
       <p class="mt-3 text-xs text-muted">{c.priceLabel} · harga normal {c.strikePriceDisplay}</p>
     </div>
   </section>
+  <SalesPopup productName={c.shortName} product="ac" image="/kelas-ac/thumb-192.webp" />
 </BaseLayout>
 
 <script define:vars={{ price: c.price, itemName: c.name }}>

@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Http\Controllers\Api\PurchaseFeedController;
 use App\Models\ScalevPurchase;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
@@ -68,8 +69,10 @@ class SyncScalevPurchases extends Command
         $this->info("Scalev sync done: {$created} new, {$updated} updated, {$skipped} skipped.");
 
         // Fresh purchases should hit the popup without waiting out the feed
-        // cache's TTL.
-        Cache::forget('purchases:recent-feed');
+        // cache's TTL, on every page's feed.
+        foreach (PurchaseFeedController::cacheKeys() as $key) {
+            Cache::forget($key);
+        }
 
         return self::SUCCESS;
     }

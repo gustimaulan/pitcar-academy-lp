@@ -163,4 +163,38 @@ class ScalevPurchaseFeedTest extends TestCase
         $this->assertStringNotContainsString('Surabaya', $payload);
         $this->assertStringNotContainsString('Kelas Inspeksi', $payload);
     }
+
+    public function test_the_feed_can_be_limited_to_one_class(): void
+    {
+        $make = fn (string $id, string $name, ?string $product, int $minutesAgo) => ScalevPurchase::create([
+            'order_id' => $id,
+            'customer_name' => $name,
+            'product_name' => $product,
+            'purchased_at' => now()->subMinutes($minutesAgo),
+        ]);
+
+        $make('01A', 'Budi Santoso', 'Kelas Inspeksi Mobil Bekas', 5);
+        $make('01B', 'Rina Wati', 'Kelas Dasar Pemeriksaan & Perawatan AC Mobil', 3);
+        $make('01C', 'Siti', null, 1);
+
+        $this->getJson('/api/purchases/recent?product=ac')
+            ->assertSuccessful()
+            ->assertJsonPath('total_purchases', 1)
+            ->assertJsonCount(1, 'purchases')
+            ->assertJsonPath('purchases.0.name', 'Rina W.');
+
+        $this->getJson('/api/purchases/recent?product=inspeksi')
+            ->assertSuccessful()
+            ->assertJsonPath('total_purchases', 1)
+            ->assertJsonPath('purchases.0.name', 'Budi S.');
+
+        // Unknown product: empty, never everybody.
+        $this->getJson('/api/purchases/recent?product=nope')
+            ->assertSuccessful()
+            ->assertJsonPath('total_purchases', 0)
+            ->assertJsonCount(0, 'purchases');
+
+        // No filter keeps the old mixed feed.
+        $this->getJson('/api/purchases/recent')->assertJsonPath('total_purchases', 3);
+    }
 }

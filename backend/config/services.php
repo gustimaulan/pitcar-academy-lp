@@ -45,6 +45,15 @@ return [
         'api_key' => env('SCALEV_API_KEY'),
         'api_url' => env('SCALEV_API_URL', 'https://api.scalev.com'),
         'timeout' => (int) env('SCALEV_TIMEOUT', 15),
+
+        // Which Scalev product names belong to each sales page, so the popup
+        // on the AC page never shows someone who bought the inspection class.
+        // Matched as a case-insensitive "contains" against the variant name
+        // stored in scalev_purchases.product_name.
+        'products' => [
+            'inspeksi' => ['Inspeksi'],
+            'ac' => ['AC Mobil'],
+        ],
     ],
 
     /*
