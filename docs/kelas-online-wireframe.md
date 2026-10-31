@@ -1,8 +1,12 @@
 # Kelas online — wireframe
 
-Halaman ada di `/kelas-online`, memakai design system yang sama. **Belum
-terindeks** (`noindex` + tidak masuk sitemap) sampai `digitalCourse.ready`
-diubah jadi `true` di `src/content.config.ts`.
+Halaman ada di `/kelas-online-fundamental`, memakai design system yang sama.
+**Belum terindeks** (`noindex` + tidak masuk sitemap) sampai
+`digitalCourse.ready` diubah jadi `true` di `src/content.config.ts`.
+
+`/kelas-online` sendiri sekarang adalah etalase semua kelas online yang
+benar-benar dijual (Kelas AC Mobil, Kelas Inspeksi Mobil Bekas); datanya di
+`onlineCourses` pada `src/content.config.ts`.
 
 ## Kenapa halaman terpisah
 

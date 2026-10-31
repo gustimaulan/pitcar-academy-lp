@@ -5,6 +5,12 @@ interface Props {
   sourceCta?: string;
   /** The chat bubble only fits a consultation; a buy button reads fine without it. */
   icon?: boolean;
+  /**
+   * The button is a checkout link: tagged `data-checkout` so the sales page's
+   * own click handler carries ad attribution across and reports
+   * begin_checkout, instead of the lead-funnel cta_click.
+   */
+  checkout?: boolean;
 }
 
 const {
@@ -12,14 +18,17 @@ const {
   label = 'Konsultasi gratis',
   sourceCta = 'floating_consultation',
   icon = true,
+  checkout = false,
 } = Astro.props;
+
+const funnelAttrs = checkout ? { 'data-checkout': '' } : { 'data-lead-cta': '' };
 ---
 
 <!-- Brand red, not WhatsApp green: this opens the consultation form, and a
      green button would promise a chat that does not start yet. -->
 <a
   href={href}
-  data-lead-cta
+  {...funnelAttrs}
   data-source-cta={sourceCta}
   data-floating-consultation
   class="btn btn-primary pointer-events-none fixed bottom-4 right-4 z-40 hidden translate-y-2 px-5 py-3 text-sm opacity-0 shadow-lg transition duration-200 sm:bottom-6 sm:right-6 sm:inline-flex"
@@ -36,7 +45,7 @@ const {
   // page has one in most sections, and a floating button that sits on top of
   // the card it duplicates is worse than no floating button.
   const anchors = [
-    ...document.querySelectorAll<HTMLElement>('[data-lead-cta]:not([data-floating-consultation]), [data-checkout]'),
+    ...document.querySelectorAll<HTMLElement>('[data-lead-cta]:not([data-floating-consultation]), [data-checkout]:not([data-floating-consultation])'),
     ...document.querySelectorAll<HTMLElement>('#konsultasi'),
   ];
   const visibility = new Map<Element, boolean>();
