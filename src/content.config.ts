@@ -867,6 +867,307 @@ export const inspectionFaqs: FaqItem[] = [
 ];
 
 /* ============================================================================
+   KELAS DASAR PEMERIKSAAN & PERAWATAN AC MOBIL
+   Produk digital kedua. Halaman: /kelas-online-ac/
+   Semua isi diambil dari materi promosi; tidak ada klaim durasi video atau
+   nama pengajar karena keduanya belum dikonfirmasi.
+   ========================================================================== */
+
+export interface AcCourse {
+  checkoutUrl: string;
+  name: string;
+  /** Nama pendek untuk judul tab, katalog, dan event analytics. */
+  shortName: string;
+  /** Angka tanpa format, untuk structured data dan event analytics. */
+  price: number;
+  priceDisplay: string;
+  strikePriceDisplay: string;
+  /** Selisih harga coret dan harga jual. !! VERIFY saat salah satunya berubah. */
+  savingsDisplay: string;
+  priceLabel: string;
+  headline: string;
+  subheadline: string;
+  /** Kalimat kedua subheadline; disembunyikan di layar sempit supaya tombol beli tetap di atas lipatan. */
+  subheadlineNote: string;
+  tagline: string;
+  /** Empat hal yang didapat, urutan sama dengan materi promosi. */
+  features: { title: string; description: string }[];
+  /** Empat video, berurutan. Judul dan isi persis seperti materi promosi. */
+  modules: { title: string; description: string }[];
+  pdf: { title: string; summary: string; contents: string[] };
+  steps: { title: string; description: string }[];
+  audience: string[];
+  notFor: string[];
+  /** Strip kepercayaan di bawah hero, dari footer materi promosi. */
+  trust: string[];
+  refundNote: string;
+}
+
+export const acCourse: AcCourse = {
+  checkoutUrl: 'https://pitcar-academy.myscalev.com/checkout-kelas-online-ac',
+  name: 'Kelas Dasar Pemeriksaan & Perawatan AC Mobil',
+  shortName: 'Kelas AC Mobil',
+  price: 99000,
+  priceDisplay: 'Rp99.000',
+  strikePriceDisplay: 'Rp499.000',
+  savingsDisplay: 'Rp400.000',
+  priceLabel: 'Harga spesial launching',
+  headline: 'AC nggak dingin bukan berarti kurang freon.',
+  subheadline:
+    'Pelajari cara kerja setiap komponen AC mobil, cara memeriksanya dengan manifold gauge, cara melacak gangguan elektrikal, sampai cuci AC tanpa bongkar.',
+  subheadlineNote: 'Empat video dan satu modul PDF, disusun mekanik bengkel spesialis tune up dan AC.',
+  tagline: 'Periksa dulu. Temukan penyebabnya. Baru tangani.',
+
+  features: [
+    {
+      title: '4 video pembelajaran',
+      description: 'Dari mengenal komponen sampai cuci AC tanpa bongkar, berurutan seperti urutan kerja di bengkel.',
+    },
+    {
+      title: 'Modul pendamping (PDF)',
+      description: 'Rangkuman, ilustrasi, dan langkah pemeriksaan yang bisa dibuka dari HP saat kamu praktik.',
+    },
+    {
+      title: 'Studi kasus & troubleshooting nyata',
+      description: 'Gejala, pemeriksaan, dan analisis kerusakan dari kasus AC mobil yang ditangani di bengkel.',
+    },
+    {
+      title: 'Akses selamanya',
+      description: 'Sekali bayar. Putar ulang bagian yang kamu butuhkan setiap kali ketemu kasus baru.',
+    },
+  ],
+
+  modules: [
+    {
+      title: 'Mengenal Komponen AC Mobil',
+      description: 'Fungsi, letak, dan cara kerja setiap komponen AC: dari kompresor sampai evaporator.',
+    },
+    {
+      title: 'General Check Up AC — Part 1',
+      description: 'Cara menggunakan manifold gauge dan urutan pemeriksaan dasar sebelum menyimpulkan apa pun.',
+    },
+    {
+      title: 'General Check Up AC — Part 2',
+      description: 'Troubleshooting sistem elektrikal dan analisis kerusakan: melacak penyebab, bukan menebak.',
+    },
+    {
+      title: 'Cuci AC Tanpa Bongkar',
+      description: 'Pembersihan blower, evaporator, filter kabin, dan kondensor menggunakan alat endoskopi.',
+    },
+  ],
+
+  pdf: {
+    title: 'Modul Pendamping AC Mobil (PDF)',
+    summary:
+      'Rangkuman tiap video dalam format yang cepat dibaca, supaya kamu tidak perlu memutar ulang video saat tangan sedang di kap mesin.',
+    contents: [
+      'Rangkuman materi setiap video',
+      'Ilustrasi komponen dan alur kerja AC',
+      'Langkah pemeriksaan dan troubleshooting',
+      'Panduan cuci AC tanpa bongkar',
+      'Studi kasus dan soal latihan',
+    ],
+  },
+
+  steps: [
+    {
+      title: 'Bayar, materi langsung terbuka',
+      description: 'Setelah pembayaran berhasil, akses materi terbuka otomatis. Tidak perlu menunggu jadwal kelas.',
+    },
+    {
+      title: 'Tonton empat videonya berurutan',
+      description: 'Mulai dari komponen, lalu pemeriksaan, baru cuci AC. Urutannya memang dibuat seperti urutan kerja.',
+    },
+    {
+      title: 'Buka modul PDF saat praktik',
+      description: 'Langkah pemeriksaan dan troubleshooting ada di PDF, siap dibuka dari HP di samping mobil.',
+    },
+    {
+      title: 'Ulangi setiap ketemu kasus baru',
+      description: 'Akses selamanya. Saat menemukan gejala yang belum pernah kamu tangani, putar lagi bagian yang relevan.',
+    },
+  ],
+
+  audience: [
+    'Siswa SMK otomotif yang ingin paham AC mobil lebih dari yang ada di buku',
+    'Mekanik pemula yang sering menerima keluhan AC tapi belum punya urutan periksa',
+    'Penggemar otomotif yang ingin merawat AC mobilnya sendiri',
+    'Pemilik mobil yang ingin paham kondisi AC-nya sebelum ke bengkel',
+  ],
+
+  // Ditulis terang-terangan, sebelum harga: pembeli produk digital tanpa
+  // refund berhak tahu batasnya sebelum membayar.
+  notFor: [
+    'Bukan sertifikasi teknisi AC dan tidak menerbitkan sertifikat kompetensi.',
+    'Alat seperti manifold gauge dan endoskopi tidak termasuk. Kelas ini mengajarkan cara memakainya.',
+    'Tidak menggantikan praktik langsung dan pendampingan di bengkel untuk kasus yang rumit.',
+    'Tidak menjamin setiap gangguan AC bisa kamu selesaikan sendiri.',
+  ],
+
+  trust: [
+    'Materi dari mekanik berpengalaman',
+    'Bisa diakses di HP dan laptop',
+    'Pembayaran aman, proses cepat',
+    'Cocok untuk siswa SMK, mekanik pemula, dan penggemar otomotif',
+  ],
+
+  refundNote:
+    'Karena produk digital dapat langsung diakses setelah pembayaran, pembelian bersifat final dan tidak dapat direfund.',
+};
+
+export const acFaqs: FaqItem[] = [
+  {
+    question: 'Saya belum pernah pegang AC mobil sama sekali. Bisa ikut?',
+    answer:
+      'Bisa. Ini kelas dasar: video pertama mulai dari mengenal fungsi dan letak setiap komponen, baru masuk ke pemeriksaan dan troubleshooting.',
+  },
+  {
+    question: 'Apakah saya harus punya manifold gauge atau endoskopi?',
+    answer:
+      'Tidak untuk mengikuti kelasnya. Video menunjukkan cara memakai alat-alat itu; alatnya baru kamu butuhkan saat mempraktikkan sendiri. Alat tidak termasuk dalam harga kelas.',
+  },
+  {
+    question: 'Bagaimana cara mengakses materinya?',
+    answer:
+      'Akses materi terbuka otomatis setelah pembayaran berhasil. Kamu tidak perlu menunggu jadwal kelas atau konfirmasi manual.',
+  },
+  {
+    question: 'Berapa lama saya bisa mengakses kelasnya?',
+    answer:
+      'Selamanya. Sekali bayar, empat video dan modul PDF bisa kamu buka kapan saja, dari HP maupun laptop.',
+  },
+  {
+    question: 'Apa isi modul PDF-nya?',
+    answer:
+      'Rangkuman materi setiap video, ilustrasi komponen dan alur kerja, langkah pemeriksaan dan troubleshooting, panduan cuci AC tanpa bongkar, serta studi kasus dan soal latihan.',
+  },
+  {
+    question: 'Apakah kelas ini mengajarkan cara isi freon?',
+    answer:
+      'Fokusnya pemeriksaan dan perawatan: mengenal komponen, general check up dengan manifold gauge, troubleshooting elektrikal, dan cuci AC tanpa bongkar. Dengan dasar itu kamu tahu kapan AC memang perlu ditambah refrigeran, dan kapan masalahnya ada di tempat lain.',
+  },
+  {
+    question: 'Apakah bisa refund?',
+    answer:
+      'Tidak. Karena produk digital dapat langsung diakses setelah pembayaran, pembelian bersifat final dan tidak dapat direfund. Baca dulu isi dan batasan kelas di halaman ini sebelum membeli.',
+  },
+  {
+    question: 'Apa bedanya dengan program offline Pitcar Academy?',
+    answer:
+      'Kelas online membangun pemahaman dasar yang bisa dipelajari dari rumah. Program offline memberi praktik langsung pada kendaraan, OJT di bengkel yang beroperasi, dan assessment kompetensi.',
+  },
+];
+
+/* ============================================================================
+   KATALOG KELAS ONLINE
+   Halaman: /kelas-online/ — etalase semua kelas online yang bisa dibeli.
+   Setiap kartu menurunkan datanya dari objek kelas masing-masing supaya harga
+   dan isi tidak pernah berbeda antara katalog dan halaman penjualan.
+   ========================================================================== */
+
+export interface OnlineCourseCard {
+  id: string;
+  /** Halaman penjualan. */
+  href: string;
+  checkoutUrl: string;
+  name: string;
+  /** Satu kalimat yang membuat orang berhenti scroll. */
+  hook: string;
+  summary: string;
+  price: number;
+  priceDisplay: string;
+  strikePriceDisplay: string;
+  priceLabel: string;
+  cover: string;
+  coverSrcset: string;
+  coverWidth: number;
+  coverHeight: number;
+  coverAlt: string;
+  highlights: string[];
+  /** Untuk siapa, dalam satu kalimat. */
+  forWho: string;
+  badge?: string;
+}
+
+export const onlineCourses: OnlineCourseCard[] = [
+  {
+    id: 'kelas-online-ac',
+    href: '/kelas-online-ac/',
+    checkoutUrl: acCourse.checkoutUrl,
+    name: acCourse.name,
+    hook: acCourse.headline,
+    summary:
+      'Cara kerja komponen, pemeriksaan dengan manifold gauge, troubleshooting elektrikal, dan cuci AC tanpa bongkar.',
+    price: acCourse.price,
+    priceDisplay: acCourse.priceDisplay,
+    strikePriceDisplay: acCourse.strikePriceDisplay,
+    // Satu kosakata untuk atribut yang sama di kedua kartu, supaya yang
+    // terbaca berbeda hanyalah perbedaan yang nyata.
+    priceLabel: 'Harga launching',
+    cover: '/kelas-ac/cover.webp',
+    coverSrcset: '/kelas-ac/cover-640.webp 640w, /kelas-ac/cover.webp 754w',
+    coverWidth: 754,
+    coverHeight: 754,
+    coverAlt:
+      'Poster Kelas Dasar Pemeriksaan & Perawatan AC Mobil: mekanik PITCAR dan empat video, dari mengenal komponen sampai cuci AC tanpa bongkar.',
+    highlights: acCourse.features.map((f) => f.title),
+    forWho: 'Siswa SMK, mekanik pemula, dan penggemar otomotif',
+    badge: 'Baru',
+  },
+  {
+    id: 'kelas-inspeksi-mobil-bekas',
+    href: '/kelas-online-inspeksi/',
+    checkoutUrl: inspectionCourse.checkoutUrl ?? '/kelas-online-inspeksi/#harga',
+    name: inspectionCourse.name,
+    hook: inspectionCourse.headline,
+    summary:
+      'Urutan pengecekan enam area, form inspeksi dengan scoring, dan ringkasan red flag untuk dibawa saat cek unit.',
+    price: inspectionCourse.price,
+    priceDisplay: inspectionCourse.priceDisplay,
+    strikePriceDisplay: inspectionCourse.strikePriceDisplay,
+    priceLabel: 'Harga launching',
+    cover: '/kelas-inspeksi/cover.webp',
+    coverSrcset: '/kelas-inspeksi/cover-640.webp 640w, /kelas-inspeksi/cover.webp 1000w',
+    coverWidth: 1000,
+    coverHeight: 1000,
+    coverAlt:
+      'Poster Kelas Inspeksi Mobil Bekas: trainer Pitcar Academy dengan form inspeksi berisi checklist eksterior, interior, mesin, transmisi, kaki-kaki, dan elektrikal.',
+    highlights: ['Video pembelajaran', 'Form inspeksi + scoring', 'Ringkasan red flag', 'Akses selamanya'],
+    forWho: 'Calon pembeli mobil bekas dan first-time buyer',
+  },
+];
+
+export const onlineCourseFaqs: FaqItem[] = [
+  {
+    question: 'Bagaimana cara membeli kelasnya?',
+    answer:
+      'Buka halaman kelas yang kamu mau, tekan tombol beli, lalu isi form checkout dan bayar. Setelah pembayaran berhasil, akses materi terbuka otomatis.',
+  },
+  {
+    question: 'Bisa ditonton dari HP?',
+    answer: 'Bisa. Semua kelas online bisa diakses dari HP, tablet, maupun laptop lewat browser.',
+  },
+  {
+    question: 'Berapa lama masa aksesnya?',
+    answer: 'Selamanya. Sekali bayar, materi bisa diputar ulang kapan saja tanpa biaya tambahan.',
+  },
+  {
+    question: 'Kalau mau ambil lebih dari satu kelas?',
+    answer: 'Setiap kelas dibeli terpisah lewat halaman checkout masing-masing. Belum ada paket gabungan.',
+  },
+  {
+    question: 'Apakah bisa refund?',
+    answer:
+      'Tidak. Karena produk digital dapat langsung diakses setelah pembayaran, pembelian bersifat final. Baca isi dan batasan tiap kelas di halamannya sebelum membeli.',
+  },
+  {
+    question: 'Apa bedanya dengan program offline Pitcar Academy?',
+    answer:
+      'Kelas online membangun pemahaman yang bisa dipelajari dari rumah. Program offline memberi praktik langsung pada kendaraan, OJT di bengkel yang beroperasi, dan assessment kompetensi.',
+  },
+];
+
+/* ============================================================================
    PROFIL SISWA — PROTOTIPE
    Data contoh. Belum ada autentikasi, jadi peserta di-hardcode.
    ========================================================================== */

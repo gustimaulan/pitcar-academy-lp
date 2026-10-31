@@ -1,0 +1,387 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import FaqSection from '../components/FaqSection.astro';
+import { acCourse as c, acFaqs, contact, trustNumbers } from '../content.config';
+
+// Same shape as the inspection sales page: every buy button goes straight to
+// the Scalev checkout form, and the page has no exits except that button.
+const checkoutLabel = `Beli sekarang — ${c.priceDisplay}`;
+const checkoutAttrs = { href: c.checkoutUrl, 'data-checkout': '' };
+
+const workshopNumbers = trustNumbers.filter((n) => n.publish);
+
+const site = Astro.site ?? new URL('https://academy.pitcar.co.id');
+const pageUrl = new URL('/kelas-online-ac/', site).href;
+const structuredData = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Course',
+    name: c.name,
+    description: `${c.subheadline} ${c.subheadlineNote}`,
+    url: pageUrl,
+    image: new URL('/kelas-ac/og.jpg', site).href,
+    inLanguage: 'id',
+    provider: { '@id': new URL('/#organization', site).href },
+    offers: {
+      '@type': 'Offer',
+      price: String(c.price),
+      priceCurrency: 'IDR',
+      availability: 'https://schema.org/InStock',
+      category: 'Paid',
+      url: pageUrl,
+    },
+    // No courseWorkload: Google expects an ISO 8601 duration there and the
+    // video durations are not known. Omitted rather than invented.
+    hasCourseInstance: {
+      '@type': 'CourseInstance',
+      courseMode: 'Online',
+    },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: acFaqs.map((faq) => ({
+      '@type': 'Question',
+      name: faq.question,
+      acceptedAnswer: { '@type': 'Answer', text: faq.answer },
+    })),
+  },
+];
+
+// One stroke weight for every icon on the page, so the trust strip reads as
+// one set rather than four downloads.
+const trustIcons = [
+  '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
+  '<rect x="2" y="4" width="14" height="11" rx="1.5"/><path d="M2 18h12"/><rect x="17" y="8" width="5" height="10" rx="1.2"/><path d="M19.5 15.5h0"/>',
+  '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
+  '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+];
+---
+
+<BaseLayout
+  title={`${c.name} — Rp99.000 | Pitcar Academy`}
+  description={`Kelas online dasar AC mobil: cara kerja komponen, pemeriksaan dengan manifold gauge, troubleshooting elektrikal, dan cuci AC tanpa bongkar. 4 video, modul PDF, akses selamanya. ${c.priceLabel} ${c.priceDisplay}.`}
+  canonical="/kelas-online-ac/"
+  image="/kelas-ac/og.jpg"
+  preloadImage="/kelas-ac/cover.webp"
+  structuredData={structuredData}
+  bare
+  floatingCta={{ href: c.checkoutUrl, label: checkoutLabel, sourceCta: 'ac_floating', icon: false, checkout: true }}
+>
+  <!-- 1. HERO — hook, janji, harga, dan tombol beli dalam satu layar -->
+  <section class="band pt-16 md:pt-24" aria-labelledby="hero-title">
+    <div class="shell">
+      <div class="grid gap-12 lg:grid-cols-12 lg:items-center lg:gap-16">
+        <!-- Flex column so the phone order can differ: there the price and
+             the buy button come straight after the subhead, and the
+             checklist moves below them, keeping the button above the fold. -->
+        <div class="flex flex-col lg:col-span-7">
+          <p class="eyebrow">Kelas online · Kelas dasar AC mobil</p>
+          <h1 id="hero-title" class="display-1 mt-6 max-w-[14ch]">{c.headline}</h1>
+          <p class="lead mt-6 max-w-prose">{c.subheadline}<span class="hidden sm:inline"> {c.subheadlineNote}</span></p>
+
+          <ul class="order-last mt-8 grid gap-x-6 gap-y-3 border-y border-line py-5 text-sm font-semibold sm:order-none sm:grid-cols-2">
+            {c.features.map((item) => (
+              <li class="flex items-center gap-2.5">
+                <svg aria-hidden="true" class="h-4 w-4 shrink-0 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                {item.title}
+              </li>
+            ))}
+          </ul>
+
+          <div class="mt-8 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <span class="font-display text-5xl font-bold leading-none">{c.priceDisplay}</span>
+            <span class="text-lg text-muted line-through">{c.strikePriceDisplay}</span>
+            <span class="bg-accent-fill px-2 py-0.5 text-[0.6875rem] font-bold uppercase tracking-wider text-white">{c.priceLabel}</span>
+          </div>
+          <p class="mt-2 text-sm text-muted">
+            <strong class="font-semibold text-accent">Hemat {c.savingsDisplay}</strong> · Sekali bayar · Akses selamanya · Akses langsung setelah pembayaran
+          </p>
+
+          <div class="mt-7 flex flex-col gap-3 sm:flex-row">
+            <a {...checkoutAttrs} data-source-cta="ac_hero" class="btn btn-primary">{checkoutLabel}</a>
+            <a href="#isi-kelas" class="btn btn-ghost">Lihat isi kelas</a>
+          </div>
+        </div>
+
+        <div class="lg:col-span-5">
+          <img
+            src="/kelas-ac/cover.webp"
+            srcset="/kelas-ac/cover-640.webp 640w, /kelas-ac/cover.webp 754w"
+            sizes="(min-width: 1024px) 40vw, 100vw"
+            width="754"
+            height="754"
+            fetchpriority="high"
+            alt="Poster Kelas Dasar Pemeriksaan & Perawatan AC Mobil: mekanik PITCAR di bengkel dan empat video, dari mengenal komponen sampai cuci AC tanpa bongkar."
+            class="w-full border border-line"
+          />
+        </div>
+      </div>
+
+      <!-- Strip kepercayaan: empat fakta yang menjawab keraguan sebelum scroll. -->
+      <ul class="mt-12 grid gap-px border border-line bg-line sm:grid-cols-2 lg:mt-16 lg:grid-cols-4">
+        {c.trust.map((item, i) => (
+          <li class="flex items-center gap-3.5 bg-surface px-5 py-4 text-sm font-semibold leading-snug">
+            <svg aria-hidden="true" class="h-6 w-6 shrink-0 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" set:html={trustIcons[i]} />
+            {item}
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <!-- 2. MASALAH — satu keluhan, banyak penyebab -->
+  <section class="band band-alt border-t border-line" aria-labelledby="problem-title">
+    <div class="shell">
+      <div class="max-w-3xl">
+        <p class="eyebrow">Kenapa perlu</p>
+        <h2 id="problem-title" class="display-2 mt-6">Hampir semua keluhan AC mulai dari kalimat yang sama: “kurang dingin”.</h2>
+        <p class="lead mt-5">
+          Penyebabnya bisa kompresor, tekanan refrigeran, kelistrikan, atau sekadar evaporator yang kotor.
+          Tanpa dasar pemeriksaan, yang dilakukan adalah menebak. Dan tebakan paling umum adalah tambah freon.
+        </p>
+      </div>
+
+      <div class="mt-12 grid gap-px border border-line bg-line md:grid-cols-2">
+        <figure class="bg-surface p-8 sm:p-10">
+          <figcaption class="text-xs font-bold uppercase tracking-[0.14em] text-muted">Tanpa dasar</figcaption>
+          <blockquote class="mt-5 font-display text-3xl font-bold leading-tight text-muted sm:text-4xl">
+            “Kurang dingin? Tambah freon.”
+          </blockquote>
+          <ul class="mt-6 space-y-2.5 text-sm text-muted">
+            <li>Menebak penyebab dari satu gejala</li>
+            <li>Membongkar bagian yang sebenarnya tidak bermasalah</li>
+            <li>Tidak tahu angka normal di manifold gauge</li>
+          </ul>
+        </figure>
+        <figure class="bg-surface p-8 sm:p-10">
+          <figcaption class="text-xs font-bold uppercase tracking-[0.14em] text-accent">Dengan kelas ini</figcaption>
+          <blockquote class="mt-5 font-display text-3xl font-bold leading-tight sm:text-4xl">
+            “{c.tagline}”
+          </blockquote>
+          <ul class="mt-6 space-y-2.5 text-sm">
+            <li>Tahu fungsi dan letak tiap komponen AC</li>
+            <li>Membaca manifold gauge dan gejala elektrikal</li>
+            <li>Membersihkan blower, evaporator, dan kondensor tanpa bongkar</li>
+          </ul>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. ISI KELAS — empat video, berurutan -->
+  <section id="isi-kelas" class="band border-t border-line scroll-mt-28" aria-labelledby="modules-title">
+    <div class="shell">
+      <div class="grid gap-12 lg:grid-cols-12 lg:gap-16">
+        <div class="lg:col-span-5">
+          <p class="eyebrow">Isi kelas</p>
+          <h2 id="modules-title" class="display-2 mt-6">Empat video, satu urutan kerja yang runtut.</h2>
+          <p class="lead mt-5">
+            Dari mengenal komponen sampai cuci AC tanpa bongkar, dengan studi kasus dan troubleshooting
+            dari pekerjaan bengkel. Setiap video dibuat untuk ditonton sebelum, dan diputar ulang saat, kamu praktik.
+          </p>
+        </div>
+        <ol class="grid gap-px border border-line bg-line sm:grid-cols-2 lg:col-span-7">
+          {c.modules.map((m, i) => (
+            <li class="bg-surface p-6 sm:p-8">
+              <span class="font-display text-sm font-semibold uppercase tracking-[0.14em] text-accent">Video {String(i + 1).padStart(2, '0')}</span>
+              <h3 class="display-3 mt-3">{m.title}</h3>
+              <p class="mt-2 text-sm leading-relaxed text-muted">{m.description}</p>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. MODUL PDF — yang dibuka saat tangan di kap mesin -->
+  <section class="band band-alt border-t border-line" aria-labelledby="pdf-title">
+    <div class="shell">
+      <div class="grid gap-10 border border-line bg-surface p-8 sm:p-10 lg:grid-cols-12 lg:items-center lg:gap-16 lg:p-14">
+        <div class="lg:col-span-4">
+          <img
+            src="/kelas-ac/modul-pdf.webp"
+            width="188"
+            height="214"
+            loading="lazy"
+            alt="Sampul Modul Pendamping AC Mobil dari Pitcar Academy, dengan ilustrasi kompresor dan komponen AC."
+            class="mx-auto w-36 sm:w-40 lg:w-full lg:max-w-[11rem]"
+          />
+        </div>
+        <div class="lg:col-span-8">
+          <p class="eyebrow">Modul pendamping</p>
+          <h2 id="pdf-title" class="display-2 mt-6">Satu PDF untuk dibuka saat tanganmu di kap mesin.</h2>
+          <p class="lead mt-5 max-w-prose">{c.pdf.summary}</p>
+          <ul class="mt-8 grid gap-x-8 gap-y-3 border-t border-line pt-6 sm:grid-cols-2">
+            {c.pdf.contents.map((item) => (
+              <li class="flex items-start gap-3 text-sm font-semibold leading-snug">
+                <svg aria-hidden="true" class="mt-0.5 h-4 w-4 shrink-0 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                {item}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. SIAPA YANG MENGAJAR — bengkel yang beroperasi, bukan slide -->
+  <section class="band border-t border-line" aria-labelledby="proof-title">
+    <div class="shell grid gap-12 lg:grid-cols-12 lg:items-center lg:gap-16">
+      <div class="lg:col-span-7">
+        <p class="eyebrow">Siapa yang mengajar</p>
+        <h2 id="proof-title" class="display-2 mt-6">Disusun mekanik PITCAR Service, bengkel spesialis tune up dan AC.</h2>
+        <p class="lead mt-5 max-w-prose">
+          Materinya diambil dari cara kerja yang dipakai mekanik saat menangani AC mobil customer:
+          apa yang diperiksa lebih dulu, angka apa yang dibaca, dan kapan sebuah gejala berarti
+          masalah di tempat lain.
+        </p>
+      </div>
+      <div class="lg:col-span-5">
+        <div class="border border-line bg-surface p-8 sm:p-10">
+          <p class="text-xs font-bold uppercase tracking-[0.14em] text-muted">Dari bengkel yang beroperasi</p>
+          <p class="display-3 mt-4">{contact.placeName}</p>
+          <dl class="mt-6 divide-y divide-line border-t border-line">
+            {workshopNumbers.map((n) => (
+              <div class="flex items-baseline justify-between gap-4 py-3.5">
+                <dt class="text-sm text-muted">{n.label}</dt>
+                <dd class="font-display text-2xl font-bold leading-none">{n.value}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. CARA BELAJAR -->
+  <section id="cara-belajar" class="band band-alt border-t border-line scroll-mt-28" aria-labelledby="steps-title">
+    <div class="shell">
+      <div class="max-w-3xl">
+        <p class="eyebrow">Cara belajar</p>
+        <h2 id="steps-title" class="display-2 mt-6">Dari bayar sampai bisa dipakai di bengkel.</h2>
+      </div>
+      <ol class="mt-12 grid gap-10 md:grid-cols-2 lg:grid-cols-4 lg:gap-8">
+        {c.steps.map((step, i) => (
+          <li class="border-t-2 border-accent-fill pt-5">
+            <span class="font-display text-sm font-semibold uppercase tracking-[0.14em] text-accent">Langkah {i + 1}</span>
+            <h3 class="display-3 mt-2">{step.title}</h3>
+            <p class="mt-2 text-sm leading-relaxed text-muted">{step.description}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <!-- 7. COCOK UNTUK + BATASAN — jujur sebelum persuasif -->
+  <section class="band border-t border-line" aria-labelledby="audience-title">
+    <div class="shell grid gap-12 lg:grid-cols-2 lg:gap-16">
+      <div>
+        <p class="eyebrow">Cocok untuk</p>
+        <h2 id="audience-title" class="display-2 mt-6">Kelas ini untuk kamu yang:</h2>
+        <ul class="mt-8 divide-y divide-line border-y border-line">
+          {c.audience.map((a) => (
+            <li class="flex items-start gap-4 py-4">
+              <svg aria-hidden="true" class="mt-1 h-5 w-5 shrink-0 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span class="text-lg leading-snug">{a}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div class="self-start border border-line bg-surface p-8 sm:p-10">
+        <p class="eyebrow">Yang perlu dipahami</p>
+        <h3 class="display-3 mt-5">Kelas dasar: membangun cara periksa yang benar, bukan menggantikan jam terbang.</h3>
+        <ul class="mt-6 space-y-3 text-muted">
+          {c.notFor.map((n) => (
+            <li class="flex items-start gap-3">
+              <span class="mt-2.5 h-1 w-3 shrink-0 bg-faint" aria-hidden="true"></span>{n}
+            </li>
+          ))}
+        </ul>
+        <p class="mt-6 border-t border-line pt-6 text-sm leading-relaxed">
+          Tujuannya: kamu tahu <strong>apa yang diperiksa lebih dulu</strong>, <strong>bagaimana membaca hasilnya</strong>,
+          dan <strong>kapan sebuah gejala perlu ditangani lebih lanjut</strong> di bengkel.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. HARGA -->
+  <section id="harga" class="band band-alt border-t border-line scroll-mt-28" aria-labelledby="price-title">
+    <div class="shell">
+      <div class="mx-auto max-w-xl border-2 border-accent-fill bg-surface p-8 sm:p-12">
+        <p class="eyebrow">{c.priceLabel}</p>
+        <h2 id="price-title" class="display-3 mt-5">{c.name}</h2>
+        <div class="mt-6 flex flex-wrap items-baseline gap-x-3">
+          <span class="font-display text-6xl font-bold leading-none">{c.priceDisplay}</span>
+          <span class="text-xl text-muted line-through">{c.strikePriceDisplay}</span>
+        </div>
+        <p class="mt-3 inline-block bg-accent-fill px-2.5 py-1 text-xs font-bold tracking-wide text-white">Hemat {c.savingsDisplay}</p>
+        <p class="mt-3 text-sm text-muted">Sekali bayar · Akses selamanya · Akses langsung setelah pembayaran</p>
+
+        <ul class="mt-8 space-y-3 border-t border-line pt-6">
+          {c.features.map((item) => (
+            <li class="flex items-start gap-3">
+              <svg aria-hidden="true" class="mt-1 h-4 w-4 shrink-0 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span><span class="font-semibold">{item.title}</span><span class="block text-sm text-muted">{item.description}</span></span>
+            </li>
+          ))}
+        </ul>
+
+        <a {...checkoutAttrs} data-source-cta="ac_pricing" class="btn btn-primary mt-8 w-full">{checkoutLabel}</a>
+        <p class="mt-3 text-center text-xs text-muted">Pembayaran aman lewat halaman checkout Pitcar Academy di Scalev. Materi terbuka otomatis setelah bayar.</p>
+        <p class="mt-6 border-t border-line pt-6 text-xs leading-relaxed text-muted">
+          <strong class="text-body">Catatan:</strong> {c.refundNote}
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9. FAQ -->
+  <FaqSection
+    faqs={acFaqs}
+    cta={{ note: 'Sudah jelas? Pelajari cara periksanya sebelum keluhan AC berikutnya datang.', href: '#harga', label: 'Lihat harga & beli', sourceCta: 'ac_faq' }}
+  />
+
+  <!-- 10. PENUTUP -->
+  <section class="band border-t border-line" aria-labelledby="closing-title">
+    <div class="shell text-center">
+      <p class="eyebrow justify-center">Sebelum kamu tambah freon lagi</p>
+      <h2 id="closing-title" class="display-2 mx-auto mt-6 max-w-[18ch]">{c.tagline}</h2>
+      <p class="lead mx-auto mt-5 max-w-prose">Empat video, satu modul PDF, akses selamanya. Mulai dari {c.priceDisplay}.</p>
+      <a {...checkoutAttrs} data-source-cta="ac_closing" class="btn btn-primary mt-8">{checkoutLabel}</a>
+      <p class="mt-3 text-xs text-muted">{c.priceLabel} · harga normal {c.strikePriceDisplay}</p>
+    </div>
+  </section>
+</BaseLayout>
+
+<script define:vars={{ price: c.price, itemName: c.name }}>
+  // GA4 ecommerce shape, so the purchase funnel can be built on standard
+  // reports. begin_checkout is the last step this page can see: payment
+  // happens on Scalev.
+  const item = { item_id: 'kelas-online-ac', item_name: itemName, price, quantity: 1 };
+  const commerce = { currency: 'IDR', value: price, items: [item] };
+
+  // Inline scripts run before the bundled analytics module defines
+  // trackFunnelEvent; module scripts are done by DOMContentLoaded.
+  document.addEventListener('DOMContentLoaded', () => window.trackFunnelEvent?.('view_item', commerce));
+
+  // Scalev reads these off its own URL, so carrying them across keeps the
+  // ad source attached to the order.
+  const attributionParams = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'gclid', 'ttclid', 'fbclid'];
+
+  document.addEventListener('click', (event) => {
+    const link = event.target?.closest?.('[data-checkout]');
+    if (!link) return;
+    if (link.hostname.endsWith('myscalev.com')) {
+      const from = new URLSearchParams(window.location.search);
+      const to = new URL(link.href);
+      for (const key of attributionParams) {
+        if (from.has(key) && !to.searchParams.has(key)) to.searchParams.set(key, from.get(key));
+      }
+      link.href = to.toString();
+    }
+    window.trackFunnelEvent?.('begin_checkout', { ...commerce, source_cta: link.dataset.sourceCta || 'unknown' });
+    window.fbq?.('track', 'InitiateCheckout', { value: price, currency: 'IDR', content_name: itemName, content_ids: [item.item_id], content_type: 'product' });
+  });
+</script>
