@@ -753,13 +753,13 @@ export interface InspectionCourse {
 export const inspectionCourse: InspectionCourse = {
   checkoutUrl: 'https://pitcar-academy.myscalev.com/checkout-kelas-inspeksi',
   name: 'Kelas Inspeksi Mobil Bekas',
-  price: 149000,
-  priceDisplay: 'Rp149.000',
-  strikePriceDisplay: 'Rp300.000',
+  price: 99000,
+  priceDisplay: 'Rp99.000',
+  strikePriceDisplay: 'Rp499.000',
   priceLabel: 'Harga launch',
-  headline: 'Jangan beli mobil bekas dalam kondisi buta.',
+  headline: 'Salah Pilih Mobil Bekas Bisa Bikin Rugi Jutaan Rupiah.',
   subheadline:
-    'Pelajari cara mengecek mobil bekas secara sistematis — apa yang perlu dicek, apa yang perlu diwaspadai, dan kapan sebuah temuan perlu dibawa ke mekanik — sebelum kamu mengeluarkan uang puluhan hingga ratusan juta.',
+    'Pelajari cara mengecek mobil bekas secara sistematis — apa yang perlu dicek, apa yang perlu diwaspadai, dan kapan sebuah temuan perlu dibawa ke mekanik — sebelum kamu mengeluarkan uang puluhan hingga ratusan juta. Kamu tidak perlu paham mesin dulu: kelas ini disusun untuk pemula dan first-time buyer.',
   tagline: 'Cek dulu. Pahami kondisinya. Baru putuskan.',
 
   includes: [
@@ -829,8 +829,10 @@ export const inspectionCourse: InspectionCourse = {
     'Tidak menjamin sebuah kendaraan bebas dari masalah.',
   ],
 
+  // Reassurance di titik CTA: hapus keraguan beli. Kebijakan no-refund tetap
+  // dijawab jujur di FAQ (lihat inspectionFaqs) dan notFor di atas.
   refundNote:
-    'Karena produk digital dapat langsung diakses setelah pembayaran, pembelian bersifat final dan tidak dapat direfund.',
+    'Akses langsung setelah bayar · Dibantu admin via WhatsApp jika ada kendala · Bayar dengan QRIS, transfer bank, atau e-wallet',
 };
 
 export const inspectionFaqs: FaqItem[] = [

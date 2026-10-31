@@ -2,9 +2,11 @@
 
 interface ImportMetaEnv {
   readonly PUBLIC_LEAD_API_BASE_URL?: string;
+  readonly PUBLIC_API_BASE_URL?: string;
   readonly PUBLIC_EDUCATION_CONSULTANT_WHATSAPP?: string;
   readonly PUBLIC_EDUCATION_CONSULTANT_WHATSAPP_DISPLAY?: string;
   readonly PUBLIC_GA_ID?: string;
+  readonly PUBLIC_GTM_ID?: string;
   readonly PUBLIC_HOTJAR_ID?: string;
   readonly PUBLIC_META_PIXEL_ID?: string;
 }

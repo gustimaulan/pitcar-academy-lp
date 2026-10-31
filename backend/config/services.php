@@ -29,6 +29,26 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Scalev Orders API
+    |--------------------------------------------------------------------------
+    |
+    | Read-only pull of paid orders for the sales popup and buyer counter.
+    | The API key is a credential: it stays server-side and is never
+    | compiled into the frontend bundle. Leave the key blank to switch
+    | the sync off; the command then does nothing rather than failing.
+    |
+    | Reference: https://dev.scalev.com/reference/listorders.md
+    |
+    */
+
+    'scalev' => [
+        'api_key' => env('SCALEV_API_KEY'),
+        'api_url' => env('SCALEV_API_URL', 'https://api.scalev.com'),
+        'timeout' => (int) env('SCALEV_TIMEOUT', 15),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Third Party Services
     |--------------------------------------------------------------------------
     |
