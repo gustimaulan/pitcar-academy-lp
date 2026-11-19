@@ -10,8 +10,10 @@ import modulInspeksi from '../assets/kelas-inspeksi/modul-inspeksi.png';
 import formInspeksi from '../assets/kelas-inspeksi/form-inspeksi-dan-scoring.png';
 import heroImage from '../assets/kelas-inspeksi/kelas-inspeksi-mockup.png';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import FaqSection from '../components/FaqSection.astro';
+import ThemeToggle from '../components/ThemeToggle.astro';
+import InspectExplorer from '../components/garage/InspectExplorer.astro';
 import SalesPopup from '../components/SalesPopup.astro';
+import '../styles/garage.css';
 import { contact, inspectionCourse as c, inspectionFaqs } from '../content.config';
 
 // Until a payment platform is connected the sale still happens — over
@@ -20,7 +22,11 @@ const whatsappNumber = import.meta.env.PUBLIC_EDUCATION_CONSULTANT_WHATSAPP || c
 const checkoutHref = c.checkoutUrl
   ?? `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Halo Pitcar Academy, saya mau beli ${c.name} (${c.priceDisplay}).`)}`;
 const checkoutIsExternal = /^https?:\/\//.test(checkoutHref);
-const checkoutLabel = `Beli kelasnya — ${c.priceDisplay}`;
+const checkoutLabel = `Beli kelasnya, ${c.priceDisplay}`;
+
+// The shared content file separates clauses with a long dash; this page sets
+// them with a comma instead of editing copy other pages use.
+const tidy = (text: string) => text.replaceAll(' — ', ', ');
 
 const site = Astro.site ?? new URL('https://academy.pitcar.co.id');
 const pageUrl = new URL('/kelas-online-inspeksi/', site).href;
@@ -68,36 +74,37 @@ const checkoutAttrs = {
 // Perbandingan on-site inspection vs kelas — dirender sebagai baris yang
 // me-wrap (stack di mobile, 3 kolom di layar lebar), bukan tabel scroll.
 const inspectionCompare = [
-  { metric: 'Biaya', onsite: 'Rp300.000–500.000 per unit', course: `${c.priceDisplay} sekali bayar, lifetime` },
+  { metric: 'Biaya', onsite: 'Rp300.000 sampai Rp500.000 per unit', course: `${c.priceDisplay} sekali bayar, lifetime` },
   { metric: 'Cakupan', onsite: 'Satu unit, sekali kunjungan', course: 'Semua unit yang kamu cek, berkali-kali, kapan saja' },
-  { metric: 'Yang kamu dapat', onsite: 'Laporan + rekomendasi dari inspector', course: 'Video, form + scoring, ringkasan red flag — untuk menilai sendiri' },
+  { metric: 'Yang kamu dapat', onsite: 'Laporan + rekomendasi dari inspector', course: 'Video, form + scoring, dan ringkasan red flag untuk menilai sendiri' },
   { metric: 'Akses', onsite: 'Jadwal dan lokasi inspector', course: 'Langsung dari HP, begitu selesai bayar' },
 ];
 ---
 
 <BaseLayout
-  title={`${c.name} — Cek Sebelum Beli | Pitcar Academy`}
+  title={`${c.name}: Cek Sebelum Beli | Pitcar Academy`}
   description={`Pelajari cara mengecek mobil bekas secara sistematis sebelum membeli. Video, form inspeksi dengan scoring, ringkasan red flag, lifetime access. ${c.priceLabel} ${c.priceDisplay}.`}
   canonical="/kelas-online-inspeksi/"
   image="/kelas-inspeksi/og.jpg"
-  imageAlt="Kelas Inspeksi Mobil Bekas — Cek Sebelum Beli: trainer Pitcar Academy di bengkel dengan form checklist inspeksi."
-  preloadImage={heroImage.src}
+  imageAlt="Kelas Inspeksi Mobil Bekas, Cek Sebelum Beli: trainer Pitcar Academy di bengkel dengan form checklist inspeksi."
   structuredData={structuredData}
+  world="garage"
   bare
-  floatingCta={{ href: '#harga', label: `Beli kelas — ${c.priceDisplay}`, sourceCta: 'inspeksi_floating', icon: false }}
+  ownThemeToggle
+  floatingCta={{ href: '#harga', label: `Beli kelas, ${c.priceDisplay}`, sourceCta: 'inspeksi_floating', icon: false }}
 >
   <!-- Sticky CTA mobile: bottom bar biar ATC jalan saat scroll di HP (<sm). -->
   <a
     {...checkoutAttrs}
     data-source-cta="inspeksi_mobile_sticky"
     data-mobile-sticky-cta
-    class="btn btn-primary fixed inset-x-4 bottom-4 z-40 shadow-lg sm:hidden"
+    class="btn btn-primary fixed inset-x-4 bottom-4 z-40 sm:hidden"
   >
     {checkoutLabel}
   </a>
   <script>
-    // Hide the sticky bar while a real CTA is already on screen — same logic
-    // as the desktop floating button, so it never duplicates a visible CTA.
+    // Hide the sticky bar while a real CTA is already on screen, so it never
+    // duplicates a visible one.
     const mobileStickyCta = document.querySelector('[data-mobile-sticky-cta]');
     if (mobileStickyCta && 'IntersectionObserver' in window) {
       const observed = [
@@ -117,64 +124,42 @@ const inspectionCompare = [
     }
   </script>
 
-  <!-- 1. HERO — masalah, janji, harga, dan tombol beli dalam satu layar -->
-  <section class="band pt-16 md:pt-24" aria-labelledby="hero-title">
+  <section class="pt-6 pb-20 sm:pt-8 lg:pb-28" aria-labelledby="hero-title">
     <div class="shell">
-      <div class="grid gap-12 lg:grid-cols-12 lg:items-center lg:gap-16">
-        <div class="lg:col-span-7">
-          <p class="eyebrow">Ceklist beli mobil bekas agar tidak rugi</p>
-          <h1 id="hero-title" class="display-1 mt-6 max-w-[14ch]">{c.headline}</h1>
-          <p class="lead mt-6 max-w-prose">{c.subheadline}</p>
-          <span id="learning-time-sentinel" class="block h-px w-px" aria-hidden="true"></span>
-          <p id="learning-time" class="course-learning-time mt-5 flex items-center gap-2 border-l-2 border-accent-fill pl-3 text-sm font-semibold">
-            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
-            <span><strong class="text-accent">Tidak sampai 1 jam</strong> untuk memahami dasar inspeksi mobil bekas.</span>
-          </p>
-
-          <ul class="mt-8 grid gap-x-6 gap-y-3 border-y border-line py-5 text-sm font-semibold sm:grid-cols-2">
-            {['Video pembelajaran', 'Modul inspeksi mobil bekas', 'Form inspeksi dan scoring', 'Ringkasan red flag', 'Lifetime access'].map((item) => (
-              <li class="flex items-start gap-3">
-                <svg aria-hidden="true" class="mt-1 h-4 w-4 shrink-0 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                {item}
-              </li>
-            ))}
-          </ul>
-
-          <div class="mt-8 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <span class="font-display text-5xl font-bold leading-none">{c.priceDisplay}</span>
-            <span class="text-lg text-muted line-through">{c.strikePriceDisplay}</span>
-            <span class="bg-accent-fill px-2 py-0.5 text-[0.6875rem] font-bold uppercase tracking-wider text-white">{c.priceLabel}</span>
-          </div>
-          <p class="mt-2 text-sm text-muted">Sekali bayar · Lifetime access · Akses langsung setelah pembayaran</p>
-
-          <div class="mt-7 flex flex-col gap-3 sm:flex-row">
-            <a {...checkoutAttrs} data-source-cta="inspeksi_hero" class="btn btn-primary">{checkoutLabel}</a>
-            <a href="#isi-kelas" class="btn btn-ghost">Lihat isi kelas</a>
-          </div>
-        </div>
-
-        <div class="lg:col-span-5">
-          <Image
-            src={heroImage}
-            format="webp"
-            width={1254}
-            height={1254}
-            sizes="(min-width: 1024px) 40vw, 100vw"
-            loading="eager"
-            alt="Trainer Pitcar Academy di area bengkel, dengan form inspeksi berisi checklist eksterior, interior, mesin, transmisi, kaki-kaki, dan elektrikal."
-            class="w-full"
-          />
-        </div>
+      <div class="mb-10 flex items-center justify-between gap-4 border-b border-line pb-3 font-display text-xl font-bold uppercase lg:mb-14">
+        <span>Pitcar <span class="text-accent">Academy</span></span>
+        <span class="flex items-center gap-3">
+          <span class="g-label text-muted">Kelas online</span>
+          <ThemeToggle />
+        </span>
       </div>
+      <InspectExplorer checkout={{ href: checkoutHref, label: `Buka kelasnya, ${c.priceDisplay}` }}>
+        <h1 id="hero-title" class="g-h2 !text-[clamp(2.5rem,5vw,3.75rem)]">{c.headline}</h1>
+        <p class="lead mt-5 max-w-prose">
+          Pelajari cara mengecek mobil bekas secara sistematis: apa yang dicek, apa yang diwaspadai, dan kapan
+          sebuah temuan perlu dibawa ke mekanik. Disusun untuk pemula dan first-time buyer.
+        </p>
+        <p class="mt-4 text-sm text-muted"><strong class="font-semibold text-accent">Tidak sampai 1 jam</strong> untuk memahami dasar inspeksi mobil bekas.</p>
+
+        <div class="mt-7 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <span class="g-num text-5xl">{c.priceDisplay}</span>
+          <span class="text-lg text-muted line-through">{c.strikePriceDisplay}</span>
+          <span class="text-sm font-semibold text-accent">{c.priceLabel}</span>
+        </div>
+        <p class="mt-2 text-sm text-muted">Sekali bayar. Lifetime access, langsung terbuka setelah pembayaran.</p>
+
+        <div class="mt-6 flex flex-col gap-3 sm:flex-row [&>a]:whitespace-nowrap">
+          <a {...checkoutAttrs} data-source-cta="inspeksi_hero" class="btn btn-primary">{checkoutLabel}</a>
+          <a href="#isi-kelas" class="btn btn-ghost">Lihat isi kelas</a>
+        </div>
+      </InspectExplorer>
     </div>
   </section>
 
-  <!-- KENAPA PERLU — risiko membeli tanpa basic inspeksi -->
-  <section class="band border-t border-line" aria-labelledby="loss-title">
+  <section class="g-section" aria-labelledby="loss-title">
     <div class="shell grid gap-12 lg:grid-cols-12 lg:gap-16">
       <div class="lg:col-span-5">
-        <p class="eyebrow">Kenapa perlu basic inspeksi</p>
-        <h2 id="loss-title" class="display-2 mt-6">Yang tidak terlihat saat membeli bisa jadi tagihan setelah mobil dibawa pulang.</h2>
+        <h2 id="loss-title" class="g-h2">Yang tidak terlihat saat membeli bisa jadi tagihan setelah mobil dibawa pulang.</h2>
         <p class="lead mt-5">
           Mobil bekas jarang terlihat buruk saat dipajang: bodi sudah dipoles, kabin wangi, dan mesin
           dipanaskan sebelum kamu datang. Tanpa basic inspeksi, kamu tidak punya cukup informasi untuk
@@ -182,99 +167,86 @@ const inspectionCompare = [
         </p>
       </div>
 
-      <ol class="border-y border-line lg:col-span-7">
-        <li class="grid gap-3 border-b border-line py-7 sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] sm:gap-8">
-          <h3 class="display-3 flex items-start gap-3"><span aria-hidden="true">❌</span><span>Kerusakan mahal terlewat</span></h3>
-          <p class="leading-relaxed text-muted">
-            Gejala yang tampak sepele saat pengecekan singkat bisa berubah jadi tagihan bengkel yang besar:
-            indikasi turun mesin butuh <strong class="text-body">Rp8–15 juta</strong>, transmisi matic yang jebol
-            <strong class="text-body">Rp12–20 juta</strong>. Semua itu bisa terbaca dari inspeksi sistematis sebelum kamu mengeluarkan uangnya.
-          </p>
-        </li>
-        <li class="grid gap-3 border-b border-line py-7 sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] sm:gap-8">
-          <h3 class="display-3 flex items-start gap-3"><span aria-hidden="true">❌</span><span>Harga beli terlalu tinggi</span></h3>
-          <p class="leading-relaxed text-muted">
-            Tanpa catatan temuan, kamu kehilangan dasar untuk menawar. Kekurangan unit tidak masuk perhitungan,
-            tetapi biaya perbaikannya tetap kamu tanggung.
-          </p>
-        </li>
-        <li class="grid gap-3 py-7 sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] sm:gap-8">
-          <h3 class="display-3 flex items-start gap-3"><span aria-hidden="true">❌</span><span>Salah unit, sulit kembali</span></h3>
-          <p class="leading-relaxed text-muted">
-            Setelah transaksi selesai, masalah tersembunyi menjadi tanggung jawabmu. Uang keluar untuk bengkel,
-            waktu habis untuk perbaikan, dan nilai jual kembali ikut turun.
-          </p>
-        </li>
-      </ol>
+      <div class="lg:col-span-7">
+        <ul class="space-y-9 lg:pt-2">
+          <li class="g-node">
+            <h3 class="g-h3">Kerusakan mahal terlewat</h3>
+            <p class="mt-2 max-w-prose leading-relaxed text-muted">
+              Gejala yang tampak sepele saat pengecekan singkat bisa berubah jadi tagihan bengkel yang besar:
+              indikasi turun mesin butuh <strong class="text-body">Rp8 sampai 15 juta</strong>, transmisi matic yang jebol
+              <strong class="text-body">Rp12 sampai 20 juta</strong>. Semua itu bisa terbaca dari inspeksi sistematis sebelum kamu mengeluarkan uangnya.
+            </p>
+          </li>
+          <li class="g-node">
+            <h3 class="g-h3">Harga beli terlalu tinggi</h3>
+            <p class="mt-2 max-w-prose leading-relaxed text-muted">
+              Tanpa catatan temuan, kamu kehilangan dasar untuk menawar. Kekurangan unit tidak masuk perhitungan,
+              tetapi biaya perbaikannya tetap kamu tanggung.
+            </p>
+          </li>
+          <li class="g-node">
+            <h3 class="g-h3">Salah unit, sulit kembali</h3>
+            <p class="mt-2 max-w-prose leading-relaxed text-muted">
+              Setelah transaksi selesai, masalah tersembunyi menjadi tanggung jawabmu. Uang keluar untuk bengkel,
+              waktu habis untuk perbaikan, dan nilai jual kembali ikut turun.
+            </p>
+          </li>
+        </ul>
 
-      <div class="mt-10 border-l-2 border-accent-fill bg-surface/60 p-5 pl-6 sm:p-6 sm:pl-7 lg:col-span-7 lg:col-start-6">
-        <p class="eyebrow">Temuan = senjata nego</p>
-        <h3 class="display-3 mt-3">Bukan cuma catatan — dasar untuk menawar.</h3>
-        <p class="mt-4 leading-relaxed text-muted">
-          Setiap temuan yang tercatat di form memberimu angka yang bisa kamu pakai saat nego. Contoh konkret:
-          inspeksimu menemukan indikasi turun mesin (perbaikan <strong class="text-body">Rp8–15 juta</strong>)?
-          Itu dasar tawaran yang jelas — atau alasan untuk meninggalkan unit dan mencari yang lain.
-          Informasi yang tadinya membuatmu ragu, justru yang membuat harga bisa turun.
-        </p>
-        <p class="mt-5 border-t border-line pt-5 text-sm font-semibold">
-          Perbaikan yang terbaca lewat inspeksi bisa jauh lebih besar daripada harga kelas
-          <span class="whitespace-nowrap text-accent">({c.priceDisplay} sekali bayar, lifetime)</span>.
-        </p>
+        <div class="mt-12 border-t border-body pt-7">
+          <h3 class="g-h3">Temuan bukan cuma catatan. Temuan adalah dasar untuk menawar.</h3>
+          <p class="mt-3 max-w-prose leading-relaxed text-muted">
+            Setiap temuan yang tercatat di form memberimu angka yang bisa dipakai saat nego. Inspeksimu menemukan
+            indikasi turun mesin, dengan perbaikan <strong class="text-body">Rp8 sampai 15 juta</strong>? Itu dasar tawaran
+            yang jelas, atau alasan untuk meninggalkan unit dan mencari yang lain.
+          </p>
+          <p class="mt-4 text-sm font-semibold">
+            Perbaikan yang terbaca lewat inspeksi bisa jauh lebih besar daripada harga kelas
+            <span class="whitespace-nowrap text-accent">({c.priceDisplay} sekali bayar, lifetime)</span>.
+          </p>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- 3. YANG DIDAPAT -->
-  <section id="isi-kelas" class="band border-t border-line scroll-mt-28" aria-labelledby="includes-title">
+  <section id="isi-kelas" class="g-section scroll-mt-10" aria-labelledby="includes-title">
     <div class="shell grid gap-12 lg:grid-cols-12 lg:gap-16">
       <div class="lg:col-span-5">
-        <p class="eyebrow">Yang kamu dapatkan</p>
-        <h2 id="includes-title" class="display-2 mt-6">Sekali bayar, semua ini jadi milikmu.</h2>
-        <p class="lead mt-5">
-          Bukan sekadar video. Form inspeksinya yang kamu bawa ke lokasi, supaya apa yang dipelajari
-          benar-benar dipakai saat berhadapan dengan unitnya.
-        </p>
+        <div class="lg:sticky lg:top-10">
+          <h2 id="includes-title" class="g-h2">Sekali bayar, semua ini jadi milikmu.</h2>
+          <p class="lead mt-5">
+            Bukan sekadar video. Form inspeksinya yang kamu bawa ke lokasi, supaya apa yang dipelajari
+            benar-benar dipakai saat berhadapan dengan unitnya.
+          </p>
+          <Image
+            src={heroImage}
+            format="webp"
+            width={1254}
+            height={1254}
+            sizes="(min-width: 1024px) 28rem, 100vw"
+            loading="lazy"
+            alt="Trainer Pitcar Academy di area bengkel, dengan form inspeksi berisi checklist eksterior, interior, mesin, transmisi, kaki-kaki, dan elektrikal."
+            class="mt-10 w-full max-w-md"
+          />
+        </div>
       </div>
-      <ol class="divide-y divide-line border-y border-line lg:col-span-7">
+      <ul class="border-t border-body lg:col-span-7">
         {c.includes.map((item) => (
-          <li class="grid grid-cols-[2.5rem_1fr] gap-4 py-6">
-            <span class="flex h-8 w-8 shrink-0 items-center justify-center text-accent" aria-hidden="true">
-              {item.title === 'Video pembelajaran' && (
-                <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="m10 9 5 3-5 3z"></path></svg>
-              )}
-              {item.title === 'Form Inspeksi Mobil Bekas' && (
-                <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"></rect><path d="M9 3.5h6M9 9h6M9 13h6M9 17h3"></path></svg>
-              )}
-              {item.title === 'Ringkasan red flag' && (
-                <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 9 17H3z"></path><path d="M12 9v4M12 17h.01"></path></svg>
-              )}
-              {item.title === 'Lifetime access' && (
-                <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
-              )}
-              {item.title === 'Akses langsung' && (
-                <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m13 2-8 12h7l-1 8 8-12h-7z"></path></svg>
-              )}
-            </span>
-            <div>
-              <h3 class="display-3">{item.title}</h3>
-              <p class="mt-1.5 text-muted">{item.description}</p>
-            </div>
+          <li class="border-b border-line py-6">
+            <h3 class="g-h3">{item.title}</h3>
+            <p class="mt-2 max-w-prose leading-relaxed text-muted">{item.description}</p>
           </li>
         ))}
-      </ol>
+      </ul>
     </div>
   </section>
 
-  <!-- 4. SNEAK PEEK MATERI -->
-  <section id="sneakpeek" class="band border-t border-line" aria-labelledby="sneakpeek-title">
+  <section id="sneakpeek" class="g-section" aria-labelledby="sneakpeek-title">
     <div class="shell">
-      <div class="max-w-3xl">
-        <p class="eyebrow">Materi dari praktisi inspeksi</p>
-        <h2 id="sneakpeek-title" class="display-2 mt-6">Video produksi sendiri, bukan buatan AI.</h2>
-      </div>
+      <h2 id="sneakpeek-title" class="g-h2 max-w-[20ch]">Video produksi sendiri, bukan buatan AI.</h2>
       <div class="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {[sneakpeek1, sneakpeek2, sneakpeek3, sneakpeek4, sneakpeek5, sneakpeek6].map((image, index) => (
-          <figure class="overflow-hidden border border-line bg-surface">
+          <figure class:list={[index === 0 && 'g-photo']}>
             <Image
               src={image}
               format="webp"
@@ -288,75 +260,54 @@ const inspectionCompare = [
     </div>
   </section>
 
-  <!-- 5. AREA INSPEKSI — isi form, sesuai materi promosi -->
-  <section class="band band-alt border-t border-line" aria-labelledby="areas-title">
-    <div class="shell">
-      <div class="max-w-3xl">
-        <p class="eyebrow">Kategori pembahasan inspeksi</p>
-        <h2 id="areas-title" class="display-2 mt-6">Enam area yang kamu cek, satu per satu.</h2>
-        <p class="lead mt-5">
-          Hasilnya bukan lagi perasaan, tapi catatan yang bisa kamu baca ulang dan bandingkan antar-unit.
-        </p>
+  <section class="g-section" aria-labelledby="areas-title">
+    <div class="shell grid gap-12 lg:grid-cols-12 lg:gap-16">
+      <div class="lg:col-span-5">
+        <h2 id="areas-title" class="g-h2">Enam area yang kamu cek, satu per satu.</h2>
+        <p class="lead mt-5">Hasilnya bukan lagi perasaan, tapi catatan yang bisa kamu baca ulang dan bandingkan antar-unit.</p>
       </div>
-      <dl class="mt-12 grid gap-px border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
+      <dl class="grid border-t border-body sm:grid-cols-2 lg:col-span-7">
         {c.inspectionAreas.map((area) => (
-          <div class="bg-surface p-6 sm:p-8">
-            <dt class="display-3 flex items-center gap-3 font-display font-bold">
-              <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"></rect><polyline points="8 12 11 15 16 9"></polyline></svg>
-              {area.title}
-            </dt>
-            <dd class="mt-2 text-sm leading-relaxed text-muted">{area.description}</dd>
+          <div class="border-b border-line py-5 sm:pr-8">
+            <dt class="g-h3">{area.title}</dt>
+            <dd class="mt-2 leading-relaxed text-muted">{area.description}</dd>
           </div>
         ))}
       </dl>
     </div>
   </section>
 
-  <!-- 5. CARA PAKAI — dari rumah sampai keputusan -->
-  <section id="cara-pakai" class="band border-t border-line scroll-mt-28" aria-labelledby="steps-title">
+  <section id="cara-pakai" class="g-section scroll-mt-10" aria-labelledby="steps-title">
     <div class="shell">
-      <div class="max-w-3xl">
-        <p class="eyebrow">Cara pakai</p>
-        <h2 id="steps-title" class="display-2 mt-6">Dari layar HP sampai keputusan beli.</h2>
-      </div>
-      <ol class="mt-12 grid gap-10 md:grid-cols-2 lg:grid-cols-4 lg:gap-8">
+      <h2 id="steps-title" class="g-h2 max-w-[20ch]">Dari layar HP sampai keputusan beli.</h2>
+      <ol class="mt-12 grid border-t border-body md:grid-cols-2 lg:grid-cols-4">
         {c.steps.map((step, i) => (
-          <li class="border-t-2 border-accent-fill pt-5">
-            <span class="font-display text-sm font-semibold uppercase tracking-[0.14em] text-accent">Langkah {i + 1}</span>
-            <h3 class="display-3 mt-2">{step.title}</h3>
-            <p class="mt-2 text-sm leading-relaxed text-muted">{step.description}</p>
+          <li class="flex gap-5 border-b border-line py-6 md:block md:pr-6 lg:border-b-0 lg:border-r lg:py-7 lg:pl-6 lg:first:pl-0 lg:last:border-r-0">
+            <span class="g-num w-8 shrink-0 text-5xl text-muted md:block md:w-auto lg:text-7xl" aria-hidden="true">{i + 1}</span>
+            <div>
+              <h3 class="g-h3 md:mt-4">{step.title}</h3>
+              <p class="mt-2 text-sm leading-relaxed text-muted">{step.description}</p>
+            </div>
           </li>
         ))}
       </ol>
     </div>
   </section>
 
-  <!-- 6. COCOK UNTUK + BATASAN — jujur sebelum persuasif -->
-  <section class="band band-alt border-t border-line" aria-labelledby="audience-title">
-    <div class="shell grid gap-12 lg:grid-cols-2 lg:gap-16">
-      <div>
-        <p class="eyebrow">Cocok untuk</p>
-        <h2 id="audience-title" class="display-2 mt-6">Kelas ini untuk kamu yang:</h2>
-        <ul class="mt-8 divide-y divide-line border-y border-line">
-          {c.audience.map((a) => (
-            <li class="flex items-start gap-3 py-4">
-              <svg aria-hidden="true" class="mt-1 h-4 w-4 shrink-0 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              <span class="text-lg leading-snug">{a}</span>
-            </li>
-          ))}
+  <section class="g-section" aria-labelledby="audience-title">
+    <div class="shell grid gap-12 lg:grid-cols-12 lg:gap-16">
+      <div class="lg:col-span-6">
+        <h2 id="audience-title" class="g-h2">Kelas ini untuk kamu yang:</h2>
+        <ul class="mt-8 space-y-4">
+          {c.audience.map((a) => <li class="g-node text-lg leading-snug">{a}</li>)}
         </ul>
       </div>
-      <div class="self-start border border-line bg-surface p-8 sm:p-10">
-        <p class="eyebrow">Yang perlu dipahami</p>
-        <h3 class="display-3 mt-5">Kelas ini membantu pengecekan awal yang lebih sistematis.</h3>
-        <ul class="mt-6 space-y-3 text-muted">
-          {c.notFor.map((n) => (
-            <li class="flex items-start gap-3">
-              <span class="mt-2.5 h-1 w-3 shrink-0 bg-faint" aria-hidden="true"></span>{n}
-            </li>
-          ))}
+      <div class="lg:col-span-6">
+        <h3 class="g-h3">Kelas ini membantu pengecekan awal yang lebih sistematis.</h3>
+        <ul class="mt-6 border-t border-body">
+          {c.notFor.map((n) => <li class="border-b border-line py-3.5 leading-relaxed text-muted">{n}</li>)}
         </ul>
-        <p class="mt-6 border-t border-line pt-6 text-sm leading-relaxed">
+        <p class="mt-6 leading-relaxed">
           Tujuannya: kamu tahu <strong>apa yang perlu dicek</strong>, <strong>apa yang perlu diperhatikan</strong>,
           dan <strong>kapan sebuah temuan perlu diperiksa lebih lanjut</strong> oleh mekanik atau inspector profesional.
         </p>
@@ -364,251 +315,133 @@ const inspectionCompare = [
     </div>
   </section>
 
-  <!-- 7. BONUS PEMBELIAN — tampil sebelum harga agar visitor lihat nilai total dulu -->
-  <section id="bonus" class="band border-t border-line scroll-mt-28" aria-labelledby="bonus-title">
+  <section id="bonus" class="g-section scroll-mt-10" aria-labelledby="bonus-title">
     <div class="shell">
-      <div class="max-w-3xl">
-        <p class="eyebrow">Bonus khusus pembeli kelas</p>
-        <h2 id="bonus-title" class="display-2 mt-6">Jangan buru-buru membeli sebelum tahu bonus yang akan kamu dapatkan</h2>
-        <p class="lead mt-5">Dibawa saat cek unit. Tanpa biaya tambahan.</p>
+      <div class="grid gap-6 lg:grid-cols-12 lg:items-end lg:gap-16">
+        <h2 id="bonus-title" class="g-h2 lg:col-span-8">Jangan buru-buru membeli sebelum tahu bonus yang akan kamu dapatkan.</h2>
+        <p class="leading-relaxed text-muted lg:col-span-4">Dibawa saat cek unit. Tanpa biaya tambahan.</p>
       </div>
 
-      <div class="mt-12 grid gap-6 lg:grid-cols-2">
-        <article class="bonus-card">
-          <div class="bonus-card-visual">
-            <Image
-              src={modulInspeksi}
-              format="webp"
-              alt="Preview modul inspeksi mobil bekas Pitcar Academy"
-              class="h-full w-full object-contain"
-            />
-          </div>
-          <div class="p-6 sm:p-8">
-            <div class="flex items-start justify-between gap-4">
-              <div>
-                <p class="bonus-number">Bonus 01</p>
-                <h3 class="display-3 mt-3">Modul inspeksi mobil bekas</h3>
-              </div>
-              <span class="bonus-free">Free</span>
-            </div>
-            <p class="mt-4 text-muted">Panduan ringkas untuk menemani kamu mengecek bagian penting mobil bekas secara runtut.</p>
-            <div class="mt-6 flex flex-wrap items-baseline gap-x-3 gap-y-1 border-t border-line pt-5">
+      <div class="mt-14 grid border-t border-body lg:grid-cols-2">
+        {[
+          { image: modulInspeksi, alt: 'Preview modul inspeksi mobil bekas Pitcar Academy', title: 'Modul inspeksi mobil bekas', text: 'Panduan ringkas untuk menemani kamu mengecek bagian penting mobil bekas secara runtut.', value: 'Rp79.000' },
+          { image: formInspeksi, alt: 'Preview form inspeksi dan scoring mobil bekas Pitcar Academy', title: 'Form inspeksi dan scoring', text: 'Form siap pakai untuk mencatat temuan, memberi skor, dan membandingkan kondisi antar-unit.', value: 'Rp59.000' },
+        ].map((bonus, index) => (
+          <article class:list={['flex flex-col py-9', index === 0 ? 'border-b border-line lg:border-b-0 lg:border-r lg:pr-10' : 'lg:pl-10']}>
+            <Image src={bonus.image} format="webp" alt={bonus.alt} class="aspect-[4/3] w-full bg-ground-alt object-contain" loading="lazy" />
+            <h3 class="g-h3 mt-7">{bonus.title}</h3>
+            <p class="mt-2 max-w-prose leading-relaxed text-muted">{bonus.text}</p>
+            <p class="mt-5 flex flex-wrap items-baseline gap-x-3 gap-y-1 border-t border-line pt-5">
               <span class="text-sm text-muted">Senilai</span>
-              <span class="font-display text-2xl font-bold">Rp79.000</span>
-              <span class="text-sm font-semibold text-accent">Free untuk pembeli kelas</span>
-            </div>
-          </div>
-        </article>
-
-        <article class="bonus-card">
-          <div class="bonus-card-visual">
-            <Image
-              src={formInspeksi}
-              format="webp"
-              alt="Preview form inspeksi dan scoring mobil bekas Pitcar Academy"
-              class="h-full w-full object-contain"
-            />
-          </div>
-          <div class="p-6 sm:p-8">
-            <div class="flex items-start justify-between gap-4">
-              <div>
-                <p class="bonus-number">Bonus 02</p>
-                <h3 class="display-3 mt-3">Form inspeksi dan scoring</h3>
-              </div>
-              <span class="bonus-free">Free</span>
-            </div>
-            <p class="mt-4 text-muted">Form siap pakai untuk mencatat temuan, memberi skor, dan membandingkan kondisi antar-unit.</p>
-            <div class="mt-6 flex flex-wrap items-baseline gap-x-3 gap-y-1 border-t border-line pt-5">
-              <span class="text-sm text-muted">Senilai</span>
-              <span class="font-display text-2xl font-bold">Rp59.000</span>
-              <span class="text-sm font-semibold text-accent">Free untuk pembeli kelas</span>
-            </div>
-          </div>
-        </article>
+              <span class="g-num text-3xl">{bonus.value}</span>
+              <span class="text-sm font-semibold text-accent">Gratis untuk pembeli kelas</span>
+            </p>
+          </article>
+        ))}
       </div>
     </div>
   </section>
 
-  <!-- 8. HARGA -->
-  <section class="band band-alt border-t border-line" aria-labelledby="price-title">
+  <section id="harga" class="g-section scroll-mt-10" aria-labelledby="price-title">
     <div class="shell">
-      <div class="mx-auto max-w-xl border-2 border-accent-fill bg-surface p-8 sm:p-12">
-        <p id="harga" class="eyebrow scroll-mt-28">{c.priceLabel}</p>
-        <h2 id="price-title" class="display-3 mt-5">{c.name}</h2>
-        <div class="mt-6 flex flex-wrap items-baseline gap-x-3">
-          <span class="font-display text-6xl font-bold leading-none">{c.priceDisplay}</span>
-          <span class="text-xl text-muted line-through">{c.strikePriceDisplay}</span>
+      <article class="grid gap-10 border-t-2 border-accent-fill bg-ground-alt p-6 sm:p-9 lg:grid-cols-12 lg:gap-16">
+        <div class="lg:col-span-7">
+          <h2 id="price-title" class="g-h2">{c.name}</h2>
+          <ul class="mt-8 space-y-3">
+            {c.includes.map((item) => <li class="g-node font-semibold">{item.title}</li>)}
+            <li class="g-node font-semibold"><a href="#bonus" class="underline hover:text-accent">2 bonus tambahan senilai Rp138.000</a></li>
+          </ul>
         </div>
-        <p class="mt-2 text-sm text-muted">Sekali bayar · Lifetime access · Akses langsung setelah pembayaran</p>
-
-        <ul class="mt-8 space-y-3 border-t border-line pt-6">
-          {c.includes.map((item) => (
-            <li class="flex items-start gap-3">
-              <svg aria-hidden="true" class="mt-1 h-4 w-4 shrink-0 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              <span class="font-semibold">{item.title}</span>
-            </li>
-          ))}
-          <li class="flex items-start gap-3">
-            <svg aria-hidden="true" class="mt-1 h-4 w-4 shrink-0 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-            <a href="#bonus" class="font-semibold underline decoration-accent-fill/40 underline-offset-4 hover:decoration-accent-fill">2 bonus tambahan senilai Rp138.000</a>
-          </li>
-        </ul>
-
-        <a {...checkoutAttrs} data-source-cta="inspeksi_pricing" class="btn btn-primary mt-8 w-full">{checkoutLabel}</a>
-        <p class="mt-3 flex items-center justify-center gap-1.5 text-xs text-muted">
-          <svg aria-hidden="true" class="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-          <span>Pembayaran aman · data kamu terlindungi</span>
-        </p>
-        {!c.checkoutUrl && (
-          <p class="mt-3 text-center text-xs text-muted">Pembelian diproses lewat WhatsApp tim Pitcar Academy.</p>
-        )}
-        <ul class="mt-6 space-y-2 border-t border-line pt-6 text-xs leading-relaxed text-muted">
-          {c.refundNote.split(' · ').map((point) => (
-            <li class="flex items-start gap-3">
-              <svg aria-hidden="true" class="mt-1 h-4 w-4 shrink-0 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              <span>{point}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
+        <div class="lg:col-span-5">
+          <p class="text-sm text-muted">Harga normal <span class="line-through">{c.strikePriceDisplay}</span></p>
+          <p class="g-num mt-4 border-t border-line pt-5 text-6xl md:text-7xl">{c.priceDisplay}</p>
+          <p class="mt-3 text-sm font-semibold text-accent">{c.priceLabel}</p>
+          <p class="mt-1 text-sm text-muted">Sekali bayar. Lifetime access, langsung terbuka setelah pembayaran.</p>
+          <a {...checkoutAttrs} data-source-cta="inspeksi_pricing" class="btn btn-primary mt-7 w-full">{checkoutLabel}</a>
+          {!c.checkoutUrl && (
+            <p class="mt-3 text-sm text-muted">Pembelian diproses lewat WhatsApp tim Pitcar Academy.</p>
+          )}
+          <ul class="mt-6 space-y-2 border-t border-line pt-5 text-sm leading-relaxed text-muted">
+            {c.refundNote.split(' · ').map((point) => <li>{point}</li>)}
+          </ul>
+        </div>
+      </article>
     </div>
   </section>
 
-  <!-- 8b. BANDINGKAN — on-site inspection vs kelas, anchor harga -->
-  <section class="band border-t border-line" aria-labelledby="compare-title">
-    <div class="shell">
-      <div class="max-w-3xl">
-        <p class="eyebrow">Bandingkan sendiri</p>
-        <h2 id="compare-title" class="display-2 mt-6">Inspeksi di lokasi vs belajar inspeksi.</h2>
+  <section class="g-section" aria-labelledby="compare-title">
+    <div class="shell grid gap-12 lg:grid-cols-12 lg:gap-16">
+      <div class="min-w-0 lg:col-span-5">
+        <h2 id="compare-title" class="g-h2">Inspeksi di lokasi vs belajar inspeksi.</h2>
         <p class="lead mt-5">
           Membayar inspector profesional ke lokasi itu sah dan berguna. Tapi untuk memeriksa unit sendiri
           saat pencarian harian, biaya sekali cek dibanding kelas lifetime jauh berbeda.
         </p>
       </div>
-
-      <div class="mt-12 overflow-hidden border border-line bg-surface">
-        <table class="w-full border-collapse align-top text-sm">
-          <thead>
-            <tr class="border-b border-line text-left text-xs font-bold uppercase tracking-wider">
-              <th scope="col" class="w-1/4 py-3 pl-5 pr-4 text-muted">Pilihan</th>
-              <th scope="col" class="py-3 px-3 text-muted sm:px-4">Inspeksi di lokasi</th>
-              <th scope="col" class="border-l-2 border-accent-fill py-3 pl-3 pr-5 text-accent sm:pl-4">Kelas ini</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-line">
-            {inspectionCompare.map((row) => (
+      <div class="min-w-0 lg:col-span-7">
+        <div class="overflow-x-auto border-t border-body">
+          <table class="w-full min-w-[30rem] border-collapse text-left align-top">
+            <thead>
               <tr>
-                <th scope="row" class="py-3 pl-5 pr-4 text-left text-xs font-bold uppercase tracking-wider text-muted">
-                  {row.metric}
-                </th>
-                <td class="py-3 px-3 text-muted sm:px-4">{row.onsite}</td>
-                <td class="border-l-2 border-accent-fill py-3 pl-3 pr-5 font-bold sm:pl-4">{row.course}</td>
+                <th scope="col" class="g-label w-1/4 border-b border-line py-3 pr-4 text-muted">Pilihan</th>
+                <th scope="col" class="g-label border-b border-line px-4 py-3 text-muted">Inspeksi di lokasi</th>
+                <th scope="col" class="g-label border-b border-line py-3 pl-4 text-accent">Kelas ini</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {inspectionCompare.map((row) => (
+                <tr>
+                  <th scope="row" class="g-label border-b border-line py-4 pr-4 text-muted">{row.metric}</th>
+                  <td class="border-b border-line px-4 py-4 leading-relaxed text-muted">{row.onsite}</td>
+                  <td class="border-b border-line py-4 pl-4 font-semibold leading-relaxed">{row.course}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p class="mt-6 max-w-prose text-sm leading-relaxed text-muted">
+          Kelas ini <strong class="text-body">tidak menggantikan</strong> pemeriksaan teknis mendalam oleh inspector
+          profesional, yang tetap disarankan untuk keputusan besar. Namun untuk tahap penyaringan dan penawaran,
+          biaya belajar yang sekali bayar ini jauh lebih kecil daripada ongkos inspeksi tiap unit yang kamu cek.
+        </p>
       </div>
-
-      <p class="mt-6 max-w-prose text-sm leading-relaxed text-muted">
-        Kelas ini <strong class="text-body">tidak menggantikan</strong> pemeriksaan teknis mendalam oleh inspector
-        profesional — itu tetap disarankan untuk keputusan besar. Namun untuk tahap penyaringan dan penawaran,
-        biaya belajar yang sekali bayar ini jauh lebih kecil daripada ongkos inspeksi tiap unit yang kamu cek.
-      </p>
     </div>
   </section>
 
-  <!-- 9. FAQ -->
-  <FaqSection
-    faqs={inspectionFaqs}
-    cta={{ note: 'Sudah jelas? Pelajari caranya sebelum kamu melihat unit berikutnya.', href: '#harga', label: `Beli ${c.priceDisplay}`, sourceCta: 'inspeksi_faq' }}
-  />
+  <section id="faq" class="g-section scroll-mt-10" aria-labelledby="faq-title">
+    <div class="shell grid gap-10 lg:grid-cols-12 lg:gap-16">
+      <div class="lg:col-span-4">
+        <h2 id="faq-title" class="g-h2">Pertanyaan yang sering muncul</h2>
+        <p class="lead mt-5">Sudah jelas? Pelajari caranya sebelum kamu melihat unit berikutnya.</p>
+        <a href="#harga" class="btn btn-ghost mt-7">Lihat harga dan beli</a>
+      </div>
+      <div class="border-t border-body lg:col-span-8">
+        {inspectionFaqs.map((faq) => (
+          <details name="faq" class="group border-b border-line">
+            <summary class="flex min-h-11 list-none items-start justify-between gap-6 py-5 text-lg font-semibold leading-snug transition-colors hover:text-accent">
+              {tidy(faq.question)}
+              <svg aria-hidden="true" class="mt-1 h-5 w-5 shrink-0 text-muted transition-transform duration-200 group-open:rotate-45" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+            </summary>
+            <p class="max-w-prose pb-6 leading-relaxed text-muted">{tidy(faq.answer)}</p>
+          </details>
+        ))}
+      </div>
+    </div>
+  </section>
 
-  <!-- 10. PENUTUP -->
-  <section class="band border-t border-line" aria-labelledby="closing-title">
-    <div class="shell text-center">
-      <p class="eyebrow justify-center">Sebelum kamu transfer DP</p>
-      <h2 id="closing-title" class="display-2 mx-auto mt-6 max-w-[18ch]">{c.tagline}</h2>
-      <p class="lead mx-auto mt-5 max-w-prose">Pelajari cara cek mobil bekas sebelum mengambil keputusan beli.</p>
-      <a {...checkoutAttrs} data-source-cta="inspeksi_closing" class="btn btn-primary mt-8">{checkoutLabel}</a>
-      <p class="mt-3 text-xs text-muted">{c.priceLabel} · harga normal {c.strikePriceDisplay}</p>
+  <section class="g-section" aria-labelledby="closing-title">
+    <div class="shell grid gap-8 lg:grid-cols-12 lg:items-end lg:gap-16">
+      <h2 id="closing-title" class="g-display lg:col-span-8">{c.tagline}</h2>
+      <div class="lg:col-span-4 lg:pb-2">
+        <p class="lead">Pelajari cara cek mobil bekas sebelum kamu transfer DP.</p>
+        <a {...checkoutAttrs} data-source-cta="inspeksi_closing" class="btn btn-primary mt-6">{checkoutLabel}</a>
+        <p class="mt-3 text-sm text-muted">{c.priceLabel}, harga normal {c.strikePriceDisplay}.</p>
+      </div>
     </div>
   </section>
 
   <SalesPopup productName={c.name} product="inspeksi" />
 </BaseLayout>
-
-<style>
-  .bonus-card {
-    overflow: hidden;
-    border: 1px solid rgb(var(--line));
-    background: rgb(var(--surface));
-    box-shadow: 0 1rem 2.5rem rgb(var(--body) / 0.06);
-  }
-
-  .bonus-card-visual {
-    display: grid;
-    min-height: 18rem;
-    place-items: center;
-    padding: 1.5rem;
-    border-bottom: 1px solid rgb(var(--line));
-    background: rgb(var(--ground));
-  }
-
-  .bonus-card-visual img {
-    height: 15rem;
-    width: 100%;
-  }
-
-  .bonus-number {
-    color: rgb(var(--accent));
-    font-size: 0.6875rem;
-    font-weight: 700;
-    letter-spacing: 0.14em;
-    line-height: 1;
-    text-transform: uppercase;
-  }
-
-  .bonus-free {
-    flex: none;
-    background: #cc0000;
-    padding: 0.4rem 0.65rem;
-    color: #fff;
-    font-size: 0.6875rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    line-height: 1;
-    text-transform: uppercase;
-  }
-
-  .course-learning-time.is-floating {
-    position: fixed;
-    inset-inline: 0;
-    top: 0;
-    z-index: 60;
-    justify-content: center;
-    margin-top: 0;
-    border: 0;
-    background-color: #cc0000;
-    color: #ffffff;
-    padding: 0.75rem 1rem;
-  }
-
-  .course-learning-time.is-floating svg,
-  .course-learning-time.is-floating .text-accent {
-    color: #ffffff;
-  }
-</style>
-
-<script>
-  const learningTime = document.getElementById('learning-time');
-  const learningTimeSentinel = document.getElementById('learning-time-sentinel');
-  if (learningTime && learningTimeSentinel && 'IntersectionObserver' in window) {
-    const observer = new IntersectionObserver(([entry]) => {
-      learningTime.classList.toggle('is-floating', !entry.isIntersecting);
-    }, { threshold: 0, rootMargin: '-80px 0px 0px' });
-    observer.observe(learningTimeSentinel);
-  }
-</script>
 
 <script define:vars={{ price: c.price, itemName: c.name }}>
   // GA4 ecommerce shape, so the purchase funnel can be built on standard
@@ -620,14 +453,15 @@ const inspectionCompare = [
   // trackFunnelEvent; module scripts are done by DOMContentLoaded.
   document.addEventListener('DOMContentLoaded', () => window.trackFunnelEvent?.('view_item', commerce));
 
-  // Scalev reads these off its own URL, so carrying them across keeps the
-  // ad source attached to the order.
+  // The checkout reads these off its own URL, so carrying them across keeps
+  // the ad source attached to the order.
   const attributionParams = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'gclid', 'ttclid', 'fbclid'];
 
   document.addEventListener('click', (event) => {
     const link = event.target?.closest?.('[data-checkout]');
     if (!link) return;
-    if (link.hostname.endsWith('myscalev.com')) {
+    const toCheckout = link.hostname === window.location.hostname && link.pathname.startsWith('/checkout');
+    if (toCheckout || link.hostname.endsWith('myscalev.com')) {
       const from = new URLSearchParams(window.location.search);
       const to = new URL(link.href);
       for (const key of attributionParams) {

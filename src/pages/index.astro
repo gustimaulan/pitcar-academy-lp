@@ -1,20 +1,9 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import HeroSection from '../components/HeroSection.astro';
-import TrustNumbersSection from '../components/TrustNumbersSection.astro';
-import ProblemSection from '../components/ProblemSection.astro';
-import MethodSection from '../components/MethodSection.astro';
-import CapabilitiesSection from '../components/CapabilitiesSection.astro';
-import WorkshopSection from '../components/WorkshopSection.astro';
-import TrainersSection from '../components/TrainersSection.astro';
-import JourneySection from '../components/JourneySection.astro';
-import PackagesSection from '../components/PackagesSection.astro';
-import FoundingBatchSection from '../components/FoundingBatchSection.astro';
-import CareerSection from '../components/CareerSection.astro';
-import ParentsSection from '../components/ParentsSection.astro';
-import ProgramFactsSection from '../components/ProgramFactsSection.astro';
-import FaqSection from '../components/FaqSection.astro';
-import CtaSection from '../components/CtaSection.astro';
+import CarExplorer from '../components/garage/CarExplorer.astro';
+import GarageStory from '../components/garage/GarageStory.astro';
+import GarageOffer from '../components/garage/GarageOffer.astro';
+import '../styles/garage.css';
 import { faqs, packages } from '../content.config';
 
 const site = Astro.site ?? new URL('https://academy.pitcar.co.id');
@@ -63,24 +52,19 @@ const structuredData = [
   title="Kursus Mekanik dengan Praktik Bengkel Nyata | Pitcar Academy"
   description="Pelatihan mekanik dengan praktik intensif dan 2 bulan OJT di ekosistem bengkel PITCAR. Konsultasikan program yang cocok untukmu."
   canonical="/"
-  preloadImage="/mechanic-hero.webp"
+  world="garage"
+  header={{
+    links: [
+      { href: '#garasi', label: 'Komponen' },
+      { href: '#program', label: 'Program' },
+      { href: '#perjalanan', label: 'Perjalanan Belajar' },
+      { href: '/kelas-online/', label: 'Kelas Online' },
+      { href: '#faq', label: 'FAQ' },
+    ],
+  }}
   structuredData={structuredData}
 >
-  {/* Dark and light bands alternate so a long page keeps a readable rhythm
-      without needing extra colour or decoration. */}
-  <HeroSection />
-  <TrustNumbersSection />
-  <ProblemSection />
-  <MethodSection />
-  <CapabilitiesSection />
-  <WorkshopSection />
-  <TrainersSection />
-  <JourneySection />
-  <PackagesSection />
-  <FoundingBatchSection />
-  <CareerSection />
-  <ParentsSection />
-  <ProgramFactsSection />
-  <FaqSection faqs={faqs} />
-  <CtaSection />
+  <CarExplorer />
+  <GarageStory />
+  <GarageOffer />
 </BaseLayout>

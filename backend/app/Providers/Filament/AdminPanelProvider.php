@@ -32,6 +32,8 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::hex('#CC0000'),
             ])
+            // Online classes are sold and paid here; offline programs go through leads and consultants.
+            ->navigationGroups(['Kelas online', 'Kelas offline', 'Pengaturan'])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([

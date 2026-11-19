@@ -1,3 +1,5 @@
+import { applyLivePrices } from './lib/livePrices';
+
 export const collections = {
   // Content data — semua info bisnis di sini
 };
@@ -751,7 +753,8 @@ export interface InspectionCourse {
 }
 
 export const inspectionCourse: InspectionCourse = {
-  checkoutUrl: 'https://pitcar-academy.myscalev.com/checkout-kelas-inspeksi',
+  // Our own checkout (DOKU) since the move off Scalev. The slug is the course row in the LMS database.
+  checkoutUrl: '/checkout/?kelas=kelas-online-inspeksi',
   name: 'Kelas Inspeksi Mobil Bekas',
   price: 99000,
   priceDisplay: 'Rp99.000',
@@ -906,7 +909,8 @@ export interface AcCourse {
 }
 
 export const acCourse: AcCourse = {
-  checkoutUrl: 'https://pitcar-academy.myscalev.com/checkout-kelas-online-ac',
+  // Our own checkout (DOKU) since the move off Scalev. The slug is the course row in the LMS database.
+  checkoutUrl: '/checkout/?kelas=kelas-online-ac',
   name: 'Kelas Dasar Pemeriksaan & Perawatan AC Mobil',
   shortName: 'Kelas AC Mobil',
   price: 99000,
@@ -1059,6 +1063,11 @@ export const acFaqs: FaqItem[] = [
       'Kelas online membangun pemahaman dasar yang bisa dipelajari dari rumah. Program offline memberi praktik langsung pada kendaraan, OJT di bengkel yang beroperasi, dan assessment kompetensi.',
   },
 ];
+
+// Prices of the two online classes come from the LMS (admin › Produk online)
+// at build time; the values written above are the fallback. Everything below,
+// and every page that imports these objects, sees the live prices.
+await applyLivePrices({ 'kelas-online-ac': acCourse, 'kelas-online-inspeksi': inspectionCourse });
 
 /* ============================================================================
    KATALOG KELAS ONLINE

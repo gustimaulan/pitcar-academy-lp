@@ -13,11 +13,11 @@ $origins = array_values(array_filter(array_map(
 
 return [
     'paths' => ['api/*'],
-    'allowed_methods' => ['GET', 'POST', 'OPTIONS'],
+    'allowed_methods' => ['GET', 'POST', 'DELETE', 'OPTIONS'],
     'allowed_origins' => $origins,
     'allowed_origins_patterns' => [],
-    'allowed_headers' => ['Accept', 'Content-Type', 'X-Submission-Id', 'X-Requested-With'],
-    'exposed_headers' => ['Retry-After'],
+    'allowed_headers' => ['Accept', 'Authorization', 'Content-Type', 'X-Submission-Id', 'X-Requested-With'],
+    'exposed_headers' => ['Retry-After', 'Content-Disposition'],
     'max_age' => 3600,
     'supports_credentials' => false,
 ];

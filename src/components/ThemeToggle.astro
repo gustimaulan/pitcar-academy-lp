@@ -5,8 +5,8 @@
 
 <button
   type="button"
-  id="theme-toggle"
-  class="inline-flex h-11 w-11 items-center justify-center rounded-sm border border-line text-body transition-colors hover:bg-ground-alt"
+  data-theme-toggle
+  class="inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-sm border border-line text-body transition-colors hover:bg-ground-alt"
   aria-label="Ganti ke mode gelap"
   aria-pressed="false"
 >
@@ -20,29 +20,33 @@
 </button>
 
 <script>
+  // The header renders this twice (desktop row and mobile row), so every
+  // instance is wired and kept in step rather than the first one found.
   const STORAGE_KEY = 'pitcar-theme';
-  const button = document.getElementById('theme-toggle');
-  const sun = document.querySelector<SVGElement>('[data-theme-icon="light"]');
-  const moon = document.querySelector<SVGElement>('[data-theme-icon="dark"]');
+  const buttons = document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]');
 
   function render(isDark: boolean) {
     document.documentElement.classList.toggle('dark', isDark);
     document.getElementById('theme-color')?.setAttribute('content', isDark ? '#0A0A0A' : '#FAFAF9');
-    sun?.classList.toggle('hidden', isDark);
-    moon?.classList.toggle('hidden', !isDark);
-    button?.setAttribute('aria-pressed', String(isDark));
-    button?.setAttribute('aria-label', isDark ? 'Ganti ke mode terang' : 'Ganti ke mode gelap');
+    buttons.forEach((button) => {
+      button.querySelector('[data-theme-icon="light"]')?.classList.toggle('hidden', isDark);
+      button.querySelector('[data-theme-icon="dark"]')?.classList.toggle('hidden', !isDark);
+      button.setAttribute('aria-pressed', String(isDark));
+      button.setAttribute('aria-label', isDark ? 'Ganti ke mode terang' : 'Ganti ke mode gelap');
+    });
   }
 
   render(document.documentElement.classList.contains('dark'));
 
-  button?.addEventListener('click', () => {
-    const isDark = !document.documentElement.classList.contains('dark');
-    render(isDark);
-    try {
-      localStorage.setItem(STORAGE_KEY, isDark ? 'dark' : 'light');
-    } catch {
-      // A blocked storage API must not stop the theme from switching.
-    }
+  buttons.forEach((button) => {
+    button.addEventListener('click', () => {
+      const isDark = !document.documentElement.classList.contains('dark');
+      render(isDark);
+      try {
+        localStorage.setItem(STORAGE_KEY, isDark ? 'dark' : 'light');
+      } catch {
+        // A blocked storage API must not stop the theme from switching.
+      }
+    });
   });
 </script>

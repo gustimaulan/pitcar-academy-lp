@@ -9,6 +9,7 @@ use App\Rules\IndonesianWhatsAppNumber;
 use App\Support\LeadOptions;
 use App\Support\WhatsAppNumber;
 use BackedEnum;
+use UnitEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
@@ -29,6 +30,8 @@ class EducationConsultantResource extends Resource
     protected static ?string $model = EducationConsultant::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserGroup;
+
+    protected static string|UnitEnum|null $navigationGroup = 'Kelas offline';
 
     protected static ?string $modelLabel = 'Education Consultant';
 

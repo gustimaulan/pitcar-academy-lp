@@ -11,6 +11,7 @@ use App\Filament\Resources\Leads\Schemas\LeadForm;
 use App\Filament\Resources\Leads\Tables\LeadsTable;
 use App\Models\Lead;
 use BackedEnum;
+use UnitEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -23,6 +24,8 @@ class LeadResource extends Resource
     protected static ?string $model = Lead::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedInboxArrowDown;
+
+    protected static string|UnitEnum|null $navigationGroup = 'Kelas offline';
 
     protected static ?string $modelLabel = 'Lead';
 
