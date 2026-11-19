@@ -57,22 +57,35 @@ export async function api<T>(path: string, { method = 'GET', body, auth = true, 
   return data as T;
 }
 
-/** Attachments need the session header, so they are fetched and handed to the browser as a file. */
-export async function download(id: number, name: string): Promise<void> {
+/** Attachments need the session header, so they are fetched rather than linked. */
+export async function fetchFile(id: number): Promise<Blob> {
   let res: Response;
   try {
     res = await fetch(`${base}/api/learn/attachments/${id}`, { headers: { Authorization: `Bearer ${session.get() ?? ''}` } });
   } catch {
     throw new ApiError(0, 'Tidak bisa terhubung ke server. Periksa koneksi internetmu, lalu coba lagi.');
   }
+  if (res.status === 401) {
+    session.clear();
+    location.replace(loginUrl());
+  }
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
-    throw new ApiError(res.status, data.message ?? 'Berkas tidak bisa diunduh. Coba lagi sebentar lagi.');
+    throw new ApiError(res.status, data.message ?? 'Berkas tidak bisa dibuka. Coba lagi sebentar lagi.');
   }
-  const url = URL.createObjectURL(await res.blob());
+  return res.blob();
+}
+
+/** Hands a fetched file to the browser as a download. */
+export function saveFile(blob: Blob, name: string): void {
+  const url = URL.createObjectURL(blob);
   const link = Object.assign(document.createElement('a'), { href: url, download: name });
   document.body.append(link);
   link.click();
   link.remove();
   setTimeout(() => URL.revokeObjectURL(url), 10_000);
+}
+
+export async function download(id: number, name: string): Promise<void> {
+  saveFile(await fetchFile(id), name);
 }

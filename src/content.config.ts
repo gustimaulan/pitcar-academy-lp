@@ -1078,6 +1078,8 @@ await applyLivePrices({ 'kelas-online-ac': acCourse, 'kelas-online-inspeksi': in
 
 export interface OnlineCourseCard {
   id: string;
+  /** Slug kelas di LMS (admin › Produk online), untuk harga yang diperbarui di browser. */
+  slug: string;
   /** Halaman penjualan. */
   href: string;
   checkoutUrl: string;
@@ -1103,6 +1105,7 @@ export interface OnlineCourseCard {
 export const onlineCourses: OnlineCourseCard[] = [
   {
     id: 'kelas-online-ac',
+    slug: 'kelas-online-ac',
     href: '/kelas-online-ac/',
     checkoutUrl: acCourse.checkoutUrl,
     name: acCourse.name,
@@ -1127,6 +1130,7 @@ export const onlineCourses: OnlineCourseCard[] = [
   },
   {
     id: 'kelas-inspeksi-mobil-bekas',
+    slug: 'kelas-online-inspeksi',
     href: '/kelas-online-inspeksi/',
     checkoutUrl: inspectionCourse.checkoutUrl ?? '/kelas-online-inspeksi/#harga',
     name: inspectionCourse.name,
