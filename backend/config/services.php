@@ -17,6 +17,18 @@ return [
     |
     */
 
+    /*
+     * "Terbitkan ulang situs" in the admin: runs the frontend deploy workflow
+     * so landing-page prices follow the CMS. A fine-grained GitHub token with
+     * Actions: read and write on that repository only.
+     */
+    'site_deploy' => [
+        'repo' => env('SITE_DEPLOY_REPO'),
+        'token' => env('SITE_DEPLOY_TOKEN'),
+        'workflow' => env('SITE_DEPLOY_WORKFLOW', 'deploy.yml'),
+        'ref' => env('SITE_DEPLOY_REF', 'main'),
+    ],
+
     'meta' => [
         'pixel_id' => env('META_PIXEL_ID'),
         'access_token' => env('META_CAPI_ACCESS_TOKEN'),

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Enums\OrderStatus;
+use App\Models\Order;
 use App\Models\ScalevPurchase;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -33,21 +35,36 @@ class PurchaseFeedController extends Controller
         }
 
         $feed = Cache::remember(self::cacheKey($product), now()->addMinute(), function () use ($patterns) {
-            $query = fn (): Builder => ScalevPurchase::query()
-                ->when($patterns !== null, fn (Builder $q) => $q->where(function (Builder $q) use ($patterns) {
-                    foreach ($patterns as $pattern) {
-                        $q->orWhereRaw('LOWER(product_name) LIKE ?', ['%'.mb_strtolower($pattern).'%']);
-                    }
-                }));
+            $matches = fn (Builder $q, string $column) => $q->where(function (Builder $q) use ($patterns, $column) {
+                foreach ($patterns as $pattern) {
+                    $q->orWhereRaw("LOWER({$column}) LIKE ?", ['%'.mb_strtolower($pattern).'%']);
+                }
+            });
+
+            $scalev = fn (): Builder => ScalevPurchase::query()
+                ->when($patterns !== null, fn (Builder $q) => $matches($q, 'product_name'));
+
+            // Since the move off Scalev, buyers come through our own checkout too; a bundle counts for both its classes.
+            $orders = fn (): Builder => Order::query()
+                ->where('status', OrderStatus::Paid)
+                ->whereNotNull('paid_at')
+                ->when($patterns !== null, fn (Builder $q) => $q->whereHas('items.course', fn (Builder $c) => $matches($c, 'title')));
+
+            $recent = $scalev()->orderByDesc('purchased_at')->limit(10)->get()
+                ->map(fn (ScalevPurchase $purchase) => $purchase->toPopupData())
+                ->concat($orders()->with('student:id,name')->orderByDesc('paid_at')->limit(10)->get()
+                    ->map(fn (Order $order) => [
+                        'name' => ScalevPurchase::mask($order->student?->name),
+                        'purchased_at' => $order->paid_at->toIso8601String(),
+                    ]))
+                ->sortByDesc(fn (array $p) => strtotime($p['purchased_at']))
+                ->take(10)
+                ->values()
+                ->all();
 
             return [
-                'total_purchases' => $query()->count(),
-                'purchases' => $query()
-                    ->orderByDesc('purchased_at')
-                    ->limit(10)
-                    ->get()
-                    ->map(fn (ScalevPurchase $purchase) => $purchase->toPopupData())
-                    ->all(),
+                'total_purchases' => $scalev()->count() + $orders()->count(),
+                'purchases' => $recent,
             ];
         });
 

@@ -2,6 +2,9 @@ name: Deploy to VPS
 on:
   push:
     branches: [main]
+  # Manual run from the Actions tab: lets the backend go live first when a
+  # release needs it (merge with [skip ci], deploy the API, then run this).
+  workflow_dispatch:
 
 jobs:
   build-deploy:

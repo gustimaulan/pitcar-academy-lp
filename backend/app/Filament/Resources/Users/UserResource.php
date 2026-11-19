@@ -6,6 +6,7 @@ use App\Enums\UserRole;
 use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Models\User;
 use BackedEnum;
+use UnitEnum;
 use Filament\Actions\CreateAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
@@ -25,11 +26,13 @@ class UserResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShieldCheck;
 
+    protected static string|UnitEnum|null $navigationGroup = 'Pengaturan';
+
     protected static ?string $modelLabel = 'Pengguna';
 
     protected static ?string $pluralModelLabel = 'Pengguna';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 1;
 
     /** Only an admin manages who can see prospect data. */
     public static function canAccess(): bool

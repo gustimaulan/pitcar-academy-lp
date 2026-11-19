@@ -36,7 +36,13 @@ class ScalevPurchase extends Model
      */
     public function maskedName(): string
     {
-        $parts = preg_split('/\s+/', trim($this->customer_name), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        return self::mask($this->customer_name);
+    }
+
+    /** "Budi Santoso" becomes "Budi S."; shared with checkout orders in the same feed. */
+    public static function mask(?string $name): string
+    {
+        $parts = preg_split('/\s+/', trim((string) $name), -1, PREG_SPLIT_NO_EMPTY) ?: [];
 
         if (count($parts) < 2) {
             return $parts[0] ?? 'Pembeli';

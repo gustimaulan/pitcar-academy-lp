@@ -3,6 +3,7 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import WhatsAppButton from '../components/WhatsAppButton.astro';
 import SeoHead from '../components/SeoHead.astro';
+import ThemeToggle from '../components/ThemeToggle.astro';
 import GoogleAnalytics from '../components/GoogleAnalytics.astro';
 import GoogleTagManager from '../components/GoogleTagManager.astro';
 import Hotjar from '../components/Hotjar.astro';
@@ -32,6 +33,10 @@ interface Props {
   floatingCta?: { href: string; label: string; sourceCta: string; icon?: boolean; checkout?: boolean };
   /** Drops the site header and footer so a sales page has no exits but the buy button. */
   bare?: boolean;
+  /** Scopes a page to its own visual world. `garage` also defaults to dark. */
+  world?: 'garage';
+  /** A bare page that places ThemeToggle in its own top strip sets this. */
+  ownThemeToggle?: boolean;
 }
 
 const {
@@ -50,7 +55,11 @@ const {
   header,
   floatingCta,
   bare = false,
+  world,
+  ownThemeToggle = false,
 } = Astro.props;
+
+const defaultDark = world === 'garage';
 
 // Site id, not a credential — it ships in the page either way. Defaulted for
 // the same reason as the analytics property: silently losing measurement is
@@ -65,20 +74,24 @@ const metaPixelId = import.meta.env.PUBLIC_META_PIXEL_ID ?? '1364110365687038';
 ---
 
 <!doctype html>
-<html lang="id">
+<html lang="id" class={world} data-default-theme={defaultDark ? 'dark' : 'light'}>
   <head>
     <meta charset="UTF-8" />
     <GoogleTagManager id={gtmId} placement="head" />
     <script is:inline>
-      // Runs before paint. Light is the default; only an explicit choice
-      // stored by the toggle switches to dark.
-      try {
-        if (localStorage.getItem('pitcar-theme') === 'dark') {
-          document.documentElement.classList.add('dark');
+      // Runs before paint. The page names its default; an explicit choice
+      // stored by the toggle always wins over it.
+      (function () {
+        var root = document.documentElement;
+        var stored = null;
+        try {
+          stored = localStorage.getItem('pitcar-theme');
+        } catch (error) {
+          // Blocked storage just means the page default.
         }
-      } catch (error) {
-        // Blocked storage just means the default theme.
-      }
+        var theme = stored === 'dark' || stored === 'light' ? stored : root.dataset.defaultTheme;
+        if (theme === 'dark') root.classList.add('dark');
+      })();
     </script>
 
     <!-- Google Analytics -->
@@ -87,7 +100,7 @@ const metaPixelId = import.meta.env.PUBLIC_META_PIXEL_ID ?? '1364110365687038';
     <MetaPixel id={metaPixelId} />
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta id="theme-color" name="theme-color" content="#FAFAF9" />
+    <meta id="theme-color" name="theme-color" content={defaultDark ? '#0A0A0A' : '#FAFAF9'} />
     {/* Real PITCAR mark. 32/48 keep the transparent cut-out for browser tabs;
         the Apple icon is flattened onto white because iOS renders a
         transparent background as black. */}
@@ -118,6 +131,12 @@ const metaPixelId = import.meta.env.PUBLIC_META_PIXEL_ID ?? '1364110365687038';
     <FunnelAnalytics />
     <a class="skip-link" href="#main-content">Lewati ke konten utama</a>
     {!bare && <Header {...header} />}
+    {/* A bare page has no header, so the switch needs another home. */}
+    {bare && !ownThemeToggle && (
+      <div class="shell -mb-3 flex justify-end pt-3">
+        <ThemeToggle />
+      </div>
+    )}
     <main id="main-content">
       <slot />
     </main>
