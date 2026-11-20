@@ -52,9 +52,10 @@ class VisitController extends Controller
     }
 
     /**
-     * A heartbeat every minute while the page is on screen ("active": true),
-     * and once more when it is hidden ("active": false). Time on page only
-     * grows; "on the site now" follows the latest beat.
+     * Time on page, plus where the visitor is. "active": true is the minute
+     * heartbeat of a page on screen; false means the page was closed or left;
+     * no "active" (tab switched away) leaves it as it was, so a hidden tab
+     * drops off "on the site now" once its last beat is two minutes old.
      */
     public function time(Request $request, string $id): Response
     {
@@ -64,7 +65,12 @@ class VisitController extends Controller
             if ($visit !== null) {
                 $seconds = min(max(0, (int) ($request->json('seconds') ?? 0)), PageVisit::MAX_SECONDS);
                 $visit->duration_seconds = max($visit->duration_seconds, $seconds);
-                $visit->last_seen_at = $request->json('active') === false ? null : now();
+                $active = $request->json('active');
+                if ($active === true) {
+                    $visit->last_seen_at = now();
+                } elseif ($active === false) {
+                    $visit->last_seen_at = null;
+                }
                 $visit->save();
             }
         } catch (Throwable $e) {
