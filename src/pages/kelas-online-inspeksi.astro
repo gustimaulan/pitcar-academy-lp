@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import ClassmateCount from '../components/ClassmateCount.astro';
+import CourseReviews from '../components/CourseReviews.astro';
 import sneakpeek1 from '../assets/kelas-inspeksi/sneakpeek-1.jpg';
 import sneakpeek2 from '../assets/kelas-inspeksi/sneakpeek-2.jpg';
 import sneakpeek3 from '../assets/kelas-inspeksi/sneakpeek-3.jpg';
@@ -344,6 +345,8 @@ const inspectionCompare = [
       </div>
     </div>
   </section>
+
+  <CourseReviews slug="kelas-online-inspeksi" reviews={c.reviews} />
 
   <section id="harga" class="g-section scroll-mt-10" aria-labelledby="price-title">
     <div class="shell">

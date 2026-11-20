@@ -1,0 +1,72 @@
+---
+/**
+ * "Kata siswa": the class's average rating and the reviews its students
+ * allowed and the team chose in the admin (Nilai kelas › Tayangkan). The build
+ * prints what the LMS had; the browser refreshes it on every visit
+ * (src/scripts/livePrices.ts), so a review the team publishes shows without a
+ * rebuild. With no chosen review and too few ratings the section stays hidden.
+ */
+import { MIN_RATINGS, type CourseReviews } from '../lib/livePrices';
+
+interface Props {
+  slug: string;
+  reviews?: CourseReviews;
+}
+
+const { slug, reviews } = Astro.props;
+const items = reviews?.items ?? [];
+const count = reviews?.count ?? 0;
+const average = reviews?.average ?? null;
+const showScore = average !== null && count >= MIN_RATINGS;
+
+const score = (n: number) => n.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const month = (date: string | null) =>
+  date ? new Intl.DateTimeFormat('id-ID', { month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta' }).format(new Date(date)) : '';
+---
+
+<section class="g-section" aria-labelledby="reviews-title" data-reviews={slug} hidden={items.length === 0 && !showScore}>
+  <div class="shell grid gap-10 lg:grid-cols-12 lg:gap-16">
+    <div class="lg:col-span-4">
+      <h2 id="reviews-title" class="g-h2">Kata siswa yang sudah belajar.</h2>
+      <p class="mt-4 max-w-prose leading-relaxed text-muted">Ulasan asli dari siswa kelas ini, ditampilkan dengan izin mereka.</p>
+      <div class="mt-8 border-t border-body pt-5" data-reviews-score hidden={!showScore}>
+        <p class="flex items-baseline gap-2">
+          <span class="g-num text-7xl" data-reviews-average>{average !== null ? score(average) : ''}</span>
+          <span class="g-num text-3xl text-muted">/ 5</span>
+        </p>
+        <p class="mt-2 text-sm text-muted">Rata-rata dari <span data-reviews-count>{count.toLocaleString('id-ID')}</span> penilaian siswa.</p>
+      </div>
+    </div>
+
+    <ul class="border-t border-body lg:col-span-8" data-reviews-list hidden={items.length === 0}>
+      {items.map((review) => (
+        <li class="border-b border-line py-6">
+          <p class="cr-stars" role="img" aria-label={`Nilai ${review.rating} dari 5`}>
+            <span class="text-accent">{'★'.repeat(review.rating)}</span><span class="text-faint">{'★'.repeat(5 - review.rating)}</span>
+          </p>
+          <blockquote class="mt-3 max-w-prose whitespace-pre-line text-lg leading-relaxed">{review.body}</blockquote>
+          <p class="mt-3 text-sm">
+            <span class="font-semibold">{review.name}</span>
+            <span class="text-muted">, siswa kelas ini{review.date ? `, ${month(review.date)}` : ''}</span>
+          </p>
+        </li>
+      ))}
+    </ul>
+  </div>
+
+  <template data-reviews-item>
+    <li class="border-b border-line py-6">
+      <p class="cr-stars" role="img"><span class="text-accent" data-r-on></span><span class="text-faint" data-r-off></span></p>
+      <blockquote class="mt-3 max-w-prose whitespace-pre-line text-lg leading-relaxed" data-r-body></blockquote>
+      <p class="mt-3 text-sm"><span class="font-semibold" data-r-name></span><span class="text-muted" data-r-meta></span></p>
+    </li>
+  </template>
+</section>
+
+<style>
+  .cr-stars {
+    font-size: 1.125rem;
+    letter-spacing: 0.15em;
+    line-height: 1;
+  }
+</style>

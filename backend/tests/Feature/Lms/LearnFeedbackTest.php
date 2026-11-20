@@ -183,4 +183,92 @@ class LearnFeedbackTest extends TestCase
 
         Livewire::test(ListCourseReviews::class)->assertCanSeeTableRecords([$review]);
     }
+
+    private function review(Course $course, string $name, array $attributes): CourseReview
+    {
+        $student = Student::create(['name' => $name, 'email' => str($name)->slug().'@example.test']);
+
+        return CourseReview::create(['student_id' => $student->id, 'course_id' => $course->id] + $attributes);
+    }
+
+    public function test_the_sales_page_shows_only_reviews_the_student_allowed_and_the_team_chose(): void
+    {
+        $course = $this->course();
+        $chosen = $this->review($course, 'muhammad jafar', ['rating' => 5, 'body' => 'Mudah dipahami.', 'may_publish' => true, 'published_at' => now()]);
+        $this->review($course, 'Fauzi', ['rating' => 4, 'body' => null, 'may_publish' => false]);
+        $this->review($course, 'Budi Santoso', ['rating' => 2, 'body' => 'Suara kecil.', 'may_publish' => false, 'published_at' => now()]);
+        $this->review($course, 'Rina', ['rating' => 5, 'body' => 'Belum dipilih tim.', 'may_publish' => true]);
+
+        $this->getJson("/api/checkout/courses/{$course->slug}")
+            ->assertOk()
+            // Every rating counts toward the score, not only the chosen ones.
+            ->assertJsonPath('reviews.count', 4)
+            ->assertJsonPath('reviews.average', 4)
+            ->assertJsonCount(1, 'reviews.items')
+            ->assertJsonPath('reviews.items.0.name', 'Muhammad')
+            ->assertJsonPath('reviews.items.0.rating', 5)
+            ->assertJsonPath('reviews.items.0.body', 'Mudah dipahami.')
+            ->assertJsonMissing(['email' => $chosen->student->email]);
+    }
+
+    public function test_a_class_without_ratings_sends_no_score(): void
+    {
+        $course = $this->course();
+
+        $this->getJson("/api/checkout/courses/{$course->slug}")
+            ->assertJsonPath('reviews.count', 0)
+            ->assertJsonPath('reviews.average', null)
+            ->assertJsonPath('reviews.items', []);
+    }
+
+    public function test_the_team_publishes_a_review_and_an_edit_takes_it_down_again(): void
+    {
+        Filament::setCurrentPanel('admin');
+        $course = $this->course();
+        $student = $this->student($course);
+        $review = CourseReview::create(['student_id' => $student->id, 'course_id' => $course->id, 'rating' => 5, 'body' => 'Bagus.', 'may_publish' => true]);
+        $this->actingAs(User::factory()->create(['role' => UserRole::Admin]));
+
+        // Warm the cached copy, so the check below proves the admin action clears it.
+        $this->getJson("/api/checkout/courses/{$course->slug}")->assertJsonCount(0, 'reviews.items');
+
+        Livewire::test(ListCourseReviews::class)
+            ->assertTableActionHidden('unpublish', $review)
+            ->callTableAction('publish', $review)
+            ->assertHasNoTableActionErrors();
+
+        $this->assertNotNull($review->refresh()->published_at);
+        $this->getJson("/api/checkout/courses/{$course->slug}")->assertJsonCount(1, 'reviews.items');
+
+        // The student rewrites it: the team has not read the new words yet.
+        $this->postJson("/api/learn/courses/{$course->slug}/review", ['rating' => 1, 'body' => 'Ternyata kurang.', 'may_publish' => true], $this->signedIn($student))
+            ->assertOk();
+        $this->assertNull($review->refresh()->published_at);
+        $this->getJson("/api/checkout/courses/{$course->slug}")->assertJsonCount(0, 'reviews.items');
+    }
+
+    public function test_sending_the_same_review_again_keeps_it_published(): void
+    {
+        $course = $this->course();
+        $student = $this->student($course);
+        $review = CourseReview::create(['student_id' => $student->id, 'course_id' => $course->id, 'rating' => 5, 'body' => 'Bagus.', 'may_publish' => true, 'published_at' => now()]);
+
+        $this->postJson("/api/learn/courses/{$course->slug}/review", ['rating' => 5, 'body' => 'Bagus.', 'may_publish' => true], $this->signedIn($student))
+            ->assertOk();
+
+        $this->assertNotNull($review->refresh()->published_at);
+    }
+
+    public function test_a_review_without_consent_or_words_cannot_be_published(): void
+    {
+        Filament::setCurrentPanel('admin');
+        $course = $this->course();
+        $silent = $this->review($course, 'Fauzi', ['rating' => 4, 'body' => null, 'may_publish' => true]);
+        $private = $this->review($course, 'Budi', ['rating' => 5, 'body' => 'Rahasia.', 'may_publish' => false]);
+        $this->actingAs(User::factory()->create(['role' => UserRole::Admin]));
+
+        Livewire::test(ListCourseReviews::class)
+            ->assertTableActionHidden('publish', $silent)
+            ->assertTableActionHidden('publish', $private);
+    }
 }

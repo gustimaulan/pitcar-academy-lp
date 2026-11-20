@@ -5,6 +5,7 @@ import AcExplorer from '../components/garage/AcExplorer.astro';
 import AcDeviceMockup from '../components/AcDeviceMockup.astro';
 import SalesPopup from '../components/SalesPopup.astro';
 import ClassmateCount from '../components/ClassmateCount.astro';
+import CourseReviews from '../components/CourseReviews.astro';
 import '../styles/garage.css';
 import { acCourse as c, acFaqs, contact, trustNumbers } from '../content.config';
 
@@ -250,6 +251,8 @@ const structuredData = [
       </div>
     </div>
   </section>
+
+  <CourseReviews slug="kelas-online-ac" reviews={c.reviews} />
 
   <section id="harga" class="g-section scroll-mt-10" aria-labelledby="price-title">
     <div class="shell">

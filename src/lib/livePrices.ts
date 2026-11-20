@@ -19,6 +19,40 @@ interface PricedCourse {
   savingsDisplay?: string;
   /** Students who hold the class now, for "bergabung dengan N siswa lain". */
   students?: number;
+  reviews?: CourseReviews;
+}
+
+export interface CourseReview {
+  /** First name only: what the student agreed to. */
+  name: string;
+  rating: number;
+  body: string;
+  date: string | null;
+}
+
+/** Every rating makes the score; items are the reviews the student allowed and the team chose. */
+export interface CourseReviews {
+  average: number | null;
+  count: number;
+  items: CourseReview[];
+}
+
+/** Below this the average is not shown: "5,0 dari 1 penilaian" proves nothing. */
+export const MIN_RATINGS = 3;
+
+/** The API answer, checked field by field; anything malformed becomes null. */
+export function parseReviews(value: unknown): CourseReviews | null {
+  if (!value || typeof value !== 'object') return null;
+  const v = value as Record<string, unknown>;
+  const count = typeof v.count === 'number' && Number.isInteger(v.count) && v.count >= 0 ? v.count : 0;
+  const average = typeof v.average === 'number' && v.average >= 1 && v.average <= 5 ? v.average : null;
+  const items = (Array.isArray(v.items) ? v.items : []).flatMap((item): CourseReview[] => {
+    const i = item as Record<string, unknown>;
+    if (typeof i?.name !== 'string' || typeof i.body !== 'string' || !i.body.trim()) return [];
+    const rating = typeof i.rating === 'number' ? Math.min(5, Math.max(1, Math.round(i.rating))) : 5;
+    return [{ name: i.name, rating, body: i.body, date: typeof i.date === 'string' ? i.date : null }];
+  });
+  return { average, count, items };
 }
 
 /** Below this the classmate line is not shown at all. */
@@ -49,7 +83,9 @@ export async function applyLivePrices(courses: Record<string, PricedCourse>): Pr
           signal: AbortSignal.timeout(5000),
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = (await res.json()) as { course?: { price?: unknown; strike_price?: unknown; students?: unknown } };
+        const data = (await res.json()) as { course?: { price?: unknown; strike_price?: unknown; students?: unknown }; reviews?: unknown };
+        const reviews = parseReviews(data.reviews);
+        if (reviews) course.reviews = reviews;
         const price = data.course?.price;
         const strike = data.course?.strike_price;
         const students = data.course?.students;

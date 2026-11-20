@@ -1,4 +1,4 @@
-import { applyLivePrices } from './lib/livePrices';
+import { applyLivePrices, type CourseReviews } from './lib/livePrices';
 
 export const collections = {
   // Content data — semua info bisnis di sini
@@ -727,6 +727,8 @@ export const digitalFaqs: FaqItem[] = [
 export interface InspectionCourse {
   /** Students who hold the class now, filled from the LMS at build time. */
   students?: number;
+  /** Ratings and the reviews the team chose, filled from the LMS at build time. */
+  reviews?: CourseReviews;
   /**
    * Link checkout platform pembayaran. Selama null, tombol beli membuka
    * WhatsApp dengan pesan yang sudah terisi — pembelian tetap bisa terjadi,
@@ -883,6 +885,8 @@ export const inspectionFaqs: FaqItem[] = [
 export interface AcCourse {
   /** Students who hold the class now, filled from the LMS at build time. */
   students?: number;
+  /** Ratings and the reviews the team chose, filled from the LMS at build time. */
+  reviews?: CourseReviews;
   checkoutUrl: string;
   name: string;
   /** Nama pendek untuk judul tab, katalog, dan event analytics. */

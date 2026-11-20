@@ -15,8 +15,9 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 /**
- * Ratings and requests from students. Both are read by the team in the admin;
- * nothing a student sends here is shown publicly.
+ * Ratings and requests from students. Both are read by the team in the admin.
+ * A review reaches the sales page only when the student allowed it and the
+ * team chose it (CourseReview::published); requests are never shown.
  */
 class LearnFeedbackController extends Controller
 {
@@ -39,14 +40,20 @@ class LearnFeedbackController extends Controller
             'body.max' => 'Ulasan maksimal 2.000 karakter.',
         ]);
 
-        $review = CourseReview::updateOrCreate(
-            ['student_id' => $student->id, 'course_id' => $course->id],
-            [
-                'rating' => $data['rating'],
-                'body' => self::clean($data['body'] ?? null),
-                'may_publish' => (bool) ($data['may_publish'] ?? false),
-            ],
-        );
+        $review = CourseReview::firstOrNew(['student_id' => $student->id, 'course_id' => $course->id]);
+        $review->fill([
+            'rating' => $data['rating'],
+            'body' => self::clean($data['body'] ?? null),
+            'may_publish' => (bool) ($data['may_publish'] ?? false),
+        ]);
+
+        // The team chose the old words. New words, a new score, or a withdrawn
+        // consent take the review off the sales page until the team looks again.
+        if ($review->isDirty(['rating', 'body', 'may_publish'])) {
+            $review->published_at = null;
+        }
+
+        $review->save();
 
         return response()->json(['review' => self::review($review)]);
     }

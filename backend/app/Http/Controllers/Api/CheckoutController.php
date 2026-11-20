@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreCheckoutRequest;
 use App\Models\Course;
 use App\Models\CourseOffer;
+use App\Models\CourseReview;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Services\Doku\DokuCheckout;
@@ -91,6 +92,7 @@ class CheckoutController extends Controller
 
         return response()->json([
             'course' => self::coursePayload($course) + ['students' => $students],
+            'reviews' => Cache::remember('course-reviews:'.$course->id, 60, fn () => self::reviewsPayload($course)),
             'offers' => $offers->map(fn (CourseOffer $offer) => self::coursePayload($offer->offerCourse) + [
                 'offer_price' => $offer->price,
                 'headline' => $offer->headline,
@@ -99,6 +101,29 @@ class CheckoutController extends Controller
     }
 
     /** @return array{slug: string, title: string, tracking_id: string, price: int, strike_price: ?int} */
+    /**
+     * For the sales page. The average and count take every rating, so the
+     * score is not only the reviews the team liked; the quotes are only the
+     * ones the student allowed and the team chose, with a first name.
+     */
+    private static function reviewsPayload(Course $course): array
+    {
+        $ratings = CourseReview::where('course_id', $course->id);
+
+        return [
+            'average' => ($avg = (clone $ratings)->avg('rating')) ? round((float) $avg, 1) : null,
+            'count' => (clone $ratings)->count(),
+            'items' => (clone $ratings)->published()->with('student:id,name')
+                ->latest('published_at')->limit(6)->get()
+                ->map(fn (CourseReview $review) => [
+                    'name' => $review->publicName(),
+                    'rating' => $review->rating,
+                    'body' => $review->body,
+                    'date' => $review->updated_at?->toDateString(),
+                ])->values()->all(),
+        ];
+    }
+
     private static function coursePayload(Course $course): array
     {
         return [

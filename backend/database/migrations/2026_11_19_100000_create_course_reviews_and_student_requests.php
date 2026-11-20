@@ -15,7 +15,7 @@ return new class extends Migration
             $table->foreignId('course_id')->constrained()->cascadeOnDelete();
             $table->unsignedTinyInteger('rating');
             $table->text('body')->nullable();
-            // The student's consent to show the review publicly. Nothing is shown yet.
+            // The student's consent to show the review publicly.
             $table->boolean('may_publish')->default(false);
             $table->timestamps();
             $table->unique(['student_id', 'course_id']);

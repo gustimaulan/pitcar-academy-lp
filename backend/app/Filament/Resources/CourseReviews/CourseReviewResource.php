@@ -13,7 +13,10 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use UnitEnum;
 
-/** Students' ratings of a class. Read only: the student owns the words. */
+/**
+ * Students' ratings of a class. The words stay the student's: the team only
+ * chooses which allowed reviews appear on the sales page.
+ */
 class CourseReviewResource extends Resource
 {
     protected static ?string $model = CourseReview::class;
