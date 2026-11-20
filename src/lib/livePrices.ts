@@ -17,7 +17,12 @@ interface PricedCourse {
   strikePriceDisplay: string;
   /** "hemat RpX" next to the price, where a page shows one. */
   savingsDisplay?: string;
+  /** Students who hold the class now, for "bergabung dengan N siswa lain". */
+  students?: number;
 }
+
+/** Below this the classmate line is not shown at all. */
+export const MIN_CLASSMATES = 10;
 
 export const rupiah = (n: number) => 'Rp' + Math.round(n).toLocaleString('id-ID');
 const digits = (text: string) => Number(text.replace(/\D/g, '')) || 0;
@@ -44,9 +49,11 @@ export async function applyLivePrices(courses: Record<string, PricedCourse>): Pr
           signal: AbortSignal.timeout(5000),
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = (await res.json()) as { course?: { price?: unknown; strike_price?: unknown } };
+        const data = (await res.json()) as { course?: { price?: unknown; strike_price?: unknown; students?: unknown } };
         const price = data.course?.price;
         const strike = data.course?.strike_price;
+        const students = data.course?.students;
+        if (typeof students === 'number' && Number.isInteger(students) && students >= 0) course.students = students;
         if (typeof price !== 'number' || !Number.isInteger(price) || price <= 0) throw new Error('harga tidak valid');
 
         // A missing or lower strike price keeps the printed one, as the browser refresh does.
