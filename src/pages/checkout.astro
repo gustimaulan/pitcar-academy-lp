@@ -82,7 +82,7 @@ const helpHref = `https://wa.me/${contact.whatsappNumber}?text=${encodeURICompon
       <div data-view="checkout" class="grid gap-10 lg:grid-cols-12 lg:gap-16" hidden>
         <aside class="min-w-0 lg:col-span-5" aria-label="Ringkasan pesanan">
           {courses.map((course) => (
-            <div data-course={course.slug} data-title={course.name} data-tracking-id={course.trackingId} data-amount={course.amount} hidden>
+            <div data-course={course.slug} data-title={course.name} data-tracking-id={course.trackingId} data-amount={course.amount} data-strike-amount={Number(course.strike.replace(/\D/g, '')) || ''} hidden>
               <h1 class="g-h2 !text-[clamp(2rem,4vw,3rem)]">{course.name}</h1>
               <div class="mt-5 flex flex-wrap items-baseline gap-x-3 gap-y-1">
                 <span class="g-num text-5xl" data-price>{course.price}</span>
@@ -123,10 +123,37 @@ const helpHref = `https://wa.me/${contact.whatsappNumber}?text=${encodeURICompon
             <fieldset class="mt-2 flex flex-col gap-5" data-upsell data-covers={JSON.stringify(bumpCovers)} hidden>
               <legend class="co-bump-legend">Tunggu dulu! Ada penawaran khusus untukmu</legend>
             </fieldset>
-            <p class="flex items-baseline justify-between gap-4 border-t border-line pt-4" data-total hidden>
-              <span class="text-sm font-semibold">Total bayar</span>
-              <strong class="g-num text-3xl" data-total-value></strong>
-            </p>
+            <section class="co-sum" aria-labelledby="co-sum-title" data-total hidden>
+              <h2 id="co-sum-title" class="co-sum-title">Rincian harga</h2>
+              <ul class="co-sum-items" data-sum-items></ul>
+              <dl class="co-sum-totals" aria-live="polite" aria-atomic="true">
+                <div class="co-sum-row" data-sum-normal-row>
+                  <dt>Harga normal</dt>
+                  <dd><s class="co-sum-strike" data-sum-normal></s></dd>
+                </div>
+                <div class="co-sum-row co-sum-save" data-sum-save-row>
+                  <dt>Kamu hemat</dt>
+                  <dd class="g-num" data-sum-save></dd>
+                </div>
+                <div class="co-sum-row co-sum-pay">
+                  <dt>Total bayar</dt>
+                  <dd class="g-num" data-total-value></dd>
+                </div>
+              </dl>
+              <p class="co-sum-nudge" data-sum-nudge hidden></p>
+            </section>
+            <template id="co-sum-item">
+              <li class="co-sum-row">
+                <span class="min-w-0">
+                  <span class="block font-semibold" data-i-title></span>
+                  <span class="block text-sm text-muted" data-i-note></span>
+                </span>
+                <span class="co-sum-prices">
+                  <s class="co-sum-strike" data-i-strike></s>
+                  <span class="g-num text-xl" data-i-price></span>
+                </span>
+              </li>
+            </template>
             <p data-error="form" class="co-error" role="alert" hidden></p>
             <div>
               <button type="submit" class="btn btn-primary w-full sm:w-auto" data-submit>Lanjut ke pembayaran</button>
@@ -468,6 +495,102 @@ const helpHref = `https://wa.me/${contact.whatsappNumber}?text=${encodeURICompon
   .co-bump-warn:empty {
     display: none;
   }
+  /* Price receipt: the page's one tinted block (DESIGN.md › Tinted block). */
+  .co-sum {
+    padding: 1.25rem 1.25rem 1.5rem;
+    border-top: 2px solid #cc0000;
+    background: rgb(var(--ground-alt));
+  }
+  @media (min-width: 640px) {
+    .co-sum { padding: 1.5rem 1.75rem 1.75rem; }
+  }
+  .co-sum-title {
+    font-family: 'Barlow Condensed', ui-sans-serif, system-ui, sans-serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1.1;
+    text-transform: uppercase;
+  }
+  .co-sum-items {
+    margin-top: 0.875rem;
+    border-top: 1px solid rgb(var(--body));
+  }
+  .co-sum-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: 0.25rem 1rem;
+    padding-block: 0.75rem;
+    border-bottom: 1px solid rgb(var(--line));
+  }
+  .co-sum-prices {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: baseline;
+    gap: 0 0.625rem;
+    white-space: nowrap;
+  }
+  .co-sum-strike {
+    color: rgb(var(--muted));
+    text-decoration-thickness: 1.5px;
+  }
+  .co-sum-totals dt {
+    font-size: 0.9375rem;
+  }
+  .co-sum-totals dd {
+    text-align: right;
+    white-space: nowrap;
+  }
+  .co-sum-save {
+    position: relative;
+    isolation: isolate;
+    color: rgb(var(--accent));
+  }
+  /* The flash sits a little wider than the row, so it reads as a band while the hairlines stay aligned. */
+  .co-sum-save::before {
+    content: '';
+    position: absolute;
+    inset: 0 -0.625rem;
+    z-index: -1;
+    background: rgb(var(--accent) / 0.16);
+    opacity: 0;
+  }
+  .co-sum-save dt {
+    font-weight: 700;
+  }
+  .co-sum-save dd {
+    font-size: 1.75rem;
+    line-height: 1;
+  }
+  .co-sum-save.is-new::before {
+    animation: co-sum-flash 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes co-sum-flash {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .co-sum-save.is-new::before { animation: none; }
+  }
+  .co-sum-pay {
+    padding-top: 1rem;
+    border-bottom: 0;
+  }
+  .co-sum-pay dt {
+    font-weight: 700;
+  }
+  .co-sum-pay dd {
+    font-size: 2.75rem;
+    line-height: 0.95;
+  }
+  .co-sum-nudge {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgb(var(--line));
+    font-size: 0.875rem;
+    color: rgb(var(--muted));
+  }
   .co-error {
     font-size: 0.875rem;
     font-weight: 600;
@@ -534,9 +657,64 @@ const helpHref = `https://wa.me/${contact.whatsappNumber}?text=${encodeURICompon
   const selected = () =>
     offers.filter((offer) => upsell.querySelector<HTMLInputElement>(`[data-addon="${CSS.escape(offer.slug)}"]`)?.checked);
 
+  /**
+   * The receipt under the order bump. Each line shows what it would cost
+   * without this checkout (the class's normal price, or the add-on bought on
+   * its own) struck through, then what is charged. Ticking an add-on adds its
+   * line, so the struck total, the saving and the total all move together.
+   */
+  let lastSaving = -1;
   function updateTotal() {
     if (!course) return;
-    $('[data-total-value]').textContent = rupiah(course.price + selected().reduce((sum, o) => sum + o.offer_price, 0));
+    const lines = [
+      {
+        title: course.title,
+        note: '',
+        normal: course.strike_price && course.strike_price > course.price ? course.strike_price : course.price,
+        price: course.price,
+      },
+      ...selected().map((o) => ({ title: o.title, note: 'Tambahan bundling', normal: Math.max(o.price, o.offer_price), price: o.offer_price })),
+    ];
+    const total = lines.reduce((sum, l) => sum + l.price, 0);
+    const normal = lines.reduce((sum, l) => sum + l.normal, 0);
+    const saving = normal - total;
+
+    const template = document.querySelector<HTMLTemplateElement>('#co-sum-item')!;
+    $('[data-sum-items]').replaceChildren(
+      ...lines.map((line) => {
+        const row = template.content.firstElementChild!.cloneNode(true) as HTMLElement;
+        const set = (sel: string, text: string) => (row.querySelector<HTMLElement>(sel)!.textContent = text);
+        set('[data-i-title]', line.title);
+        set('[data-i-note]', line.note);
+        set('[data-i-price]', rupiah(line.price));
+        const strike = row.querySelector<HTMLElement>('[data-i-strike]')!;
+        if (line.normal > line.price) strike.innerHTML = `<span class="sr-only">Harga normal </span>${rupiah(line.normal)}`;
+        else strike.remove();
+        if (!line.note) row.querySelector('[data-i-note]')!.remove();
+        return row;
+      }),
+    );
+
+    $('[data-sum-normal]').innerHTML = `<span class="sr-only">Sebelumnya </span>${rupiah(normal)}`;
+    $('[data-sum-save]').textContent = rupiah(saving);
+    $('[data-sum-normal-row]').hidden = saving <= 0;
+    $('[data-sum-save-row]').hidden = saving <= 0;
+    $('[data-total-value]').textContent = rupiah(total);
+
+    // One unticked add-on is still worth naming next to the saving it would add.
+    const missed = offers.find((o) => !selected().includes(o) && o.price > o.offer_price);
+    const nudge = $('[data-sum-nudge]');
+    nudge.textContent = missed ? `Centang ${missed.title} di atas untuk hemat ${rupiah(missed.price - missed.offer_price)} lagi.` : '';
+    nudge.hidden = !missed;
+
+    // A bigger saving gets one short flash, so the change below the bump is seen.
+    if (lastSaving >= 0 && saving > lastSaving) {
+      const row = $('[data-sum-save-row]');
+      row.classList.remove('is-new');
+      void row.offsetWidth;
+      row.classList.add('is-new');
+    }
+    lastSaving = saving;
     $('[data-total]').hidden = false;
   }
 
@@ -589,7 +767,7 @@ const helpHref = `https://wa.me/${contact.whatsappNumber}?text=${encodeURICompon
   async function loadCourse(slug: string) {
     const panel = root.querySelector<HTMLElement>(`[data-course="${CSS.escape(slug)}"]`);
     if (!panel) return;
-    course = { slug, title: panel.dataset.title ?? '', tracking_id: panel.dataset.trackingId ?? slug, price: Number(panel.dataset.amount) || 0, strike_price: null };
+    course = { slug, title: panel.dataset.title ?? '', tracking_id: panel.dataset.trackingId ?? slug, price: Number(panel.dataset.amount) || 0, strike_price: Number(panel.dataset.strikeAmount) || null };
     try {
       const res = await fetch(`${api}/api/checkout/courses/${encodeURIComponent(slug)}`, { headers: { Accept: 'application/json' } });
       if (res.ok) {
