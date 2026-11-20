@@ -2,8 +2,17 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ThemeToggle from '../components/ThemeToggle.astro';
 import '../styles/garage.css';
-import { acCourse, contact, inspectionCourse } from '../content.config';
+import { acCourse, contact, inspectionCourse, onlineCourses } from '../content.config';
 import { livePriceAttrs } from '../lib/livePrices';
+
+// The add-on card shows the add-on's poster, cropped to its title block.
+const coverFocus: Record<string, string> = { 'kelas-online-ac': '50% 22%', 'kelas-online-inspeksi': '50% 0%' };
+const bumpCovers = Object.fromEntries(
+  onlineCourses.map((c) => [
+    c.slug,
+    { src: c.cover, srcset: c.coverSrcset, alt: c.coverAlt, focus: coverFocus[c.slug] ?? '50% 0%' },
+  ]),
+);
 
 // Slugs match the course rows on the backend (LmsCourseSeeder).
 const courses = [
@@ -111,8 +120,8 @@ const helpHref = `https://wa.me/${contact.whatsappNumber}?text=${encodeURICompon
               <input id="co-wa" name="whatsapp" type="tel" autocomplete="tel" inputmode="tel" placeholder="081234567890" required class="co-input" aria-describedby="co-wa-err" />
               <p id="co-wa-err" data-error="whatsapp" class="co-error" hidden></p>
             </div>
-            <fieldset class="flex flex-col gap-3" data-upsell hidden>
-              <legend class="mb-3 text-sm font-semibold">Tambahan untuk pesananmu</legend>
+            <fieldset class="mt-2 flex flex-col gap-5" data-upsell data-covers={JSON.stringify(bumpCovers)} hidden>
+              <legend class="co-bump-legend">Tunggu dulu! Ada penawaran khusus untukmu</legend>
             </fieldset>
             <p class="flex items-baseline justify-between gap-4 border-t border-line pt-4" data-total hidden>
               <span class="text-sm font-semibold">Total bayar</span>
@@ -195,15 +204,26 @@ const helpHref = `https://wa.me/${contact.whatsappNumber}?text=${encodeURICompon
 
     <template id="co-upsell">
       <label class="co-upsell">
-        <input type="checkbox" class="co-check" />
-        <span class="flex min-w-0 flex-col gap-1">
-          <span class="font-semibold" data-u-title></span>
-          <span class="text-sm text-muted" data-u-headline></span>
-          <span class="mt-1 flex flex-wrap items-baseline gap-x-3">
-            <strong class="g-num text-2xl text-accent" data-u-price></strong>
-            <span class="text-sm text-muted line-through" data-u-normal></span>
+        <span class="co-bump-tag">Hanya di halaman ini</span>
+        <span class="co-bump-bar">
+          <svg class="co-bump-arrow" viewBox="0 0 40 28" aria-hidden="true"><path d="M0 9h22V0l18 14-18 14v-9H0z" fill="currentColor" /></svg>
+          <input type="checkbox" class="co-check" />
+          <span class="co-bump-cta">
+            <span class="co-bump-off">Ya! Centang untuk ambil juga</span>
+            <span class="co-bump-on">Mantap, sudah masuk pesananmu</span>
           </span>
-          <span class="text-sm" data-u-saving></span>
+        </span>
+        <span class="co-bump-body">
+          <span class="co-bump-title" data-u-title></span>
+          <span class="text-[0.9375rem]" data-u-headline></span>
+          <span class="text-[0.9375rem]">Khusus di halaman ini saja, kelas ini bisa kamu dapatkan dengan <strong>harga termurah</strong>.</span>
+          <span class="co-bump-offer">
+            <strong>Cukup tambah</strong>
+            <strong class="co-bump-price" data-u-price></strong>
+            <s class="text-muted" data-u-normal></s>
+            <span>untuk akses materinya selamanya.</span>
+          </span>
+          <span class="co-bump-warn" data-u-saving></span>
         </span>
       </label>
     </template>
@@ -301,30 +321,152 @@ const helpHref = `https://wa.me/${contact.whatsappNumber}?text=${encodeURICompon
     cursor: not-allowed;
     opacity: 0.6;
   }
+  /* Order bump: loud on purpose, a coupon clipped into the form. */
+  .co-bump-legend {
+    margin-bottom: 1.375rem;
+    font-family: 'Barlow Condensed', ui-sans-serif, system-ui, sans-serif;
+    font-size: 1.375rem;
+    font-weight: 700;
+    line-height: 1.15;
+    text-transform: uppercase;
+    color: rgb(var(--accent));
+  }
   .co-upsell {
+    --bump-paper: 255 251 235;
+    position: relative;
     display: flex;
+    flex-direction: column;
     gap: 1rem;
-    align-items: flex-start;
-    padding: 1rem 1.125rem;
-    border: 1px solid rgb(var(--line));
-    border-radius: 2px;
-    background: rgb(var(--surface));
+    padding: 1.5rem 1rem 1.25rem;
+    border: 3px dashed #cc0000;
+    background: rgb(var(--bump-paper));
     cursor: pointer;
   }
-  .co-upsell:hover,
-  .co-upsell:has(:checked) {
+  .dark .co-upsell {
+    --bump-paper: 31 26 10;
     border-color: rgb(var(--accent));
   }
+  .co-upsell:has(:checked) {
+    border-style: solid;
+  }
   .co-upsell:has(:focus-visible) {
-    outline: 2px solid rgb(var(--accent));
-    outline-offset: 2px;
+    outline: 3px solid rgb(var(--body));
+    outline-offset: 3px;
+  }
+  .co-bump-tag {
+    position: absolute;
+    top: -0.85rem;
+    left: 0.75rem;
+    padding: 0.125rem 0.625rem;
+    font-family: 'Barlow Condensed', ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.875rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #fff;
+    background: #cc0000;
+  }
+  .co-bump-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 3.75rem;
+    padding: 0.625rem 0.875rem;
+    color: #0a0a0a;
+    background: #f5d24b;
+  }
+  .co-upsell:has(:checked) .co-bump-bar {
+    background: #c9e7a8;
+  }
+  .co-bump-arrow {
+    flex: none;
+    width: 2.25rem;
+    height: auto;
+    color: #cc0000;
+    animation: co-bump-nudge 0.9s ease-in-out infinite;
+  }
+  .co-upsell:has(:checked) .co-bump-arrow {
+    display: none;
+  }
+  @keyframes co-bump-nudge {
+    50% { transform: translateX(6px); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .co-bump-arrow { animation: none; }
   }
   .co-check {
     flex: none;
-    width: 1.25rem;
-    height: 1.25rem;
-    margin-top: 0.125rem;
-    accent-color: rgb(var(--accent));
+    appearance: none;
+    width: 1.875rem;
+    height: 1.875rem;
+    margin: 0;
+    border: 2px solid #6b6b6b;
+    border-radius: 4px;
+    background: #fff center / 75% no-repeat;
+    cursor: pointer;
+  }
+  .co-check:checked {
+    border-color: #1f7a1f;
+    background-color: #1f7a1f;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2 8.5l4 4 8-9' fill='none' stroke='%23fff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  }
+  .co-check:focus-visible {
+    outline: none;
+  }
+  .co-bump-cta {
+    font-size: 1.0625rem;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+  .co-bump-on,
+  .co-upsell:has(:checked) .co-bump-off {
+    display: none;
+  }
+  .co-upsell:has(:checked) .co-bump-on {
+    display: inline;
+  }
+  .co-bump-cover {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+  }
+  .co-bump-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .co-bump-title {
+    font-family: 'Barlow Condensed', ui-sans-serif, system-ui, sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.1;
+    text-transform: uppercase;
+  }
+  .co-bump-offer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 0.4em;
+    font-size: 1.0625rem;
+  }
+  .co-bump-price {
+    font-family: 'Barlow Condensed', ui-sans-serif, system-ui, sans-serif;
+    font-size: 2rem;
+    line-height: 1;
+    color: rgb(var(--accent));
+  }
+  .co-bump-warn {
+    margin-top: 0.25rem;
+    padding-top: 0.625rem;
+    border-top: 1px dashed rgb(var(--accent) / 0.5);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: rgb(var(--accent));
+  }
+  .co-bump-warn:empty {
+    display: none;
   }
   .co-error {
     font-size: 0.875rem;
@@ -379,7 +521,13 @@ const helpHref = `https://wa.me/${contact.whatsappNumber}?text=${encodeURICompon
   };
 
   const rupiah = (n: number) => 'Rp' + n.toLocaleString('id-ID');
+  // "79 ribu" reads cheaper than "Rp79.000"; odd amounts keep the full figure.
+  const ribu = (n: number) => (n >= 1000 && n % 1000 === 0 ? `${(n / 1000).toLocaleString('id-ID')} ribu` : rupiah(n));
   const upsell = $<HTMLFieldSetElement>('[data-upsell]');
+  type Cover = { src: string; srcset: string; alt: string; focus: string };
+  const covers: Record<string, Cover> = (() => {
+    try { return JSON.parse(upsell.dataset.covers ?? '{}'); } catch { return {}; }
+  })();
   let course: CoursePrice | null = null;
   let offers: Offer[] = [];
 
@@ -402,11 +550,32 @@ const helpHref = `https://wa.me/${contact.whatsappNumber}?text=${encodeURICompon
       box.name = 'addons';
       box.value = offer.slug;
       const fill = (sel: string, text: string) => (card.querySelector<HTMLElement>(sel)!.textContent = text);
-      fill('[data-u-title]', `Tambah ${offer.title}`);
+      const discounted = offer.price > offer.offer_price;
+      fill('[data-u-title]', offer.title);
       fill('[data-u-headline]', offer.headline ?? '');
-      fill('[data-u-price]', `+${rupiah(offer.offer_price)}`);
-      fill('[data-u-normal]', rupiah(offer.price));
-      fill('[data-u-saving]', offer.price > offer.offer_price ? `Hemat ${rupiah(offer.price - offer.offer_price)} dibanding beli terpisah.` : '');
+      fill('[data-u-price]', ribu(offer.offer_price));
+      fill('[data-u-normal]', discounted ? rupiah(offer.price) : '');
+      fill(
+        '[data-u-saving]',
+        discounted
+          ? `Hemat ${rupiah(offer.price - offer.offer_price)}. Harga ini cuma ada di halaman checkout. Beli terpisah nanti, harganya kembali ${rupiah(offer.price)}.`
+          : 'Harga ini cuma ada di halaman checkout, sebelum kamu lanjut ke pembayaran.',
+      );
+      const cover = covers[offer.slug];
+      if (cover) {
+        const img = Object.assign(document.createElement('img'), {
+          className: 'co-bump-cover',
+          src: cover.src,
+          srcset: cover.srcset,
+          sizes: '(min-width: 1024px) 560px, 100vw',
+          alt: cover.alt,
+          width: 640,
+          height: 400,
+          decoding: 'async',
+        });
+        img.style.objectPosition = cover.focus;
+        card.querySelector('.co-bump-body')!.before(img);
+      }
       box.addEventListener('change', () => {
         updateTotal();
         window.trackFunnelEvent?.('checkout_upsell_toggle', { item_id: offer.tracking_id, item_name: offer.title, checked: box.checked, value: offer.offer_price });
