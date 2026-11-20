@@ -1,6 +1,7 @@
 ---
 import { livePriceAttrs } from '../lib/livePrices';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import ClassmateCount from '../components/ClassmateCount.astro';
 import '../styles/garage.css';
 import { contact, onlineCourses, onlineCourseFaqs, packages, trustNumbers } from '../content.config';
 
@@ -88,9 +89,9 @@ const howToBuy = [
       { href: '#kelas', label: 'Pilih kelas' },
       { href: '#cara-belajar', label: 'Cara belajar' },
       { href: '#faq', label: 'FAQ' },
-      // Students who already bought: the sales pages are bare, so this is their way back in.
-      { href: '/belajar/masuk/', label: 'Masuk' },
     ],
+    // Students who already bought: the sales pages are bare, so this is their way back in.
+    login: { href: '/belajar/masuk/', label: 'Masuk' },
     cta: { href: '#kelas', label: 'Pilih kelas', sourceCta: 'kelas_online_header' },
     showAnnouncement: false,
   }}
@@ -162,6 +163,7 @@ const howToBuy = [
                 <span class="text-sm font-semibold text-accent">{course.priceLabel}</span>
               </div>
               <p class="mt-2 text-sm text-muted">Sekali bayar. Akses selamanya, langsung terbuka setelah pembayaran.</p>
+              <ClassmateCount slug={course.slug} count={course.students} class="mt-3" />
               <div class="mt-6 flex flex-col gap-3 sm:flex-row">
                 <a href={course.href} data-lead-cta data-source-cta={`kelas_online_detail_${course.id}`} class="btn btn-primary flex-1">Lihat isi kelas</a>
                 <a

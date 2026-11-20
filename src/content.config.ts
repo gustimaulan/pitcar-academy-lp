@@ -1087,6 +1087,8 @@ export interface OnlineCourseCard {
   /** Halaman penjualan. */
   href: string;
   checkoutUrl: string;
+  /** Siswa yang memegang kelas ini saat build; browser memperbaruinya. */
+  students?: number;
   name: string;
   /** Satu kalimat yang membuat orang berhenti scroll. */
   hook: string;
@@ -1119,6 +1121,7 @@ export const onlineCourses: OnlineCourseCard[] = [
     price: acCourse.price,
     priceDisplay: acCourse.priceDisplay,
     strikePriceDisplay: acCourse.strikePriceDisplay,
+    students: acCourse.students,
     // Satu kosakata untuk atribut yang sama di kedua kartu, supaya yang
     // terbaca berbeda hanyalah perbedaan yang nyata.
     priceLabel: 'Harga launching',
@@ -1144,6 +1147,7 @@ export const onlineCourses: OnlineCourseCard[] = [
     price: inspectionCourse.price,
     priceDisplay: inspectionCourse.priceDisplay,
     strikePriceDisplay: inspectionCourse.strikePriceDisplay,
+    students: inspectionCourse.students,
     priceLabel: 'Harga launching',
     cover: '/kelas-inspeksi/cover.webp',
     coverSrcset: '/kelas-inspeksi/cover-640.webp 640w, /kelas-inspeksi/cover.webp 1000w',
