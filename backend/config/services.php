@@ -66,6 +66,14 @@ return [
             'inspeksi' => ['Inspeksi'],
             'ac' => ['AC Mobil'],
         ],
+
+        // Which LMS class a Scalev order opens, by course slug. Same
+        // case-insensitive "contains" match against the variant name; a
+        // variant that names both classes (a bundle) opens both.
+        'courses' => [
+            'kelas-online-ac' => ['AC Mobil'],
+            'kelas-online-inspeksi' => ['Inspeksi'],
+        ],
     ],
 
     /*
