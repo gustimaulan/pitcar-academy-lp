@@ -64,7 +64,8 @@ if (base && !skip) {
   const seconds = () => Math.round((total + (shownAt === null ? 0 : performance.now() - shownAt)) / 1000);
 
   // A plain-text beacon needs no CORS preflight, so it still leaves while the page closes.
-  const send = (active: boolean) => {
+  // active: true = still on screen, false = closed or left, undefined = tab switched away.
+  const send = (active?: boolean) => {
     const body = JSON.stringify({ seconds: seconds(), active });
     if (!navigator.sendBeacon?.(url, new Blob([body], { type: 'text/plain' }))) {
       fetch(url, { method: 'POST', body, keepalive: true }).catch(() => {});
@@ -78,21 +79,27 @@ if (base && !skip) {
     beat = window.setInterval(() => send(true), 60_000);
   };
 
-  const hidden = () => {
+  const pause = () => {
     window.clearInterval(beat);
     if (shownAt !== null) {
       total += performance.now() - shownAt;
       shownAt = null;
     }
-    send(false);
   };
 
   if (shownAt !== null) startBeat();
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') return hidden();
+    // Switching tabs saves the time but keeps the visitor counted until the last beat is two minutes old.
+    if (document.visibilityState === 'hidden') {
+      pause();
+      return send();
+    }
     shownAt = performance.now();
     send(true);
     startBeat();
   });
-  window.addEventListener('pagehide', hidden);
+  window.addEventListener('pagehide', () => {
+    pause();
+    send(false);
+  });
 }

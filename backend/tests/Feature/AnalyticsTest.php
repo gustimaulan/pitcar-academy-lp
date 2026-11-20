@@ -116,6 +116,11 @@ class AnalyticsTest extends TestCase
         $beat(['seconds' => 60, 'active' => true]);
         $this->assertTrue(PageVisit::find($id)->last_seen_at->gt(now()->subSeconds(5)));
 
+        // Tab switched away: time saved, still counted from the last beat.
+        $beat(['seconds' => 70]);
+        $this->assertNotNull(PageVisit::find($id)->last_seen_at);
+
+        // Page closed: gone from "on the site now" at once.
         $beat(['seconds' => 75, 'active' => false]);
         $visit = PageVisit::find($id);
         $this->assertNull($visit->last_seen_at);
