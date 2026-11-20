@@ -11,7 +11,10 @@
  */
 
 type Built = { price: number; strike: number };
-type Live = { price: number; strike: number | null };
+type Live = { price: number; strike: number | null; students: number | null };
+
+// Same floor as the build (MIN_CLASSMATES in src/lib/livePrices.ts).
+const MIN_CLASSMATES = 10;
 
 const rupiah = (n: number) => 'Rp' + Math.round(n).toLocaleString('id-ID');
 const base = (import.meta.env.PUBLIC_API_BASE_URL ?? import.meta.env.PUBLIC_LEAD_API_BASE_URL ?? '').trim().replace(/\/$/, '');
@@ -21,11 +24,16 @@ async function fetchPrice(slug: string): Promise<Live | null> {
   try {
     const res = await fetch(`${base}/api/checkout/courses/${encodeURIComponent(slug)}`, { headers: { Accept: 'application/json' } });
     if (!res.ok) return null;
-    const data = (await res.json()) as { course?: { price?: unknown; strike_price?: unknown } };
+    const data = (await res.json()) as { course?: { price?: unknown; strike_price?: unknown; students?: unknown } };
     const price = data.course?.price;
     const strike = data.course?.strike_price;
+    const students = data.course?.students;
     if (typeof price !== 'number' || !Number.isInteger(price) || price <= 0) return null;
-    return { price, strike: typeof strike === 'number' ? strike : null };
+    return {
+      price,
+      strike: typeof strike === 'number' ? strike : null,
+      students: typeof students === 'number' && Number.isInteger(students) && students >= 0 ? students : null,
+    };
   } catch {
     return null;
   }
@@ -86,12 +94,25 @@ function apply(scope: HTMLElement, built: Built, live: Live) {
   if (scope === document.body) document.title = swap(document.title);
 }
 
+/** "Bergabung dengan N siswa lain" lines (ClassmateCount.astro) take today's count. */
+function applyClassmates(live: Map<string, Live | null>) {
+  for (const line of document.querySelectorAll<HTMLElement>('[data-classmates]')) {
+    const students = live.get(line.dataset.classmates!)?.students;
+    if (students == null) continue;
+    const count = line.querySelector('[data-classmates-count]');
+    if (count) count.textContent = students.toLocaleString('id-ID');
+    line.hidden = students < MIN_CLASSMATES;
+  }
+}
+
 async function refresh() {
   if (!base) return;
   const scopes = [...document.querySelectorAll<HTMLElement>('[data-live-price]')];
-  if (scopes.length === 0) return;
-  const slugs = [...new Set(scopes.map((s) => s.dataset.livePrice!))];
+  const lines = [...document.querySelectorAll<HTMLElement>('[data-classmates]')];
+  if (scopes.length === 0 && lines.length === 0) return;
+  const slugs = [...new Set([...scopes.map((s) => s.dataset.livePrice!), ...lines.map((l) => l.dataset.classmates!)])];
   const live = new Map(await Promise.all(slugs.map(async (slug) => [slug, await fetchPrice(slug)] as const)));
+  applyClassmates(live);
 
   for (const scope of scopes) {
     const price = live.get(scope.dataset.livePrice!);
