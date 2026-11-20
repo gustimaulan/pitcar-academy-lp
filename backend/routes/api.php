@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\LeadController;
 use App\Http\Controllers\Api\LearnController;
 use App\Http\Controllers\Api\LearnFeedbackController;
 use App\Http\Controllers\Api\PurchaseFeedController;
+use App\Http\Controllers\Api\VisitController;
 use App\Http\Middleware\AuthenticateStudent;
 use Illuminate\Support\Facades\Route;
 
@@ -60,3 +61,7 @@ Route::prefix('learn')->group(function () {
         Route::post('/requests', [LearnFeedbackController::class, 'storeRequest'])->middleware('throttle:5,1');
     });
 });
+
+// Page views from the public site, for the analytics page in the admin.
+Route::post('/visits', [VisitController::class, 'start'])->middleware('throttle:120,1');
+Route::post('/visits/{id}/time', [VisitController::class, 'time'])->middleware('throttle:240,1');
