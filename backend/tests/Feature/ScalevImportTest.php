@@ -5,16 +5,23 @@ namespace Tests\Feature;
 use App\Enums\CourseStatus;
 use App\Enums\EnrollmentSource;
 use App\Enums\UserRole;
+use App\Filament\Resources\ScalevUnpaidOrders\Pages\ListScalevUnpaidOrders;
 use App\Filament\Resources\ScalevUnpaidOrders\Tables\ScalevUnpaidOrdersTable;
+use App\Jobs\SendScalevUnpaidEmail;
 use App\Mail\ScalevMoveMail;
+use App\Mail\ScalevUnpaidMail;
 use App\Models\Course;
 use App\Models\Enrollment;
 use App\Models\ScalevUnpaidOrder;
 use App\Models\Student;
 use App\Models\User;
+use App\Services\Lms\ScalevUnpaidMailer;
+use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Queue;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 class ScalevImportTest extends TestCase
@@ -206,5 +213,70 @@ class ScalevImportTest extends TestCase
 
         $this->artisan('scalev:announce')->expectsOutputToContain('0 pembeli')->assertSuccessful();
         Mail::assertSent(ScalevMoveMail::class, 2);
+    }
+
+    private function unpaid(string $id, ?string $email, array $over = []): ScalevUnpaidOrder
+    {
+        return ScalevUnpaidOrder::create(array_replace(['order_id' => $id, 'customer_name' => 'Budi Santoso', 'email' => $email, 'course_id' => $this->ac->id, 'amount' => 99000, 'ordered_at' => now()->subDay()], $over));
+    }
+
+    public function test_the_unpaid_follow_up_email_goes_once_to_each_order_with_an_address(): void
+    {
+        Mail::fake();
+        config(['lms.frontend_url' => 'https://academy.example.test']);
+        $this->unpaid('U1', 'budi@example.test');
+        $this->unpaid('U2', null);
+        $this->unpaid('U3', 'lama@example.test', ['ordered_at' => now()->subDays(9)]);
+        $this->unpaid('U4', 'sudah@example.test');
+        $bought = Student::create(['name' => 'Sudah', 'email' => 'sudah@example.test']);
+        $bought->enrollments()->create(['course_id' => $this->ac->id, 'source' => EnrollmentSource::Doku, 'granted_at' => now()]);
+
+        $this->artisan('scalev:email-unpaid --dry-run')
+            ->expectsOutputToContain('1 pesanan belum bayar belum dikirimi email')
+            ->expectsOutputToContain('1 pesanan tidak punya email')
+            ->assertSuccessful();
+        Mail::assertNothingSent();
+
+        $this->artisan('scalev:email-unpaid')->expectsOutputToContain('Terkirim: 1')->assertSuccessful();
+        Mail::assertSent(ScalevUnpaidMail::class, 1);
+        Mail::assertSent(ScalevUnpaidMail::class, function (ScalevUnpaidMail $mail) {
+            $html = $mail->render();
+
+            return $mail->hasTo('budi@example.test')
+                && str_contains($html, 'Halo Budi,')
+                && str_contains($html, 'https://academy.example.test/checkout/?kelas=kelas-online-ac&amp;utm_source=email')
+                && str_contains($html, 'Rp149.000')
+                && str_contains($html, 'Kalau sudah tidak berminat');
+        });
+        $this->assertNotNull(ScalevUnpaidOrder::find('U1')->emailed_at);
+
+        $this->artisan('scalev:email-unpaid')->expectsOutputToContain('0 pesanan')->assertSuccessful();
+        Mail::assertSent(ScalevUnpaidMail::class, 1);
+    }
+
+    public function test_the_admin_queues_the_follow_up_email_for_all_or_for_picked_orders(): void
+    {
+        Filament::setCurrentPanel('admin');
+        Queue::fake();
+        $this->actingAs(User::factory()->create(['role' => UserRole::Manager, 'is_active' => true]));
+        $a = $this->unpaid('U1', 'a@example.test');
+        $b = $this->unpaid('U2', 'b@example.test');
+        $none = $this->unpaid('U3', null);
+
+        Livewire::test(ListScalevUnpaidOrders::class)
+            ->callTableBulkAction('email', [$a, $none])
+            ->assertNotified('1 email masuk antrean');
+        Queue::assertPushed(SendScalevUnpaidEmail::class, 1);
+
+        Livewire::test(ListScalevUnpaidOrders::class)->mountAction('previewEmail')->assertActionMounted('previewEmail')->assertHasNoErrors();
+        Livewire::test(ListScalevUnpaidOrders::class)->callAction('emailAll');
+        Queue::assertPushed(SendScalevUnpaidEmail::class, 3);
+
+        Mail::fake();
+        (new SendScalevUnpaidEmail('U2'))->handle(app(ScalevUnpaidMailer::class));
+        Mail::assertSent(ScalevUnpaidMail::class, fn ($mail) => $mail->hasTo('b@example.test'));
+        // A second job for the same order sends nothing.
+        (new SendScalevUnpaidEmail('U2'))->handle(app(ScalevUnpaidMailer::class));
+        Mail::assertSent(ScalevUnpaidMail::class, 1);
     }
 }

@@ -3,8 +3,10 @@
 namespace App\Filament\Resources\ScalevUnpaidOrders\Tables;
 
 use App\Models\ScalevUnpaidOrder;
+use App\Services\Lms\ScalevUnpaidMailer;
 use App\Support\WhatsAppNumber;
 use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -14,6 +16,7 @@ use Filament\Tables\Enums\RecordActionsPosition;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
 class ScalevUnpaidOrdersTable
 {
@@ -32,7 +35,7 @@ class ScalevUnpaidOrdersTable
 
                 TextColumn::make('product_name')
                     ->label('Produk di Scalev')
-                    ->limit(36)
+                    ->limit(30)
                     ->description(fn (ScalevUnpaidOrder $record) => $record->course ? null : 'tidak cocok dengan kelas mana pun'),
 
                 TextColumn::make('amount')
@@ -46,11 +49,21 @@ class ScalevUnpaidOrdersTable
                     ->since()
                     ->sortable(),
 
-                TextColumn::make('followed_up_at')
+                // WhatsApp on the first line (who sent it), the email underneath.
+                TextColumn::make('follow_up')
                     ->label('Follow up')
-                    ->dateTime('d M H:i')
-                    ->description(fn (ScalevUnpaidOrder $record) => $record->followedUpBy?->name)
-                    ->placeholder('Belum'),
+                    ->state(fn (ScalevUnpaidOrder $record) => $record->followed_up_at
+                        ? 'WA '.$record->followed_up_at->timezone(config('app.display_timezone'))->format('d M H:i')
+                        : 'WA belum')
+                    ->color(fn (ScalevUnpaidOrder $record) => $record->followed_up_at ? null : 'gray')
+                    ->description(fn (ScalevUnpaidOrder $record) => collect([
+                        $record->followedUpBy?->name,
+                        match (true) {
+                            $record->emailed_at !== null => 'email '.$record->emailed_at->timezone(config('app.display_timezone'))->format('d M H:i'),
+                            $record->email === null => 'tanpa email',
+                            default => 'email belum',
+                        },
+                    ])->filter()->implode(', ')),
 
                 TextColumn::make('order_id')
                     ->label('No. Scalev')
@@ -69,7 +82,21 @@ class ScalevUnpaidOrdersTable
                     ),
             ])
             ->recordActionsPosition(RecordActionsPosition::BeforeColumns)
-            ->recordActions([self::followUp()]);
+            ->recordActions([self::followUp()])
+            ->toolbarActions([
+                BulkAction::make('email')
+                    ->label('Kirim email')
+                    ->icon('heroicon-o-envelope')
+                    ->requiresConfirmation()
+                    ->modalHeading('Kirim email follow-up ke pesanan terpilih?')
+                    ->modalDescription('Satu email berisi link checkout baru dengan harga sekarang. Pesanan tanpa email atau yang sudah pernah dikirimi email dilewati.')
+                    ->modalSubmitActionLabel('Kirim')
+                    ->action(function (Collection $records) {
+                        $queued = app(ScalevUnpaidMailer::class)->queue($records);
+                        self::queuedNotice($queued, $records->count());
+                    })
+                    ->deselectRecordsAfterCompletion(),
+            ]);
     }
 
     private static function followUp(): Action
@@ -131,27 +158,38 @@ class ScalevUnpaidOrdersTable
             });
     }
 
+    public static function queuedNotice(int $queued, ?int $picked = null): void
+    {
+        $skipped = $picked !== null ? $picked - $queued : 0;
+
+        Notification::make()
+            ->title($queued > 0 ? "{$queued} email masuk antrean" : 'Tidak ada email yang dikirim')
+            ->body(($queued > 0 ? 'Dikirim bertahap oleh worker, sekitar satu per detik. Kolom Email terisi begitu terkirim.' : 'Semua pesanan terpilih sudah pernah dikirimi email atau tidak punya alamat email.')
+                .($queued > 0 && $skipped > 0 ? " {$skipped} pesanan dilewati karena tanpa email atau sudah pernah dikirimi." : ''))
+            ->status($queued > 0 ? 'success' : 'warning')
+            ->send();
+    }
+
     /**
      * Points to the new checkout at today's price. The utm tags put the
      * replies that end in a sale under WhatsApp in the analytics page.
      */
     public static function message(ScalevUnpaidOrder $order): string
     {
-        $first = strtok(trim($order->customer_name), ' ') ?: $order->customer_name;
-        $utm = 'utm_source=whatsapp&utm_medium=follow-up&utm_campaign=scalev-pending';
-        $base = rtrim((string) config('lms.frontend_url'), '/');
+        $first = $order->firstName();
         $course = $order->course;
+        $link = $order->checkoutUrl('whatsapp');
 
         if ($course === null) {
             return "Halo {$first}, ini dari Pitcar Academy. Kamu sempat memesan ".($order->product_name ?: 'kelas online kami').', tapi pembayarannya belum selesai. '
-                ."Sekarang pemesanan kelas online pindah ke sini, dan materinya langsung terbuka setelah bayar:\n{$base}/kelas-online/?{$utm}\n\n"
+                ."Sekarang pemesanan kelas online pindah ke sini, dan materinya langsung terbuka setelah bayar:\n{$link}\n\n"
                 ."Tagihan yang lama tidak perlu dibayar.\nAda pertanyaan soal kelasnya? Balas pesan ini saja.";
         }
 
         $price = 'Rp'.number_format((int) $course->price, 0, ',', '.');
 
         return "Halo {$first}, ini dari Pitcar Academy. Kamu sempat memesan {$course->title}, tapi pembayarannya belum selesai. "
-            ."Sekarang pemesanannya pindah ke sini, dan materinya langsung terbuka setelah bayar:\n{$base}/checkout/?kelas={$course->slug}&{$utm}\n\n"
+            ."Sekarang pemesanannya pindah ke sini, dan materinya langsung terbuka setelah bayar:\n{$link}\n\n"
             ."Harganya saat ini {$price}. Tagihan yang lama tidak perlu dibayar.\nAda pertanyaan soal kelasnya? Balas pesan ini saja.";
     }
 }
