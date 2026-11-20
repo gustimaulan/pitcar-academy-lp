@@ -7,6 +7,7 @@ use App\Enums\OrderStatus;
 use App\Enums\UserRole;
 use App\Filament\Analytics\AnalyticsStats;
 use App\Filament\Analytics\CampaignsTable;
+use App\Filament\Analytics\LiveVisitors;
 use App\Filament\Analytics\PagesTable;
 use App\Filament\Analytics\SourcesTable;
 use App\Filament\Pages\MetaAdsSettings;
@@ -104,6 +105,42 @@ class AnalyticsTest extends TestCase
 
         $send(99999);
         $this->assertSame(PageVisit::MAX_SECONDS, PageVisit::find($id)->duration_seconds);
+    }
+
+    public function test_the_heartbeat_marks_a_page_open_and_hiding_it_closes_it(): void
+    {
+        $id = $this->visit();
+        $beat = fn (array $body) => $this->call('POST', "/api/visits/{$id}/time", [], [], [], ['CONTENT_TYPE' => 'text/plain'], json_encode($body))->assertNoContent();
+
+        $this->travel(90)->seconds();
+        $beat(['seconds' => 60, 'active' => true]);
+        $this->assertTrue(PageVisit::find($id)->last_seen_at->gt(now()->subSeconds(5)));
+
+        $beat(['seconds' => 75, 'active' => false]);
+        $visit = PageVisit::find($id);
+        $this->assertNull($visit->last_seen_at);
+        $this->assertSame(75, $visit->duration_seconds);
+    }
+
+    public function test_on_the_site_now_counts_open_pages_only(): void
+    {
+        Filament::setCurrentPanel('admin');
+        $this->actingAs(User::factory()->create(['role' => UserRole::Manager, 'is_active' => true]));
+        $make = fn (string $visitor, string $path, $seen) => PageVisit::create([
+            'id' => (string) Str::uuid(), 'visitor_id' => $visitor, 'visit_date' => now('Asia/Jakarta')->toDateString(),
+            'path' => $path, 'source' => 'direct', 'device' => 'mobile', 'started_at' => now(), 'last_seen_at' => $seen,
+        ]);
+        $budi = (string) Str::uuid();
+        $make($budi, '/kelas-online-ac/', now()->subSeconds(30));
+        $make($budi, '/checkout/', now()->subSeconds(10)); // two tabs, one person
+        $make((string) Str::uuid(), '/kelas-online-ac/', now()->subSeconds(50));
+        $make((string) Str::uuid(), '/', now()->subMinutes(10)); // went quiet
+        $make((string) Str::uuid(), '/', null); // hid the page
+
+        Livewire::test(LiveVisitors::class)
+            ->assertSee('Sedang di web')
+            ->assertSee('2 di Kelas AC mobil, 1 di Checkout')
+            ->assertSee('5 halaman dibuka');
     }
 
     private function seedPeriod(): void

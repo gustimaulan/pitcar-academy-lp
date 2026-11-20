@@ -42,6 +42,7 @@ class VisitController extends Controller
                 'utm_campaign' => filled($entry['utm_campaign'] ?? null) ? substr((string) $entry['utm_campaign'], 0, 191) : null,
                 'device' => preg_match('/Mobi|Android|iPhone|iPad/i', (string) $request->userAgent()) ? 'mobile' : 'desktop',
                 'started_at' => now(),
+                'last_seen_at' => now(),
             ]);
         } catch (Throwable $e) {
             report($e);
@@ -50,16 +51,21 @@ class VisitController extends Controller
         return response()->noContent();
     }
 
-    /** Sent each time the page is hidden; the latest total wins, never less than before. */
+    /**
+     * A heartbeat every minute while the page is on screen ("active": true),
+     * and once more when it is hidden ("active": false). Time on page only
+     * grows; "on the site now" follows the latest beat.
+     */
     public function time(Request $request, string $id): Response
     {
         try {
-            $seconds = (int) ($request->json('seconds') ?? 0);
+            $visit = Str::isUuid($id) ? PageVisit::find($id) : null;
 
-            if (Str::isUuid($id) && $seconds > 0) {
-                PageVisit::whereKey($id)
-                    ->where('duration_seconds', '<', min($seconds, PageVisit::MAX_SECONDS))
-                    ->update(['duration_seconds' => min($seconds, PageVisit::MAX_SECONDS)]);
+            if ($visit !== null) {
+                $seconds = min(max(0, (int) ($request->json('seconds') ?? 0)), PageVisit::MAX_SECONDS);
+                $visit->duration_seconds = max($visit->duration_seconds, $seconds);
+                $visit->last_seen_at = $request->json('active') === false ? null : now();
+                $visit->save();
             }
         } catch (Throwable $e) {
             report($e);

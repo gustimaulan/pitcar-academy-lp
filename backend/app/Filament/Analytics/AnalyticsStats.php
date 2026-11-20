@@ -10,6 +10,9 @@ class AnalyticsStats extends StatsOverviewWidget
 {
     use ReadsReport;
 
+    // Sums over the whole range; once a minute is fresh enough and spares the database.
+    protected ?string $pollingInterval = '60s';
+
     protected static ?int $sort = 1;
 
     protected int|string|array $columnSpan = 'full';
