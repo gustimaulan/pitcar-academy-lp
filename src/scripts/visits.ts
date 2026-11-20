@@ -60,25 +60,39 @@ if (base && !skip) {
   // Only time on screen counts: a tab in the background is not reading.
   let shownAt: number | null = document.visibilityState === 'visible' ? performance.now() : null;
   let total = 0;
+  const url = `${base}/api/visits/${id}/time`;
+  const seconds = () => Math.round((total + (shownAt === null ? 0 : performance.now() - shownAt)) / 1000);
 
-  const report = () => {
-    if (shownAt !== null) {
-      total += performance.now() - shownAt;
-      shownAt = null;
-    }
-    const seconds = Math.round(total / 1000);
-    if (seconds < 1) return;
-    const body = JSON.stringify({ seconds });
-    const url = `${base}/api/visits/${id}/time`;
-    // A plain-text beacon needs no CORS preflight, so it still leaves while the page closes.
+  // A plain-text beacon needs no CORS preflight, so it still leaves while the page closes.
+  const send = (active: boolean) => {
+    const body = JSON.stringify({ seconds: seconds(), active });
     if (!navigator.sendBeacon?.(url, new Blob([body], { type: 'text/plain' }))) {
       fetch(url, { method: 'POST', body, keepalive: true }).catch(() => {});
     }
   };
 
+  // While the page is on screen it says so every minute; the admin counts it as on the site now.
+  let beat: number | undefined;
+  const startBeat = () => {
+    window.clearInterval(beat);
+    beat = window.setInterval(() => send(true), 60_000);
+  };
+
+  const hidden = () => {
+    window.clearInterval(beat);
+    if (shownAt !== null) {
+      total += performance.now() - shownAt;
+      shownAt = null;
+    }
+    send(false);
+  };
+
+  if (shownAt !== null) startBeat();
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') report();
-    else shownAt = performance.now();
+    if (document.visibilityState === 'hidden') return hidden();
+    shownAt = performance.now();
+    send(true);
+    startBeat();
   });
-  window.addEventListener('pagehide', report);
+  window.addEventListener('pagehide', hidden);
 }

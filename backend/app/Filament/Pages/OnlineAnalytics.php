@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use App\Filament\Analytics\AdSpendChart;
 use App\Filament\Analytics\AnalyticsStats;
 use App\Filament\Analytics\CampaignsTable;
+use App\Filament\Analytics\LiveVisitors;
 use App\Filament\Analytics\PagesTable;
 use App\Filament\Analytics\SourcesTable;
 use App\Filament\Analytics\VisitorsSalesChart;
@@ -84,6 +85,7 @@ class OnlineAnalytics extends Dashboard
     public function getWidgets(): array
     {
         return [
+            LiveVisitors::class,
             AnalyticsStats::class,
             VisitorsSalesChart::class,
             AdSpendChart::class,
