@@ -17,11 +17,11 @@ class ScalevUnpaidOrder extends Model
 
     public $incrementing = false;
 
-    protected $fillable = ['order_id', 'customer_name', 'email', 'whatsapp', 'product_name', 'course_id', 'amount', 'ordered_at', 'followed_up_at', 'followed_up_by'];
+    protected $fillable = ['order_id', 'customer_name', 'email', 'whatsapp', 'product_name', 'course_id', 'amount', 'ordered_at', 'followed_up_at', 'followed_up_by', 'emailed_at'];
 
     protected function casts(): array
     {
-        return ['amount' => 'integer', 'ordered_at' => 'datetime', 'followed_up_at' => 'datetime'];
+        return ['amount' => 'integer', 'ordered_at' => 'datetime', 'followed_up_at' => 'datetime', 'emailed_at' => 'datetime'];
     }
 
     public function course(): BelongsTo
@@ -48,5 +48,31 @@ class ScalevUnpaidOrder extends Model
                 ->whereColumn('students.email', 'scalev_unpaid_orders.email')
                 ->whereColumn('enrollments.course_id', 'scalev_unpaid_orders.course_id')
                 ->whereNull('enrollments.revoked_at'));
+    }
+
+    /** On the follow-up list, has an address, and has not been emailed yet. */
+    public function scopeToEmail(Builder $query): Builder
+    {
+        return $query->toFollowUp()->whereNotNull('email')->whereNull('emailed_at');
+    }
+
+    /**
+     * The new checkout for this order's class, or the catalog when the
+     * product matched no class. The utm tags name the channel, so sales
+     * from each follow-up show apart in the analytics page.
+     */
+    public function checkoutUrl(string $channel): string
+    {
+        $base = rtrim((string) config('lms.frontend_url'), '/');
+        $utm = 'utm_source='.$channel.'&utm_medium=follow-up&utm_campaign=scalev-pending';
+
+        return $this->course
+            ? "{$base}/checkout/?kelas={$this->course->slug}&{$utm}"
+            : "{$base}/kelas-online/?{$utm}";
+    }
+
+    public function firstName(): string
+    {
+        return strtok(trim($this->customer_name), ' ') ?: $this->customer_name;
     }
 }
