@@ -410,7 +410,8 @@ const helpHref = `https://wa.me/${contact.whatsappNumber}?text=${encodeURICompon
     width: 2.25rem;
     height: auto;
     color: #cc0000;
-    animation: co-bump-nudge 0.9s ease-in-out infinite;
+    /* Four nudges (3.6s) to catch the eye, then still: no endless loop. */
+    animation: co-bump-nudge 0.9s ease-in-out 4;
   }
   .co-upsell:has(:checked) .co-bump-arrow {
     display: none;
