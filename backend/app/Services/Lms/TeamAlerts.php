@@ -3,8 +3,10 @@
 namespace App\Services\Lms;
 
 use App\Enums\UserRole;
+use App\Filament\Resources\Discussions\DiscussionResource;
 use App\Filament\Resources\Orders\OrderResource;
 use App\Filament\Resources\StudentRequests\StudentRequestResource;
+use App\Models\DiscussionPost;
 use App\Models\Order;
 use App\Models\StudentRequest;
 use App\Models\User;
@@ -13,9 +15,9 @@ use Filament\Notifications\Notification;
 use Throwable;
 
 /**
- * The bell in the admin: new orders, payments and student messages, for the
- * managers and admins who follow them up. Never throws: a missed alert must
- * not undo an order or a payment.
+ * The bell in the admin: new orders, payments, student messages, discussion
+ * questions and reported posts, for the managers and admins who follow them
+ * up. Never throws: a missed alert must not undo an order or a payment.
  */
 class TeamAlerts
 {
@@ -47,6 +49,28 @@ class TeamAlerts
             ->icon('heroicon-o-inbox-arrow-down')
             ->iconColor('info')
             ->actions([$this->open('Tanggapi', StudentRequestResource::getUrl('index', panel: 'admin'))]));
+    }
+
+    public function newThread(DiscussionPost $post): void
+    {
+        $this->send(fn () => Notification::make()
+            ->title('Pertanyaan baru di diskusi')
+            ->body($post->student->name.' di '.$post->course->title.': '.str($post->body)->limit(120))
+            ->icon('heroicon-o-chat-bubble-left-right')
+            ->iconColor('info')
+            ->actions([$this->open('Buka diskusi', DiscussionResource::getUrl('view', ['record' => $post], panel: 'admin'))]));
+    }
+
+    public function reported(DiscussionPost $post): void
+    {
+        $thread = $post->isThread() ? $post : $post->thread;
+
+        $this->send(fn () => Notification::make()
+            ->title('Pesan dilaporkan siswa')
+            ->body('Pesan '.$post->authorName().' di '.$post->course->title.': '.str($post->body)->limit(120))
+            ->icon('heroicon-o-flag')
+            ->iconColor('danger')
+            ->actions([$this->open('Periksa', DiscussionResource::getUrl('view', ['record' => $thread], panel: 'admin'))]));
     }
 
     /** @param callable(): Notification $make */
