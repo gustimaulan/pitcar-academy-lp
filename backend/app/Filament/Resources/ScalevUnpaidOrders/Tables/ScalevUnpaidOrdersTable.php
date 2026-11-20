@@ -64,8 +64,8 @@ class ScalevUnpaidOrdersTable
                     ->trueLabel('Sudah')
                     ->falseLabel('Belum')
                     ->queries(
-                        true: fn (Builder $q) => $q->whereNotNull('followed_up_at'),
-                        false: fn (Builder $q) => $q->whereNull('followed_up_at'),
+                        true: fn (Builder $query) => $query->whereNotNull('followed_up_at'),
+                        false: fn (Builder $query) => $query->whereNull('followed_up_at'),
                     ),
             ])
             ->recordActionsPosition(RecordActionsPosition::BeforeColumns)

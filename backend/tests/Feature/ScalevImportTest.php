@@ -3,9 +3,10 @@
 namespace Tests\Feature;
 
 use App\Enums\CourseStatus;
-use App\Enums\UserRole;
 use App\Enums\EnrollmentSource;
+use App\Enums\UserRole;
 use App\Filament\Resources\ScalevUnpaidOrders\Tables\ScalevUnpaidOrdersTable;
+use App\Mail\ScalevMoveMail;
 use App\Models\Course;
 use App\Models\Enrollment;
 use App\Models\ScalevUnpaidOrder;
@@ -182,5 +183,28 @@ class ScalevImportTest extends TestCase
 
         $this->actingAs(User::factory()->create(['role' => UserRole::Manager, 'is_active' => true]));
         $this->get('/admin/pesanan-scalev')->assertOk()->assertSee('Belum bayar di Scalev')->assertSee('Budi Santoso');
+    }
+
+    public function test_the_announcement_emails_each_moved_buyer_once(): void
+    {
+        Mail::fake();
+        $this->fake([[$this->order('A1'), $this->order('A2', ['customer' => ['name' => 'Sari', 'email' => 'sari@example.test']])]]);
+        $this->artisan('scalev:import')->assertSuccessful();
+        // A buyer from the new checkout is not part of the move.
+        $doku = Student::create(['name' => 'Baru', 'email' => 'baru@example.test']);
+        $doku->enrollments()->create(['course_id' => $this->ac->id, 'source' => EnrollmentSource::Doku, 'granted_at' => now()]);
+
+        $this->artisan('scalev:announce --dry-run')->expectsOutputToContain('2 pembeli')->assertSuccessful();
+        Mail::assertNothingSent();
+
+        $this->artisan('scalev:announce')->expectsOutputToContain('Terkirim: 2')->assertSuccessful();
+        Mail::assertSent(ScalevMoveMail::class, 2);
+        Mail::assertSent(ScalevMoveMail::class, fn (ScalevMoveMail $mail) => $mail->hasTo('budi@example.test')
+            && $mail->titles === ['Kelas Inspeksi Mobil Bekas']
+            && str_contains($mail->url, '/belajar/masuk/?token='));
+        $this->assertNotNull(Student::where('email', 'budi@example.test')->value('scalev_announced_at'));
+
+        $this->artisan('scalev:announce')->expectsOutputToContain('0 pembeli')->assertSuccessful();
+        Mail::assertSent(ScalevMoveMail::class, 2);
     }
 }

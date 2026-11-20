@@ -88,6 +88,23 @@ return [
     |
     */
 
+    /*
+    |--------------------------------------------------------------------------
+    | AI Pitcar Academy (Claude API)
+    |--------------------------------------------------------------------------
+    |
+    | Without a key the AI panels say the assistant is not switched on yet.
+    | The daily limit counts a student's questions per Jakarta day.
+    |
+    */
+
+    'anthropic' => [
+        'key' => env('ANTHROPIC_API_KEY'),
+        'base_url' => env('ANTHROPIC_BASE_URL'),
+        'model' => env('AI_MODEL', 'claude-opus-5-5'),
+        'student_daily_limit' => (int) env('AI_STUDENT_DAILY_LIMIT', 20),
+    ],
+
     'postmark' => [
         'key' => env('POSTMARK_API_KEY'),
     ],

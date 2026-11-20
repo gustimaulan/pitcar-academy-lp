@@ -1,5 +1,6 @@
 ---
 import LearnShell from '../../components/learn/LearnShell.astro';
+import ClassTalk from '../../components/learn/ClassTalk.astro';
 ---
 
 <LearnShell title="Kelas">
@@ -56,7 +57,7 @@ import LearnShell from '../../components/learn/LearnShell.astro';
         </div>
       </div>
 
-      <aside class="min-w-0 lg:col-span-4" aria-label="Isi kelas">
+      <aside class="min-w-0 lg:col-span-4 lg:row-span-2" aria-label="Isi kelas">
         <p class="text-sm text-muted" data-course-name></p>
         <div class="mt-2 flex items-baseline gap-3">
           <strong class="g-num text-6xl" data-course-percent></strong>
@@ -105,6 +106,11 @@ import LearnShell from '../../components/learn/LearnShell.astro';
           <p class="mt-6 text-sm text-muted">Ada usul materi atau kendala? <a href="/belajar/masukan/" data-request-link>Kirim pesan ke tim kami</a>.</p>
         </section>
       </aside>
+
+      <!-- After the class list on a phone; under the video on a wide screen. -->
+      <div class="min-w-0 lg:col-span-8">
+        <ClassTalk />
+      </div>
     </div>
   </div>
 
@@ -166,6 +172,7 @@ import LearnShell from '../../components/learn/LearnShell.astro';
 
 <script>
   import { api, ApiError, fetchFile, requireSession, saveFile } from '../../scripts/learn/api';
+  import { mountTalk } from '../../scripts/learn/talk';
 
   type FileRow = { id: number; name: string; mime: string | null; size: number | null };
   type Lesson = { id: number; title: string; summary: string | null; video: string | null; provider: 'youtube' | 'drive' | null; duration: number | null; percent: number; position: number; done: boolean; files: FileRow[] };
@@ -186,6 +193,7 @@ import LearnShell from '../../components/learn/LearnShell.astro';
   let watched = new Set<number>();
   let baseSeconds = 0;
   let lastSent = -1;
+  let talk: ReturnType<typeof mountTalk> | null = null;
 
   const setBar = (el: HTMLElement, percent: number) => {
     el.setAttribute('aria-valuenow', String(percent));
@@ -460,6 +468,7 @@ import LearnShell from '../../components/learn/LearnShell.astro';
     next.disabled = i === lessons.length - 1;
     next.textContent = i === lessons.length - 1 ? 'Ini video terakhir' : `Lanjut ke video ${i + 2}`;
     fileList($('[data-lesson-files]'), lesson.files);
+    talk?.setLesson({ id: lesson.id, title: lesson.title });
     renderLessonProgress();
     renderCourse();
     mount(lesson);
@@ -490,6 +499,7 @@ import LearnShell from '../../components/learn/LearnShell.astro';
     fileList($('[data-course-files]'), course.files);
     renderReview();
     show('ready');
+    talk ??= mountTalk(document.querySelector<HTMLElement>('[data-talk]')!, slug);
     const asked = Number(params.get('v'));
     open(lessons.find((l) => l.id === asked) ?? lessons.find((l) => !l.done) ?? lessons[0]);
   }

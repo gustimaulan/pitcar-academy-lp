@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\Api\CheckoutController;
+use App\Http\Controllers\Api\DiscussionController;
 use App\Http\Controllers\Api\DokuNotificationController;
 use App\Http\Controllers\Api\LeadController;
+use App\Http\Controllers\Api\LearnAiController;
 use App\Http\Controllers\Api\LearnController;
 use App\Http\Controllers\Api\LearnFeedbackController;
 use App\Http\Controllers\Api\PurchaseFeedController;
@@ -59,6 +61,19 @@ Route::prefix('learn')->group(function () {
         Route::post('/courses/{slug}/review', [LearnFeedbackController::class, 'saveReview'])->middleware('throttle:10,1');
         Route::get('/requests', [LearnFeedbackController::class, 'requests']);
         Route::post('/requests', [LearnFeedbackController::class, 'storeRequest'])->middleware('throttle:5,1');
+
+        // Class discussions.
+        Route::get('/courses/{slug}/discussions', [DiscussionController::class, 'index']);
+        Route::post('/courses/{slug}/discussions', [DiscussionController::class, 'store'])->middleware('throttle:6,1');
+        Route::get('/discussions/{post}', [DiscussionController::class, 'show']);
+        Route::post('/discussions/{post}/replies', [DiscussionController::class, 'reply'])->middleware('throttle:12,1');
+        Route::post('/discussions/{post}/delete', [DiscussionController::class, 'destroy'])->middleware('throttle:20,1');
+        Route::post('/discussions/{post}/report', [DiscussionController::class, 'report'])->middleware('throttle:10,1');
+
+        // AI Pitcar Academy.
+        Route::get('/courses/{slug}/ai', [LearnAiController::class, 'show']);
+        Route::post('/courses/{slug}/ai', [LearnAiController::class, 'ask'])->middleware('throttle:10,1');
+        Route::post('/courses/{slug}/ai/new', [LearnAiController::class, 'reset'])->middleware('throttle:10,1');
     });
 });
 
