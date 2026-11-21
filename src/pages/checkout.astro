@@ -667,7 +667,7 @@ const helpHref = `https://wa.me/${contact.whatsappNumber}?text=${encodeURICompon
     if (!course) return;
     const q = quote(course, offers, selected().map((o) => o.slug));
     const { saving, total } = q;
-    const lines = q.lines.map((l, i) => ({ ...l, note: i === 0 ? '' : 'Tambahan bundling' }));
+    const lines = q.lines.map((l, i) => ({ ...l, note: i === 0 ? '' : 'Add-on' }));
 
     const template = document.querySelector<HTMLTemplateElement>('#co-sum-item')!;
     $('[data-sum-items]').replaceChildren(
@@ -685,7 +685,8 @@ const helpHref = `https://wa.me/${contact.whatsappNumber}?text=${encodeURICompon
       }),
     );
 
-    $('[data-sum-normal]').innerHTML = `<span class="sr-only">Sebelumnya </span>${rupiah(q.normal)}`;
+    // Its <dt> already says "Harga normal".
+    $('[data-sum-normal]').textContent = rupiah(q.normal);
     $('[data-sum-save]').textContent = rupiah(saving);
     $('[data-sum-normal-row]').hidden = saving <= 0;
     $('[data-sum-save-row]').hidden = saving <= 0;
@@ -759,6 +760,7 @@ const helpHref = `https://wa.me/${contact.whatsappNumber}?text=${encodeURICompon
 
   /** Price and add-ons come from the LMS; the printed price stands in until it answers, or if it cannot. */
   async function loadCourse(slug: string) {
+    lastSaving = -1; // another class's saving must not flash as this one's
     const panel = root.querySelector<HTMLElement>(`[data-course="${CSS.escape(slug)}"]`);
     if (!panel) return;
     course = { slug, title: panel.dataset.title ?? '', tracking_id: panel.dataset.trackingId ?? slug, price: Number(panel.dataset.amount) || 0, strike_price: Number(panel.dataset.strikeAmount) || null };
