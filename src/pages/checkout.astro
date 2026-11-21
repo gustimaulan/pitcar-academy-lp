@@ -711,7 +711,8 @@ const helpHref = `https://wa.me/${contact.whatsappNumber}?text=${encodeURICompon
   function renderOffers() {
     const template = document.querySelector<HTMLTemplateElement>('#co-upsell')!;
     upsell.querySelectorAll('.co-upsell').forEach((el) => el.remove());
-    const priced = new Map(course ? quote(course, offers, []).addons.map((a) => [a.slug, a]) : []);
+    if (!course) return;
+    const priced = new Map(quote(course, offers, []).addons.map((a) => [a.slug, a]));
     for (const offer of offers) {
       const card = template.content.firstElementChild!.cloneNode(true) as HTMLElement;
       const box = card.querySelector<HTMLInputElement>('input')!;
@@ -720,8 +721,8 @@ const helpHref = `https://wa.me/${contact.whatsappNumber}?text=${encodeURICompon
       box.value = offer.slug;
       const fill = (sel: string, text: string) => (card.querySelector<HTMLElement>(sel)!.textContent = text);
       // Struck at its harga normal, as its own sales page shows it; "beli terpisah" is what it costs alone.
-      const { normal, saving } = priced.get(offer.slug) ?? { normal: offer.offer_price, saving: 0 };
-      const alone = offer.price > offer.offer_price ? ` Beli terpisah nanti, harganya ${rupiah(offer.price)}.` : '';
+      const { normal, saving, alone: own, price } = priced.get(offer.slug)!;
+      const alone = own > price ? ` Beli terpisah nanti, harganya ${rupiah(own)}.` : '';
       fill('[data-u-title]', offer.title);
       fill('[data-u-headline]', offer.headline ?? '');
       fill('[data-u-price]', ribu(offer.offer_price));
@@ -767,7 +768,11 @@ const helpHref = `https://wa.me/${contact.whatsappNumber}?text=${encodeURICompon
         const data: { course: CoursePrice; offers: Offer[] } = await res.json();
         // A missing or lower strike price keeps the one printed on the page, as the sales pages do.
         course = { ...data.course, strike_price: strike(data.course.price, data.course.strike_price, course.strike_price ?? 0) };
-        offers = data.offers ?? [];
+        // An add-on falls back to the strike price its own panel prints, like the class does.
+        offers = (data.offers ?? []).map((o) => {
+          const printed = Number(root.querySelector<HTMLElement>(`[data-course="${CSS.escape(o.slug)}"]`)?.dataset.strikeAmount) || 0;
+          return { ...o, strike_price: strike(o.price, o.strike_price, printed) };
+        });
         panel.querySelector<HTMLElement>('[data-price]')!.textContent = rupiah(course.price);
         panel.querySelector<HTMLElement>('[data-strike]')!.textContent = course.strike_price ? rupiah(course.strike_price) : '';
         renderOffers();
