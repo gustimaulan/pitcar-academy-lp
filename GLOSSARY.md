@@ -13,19 +13,18 @@ A higher price shown struck through next to the harga jual. It counts only when 
 _Avoid_: strike price, harga asli
 
 **Harga normal**:
-The price a line is measured against: its harga coret when it has one, otherwise its harga jual. The same rule holds for the class being bought and for every add-on.
-_Avoid_: harga sebelumnya
+The price a line is measured against: its harga coret when it has one, otherwise its harga jual. The same rule holds for the class being bought and for every tambahan bundling.
 
 **Hemat**:
 Harga normal minus what is charged. Never negative.
 _Avoid_: diskon, potongan, savings
 
-**Add-on**:
+**Tambahan bundling**:
 Another class offered under the order bump at checkout, for less than its harga jual and only in that checkout.
-_Avoid_: bundling, upsell, tawaran
+_Avoid_: add-on, upsell
 
 **Harga tawaran**:
-What an add-on costs when ticked at checkout.
+What a tambahan bundling costs when ticked at checkout.
 _Avoid_: offer price, harga bundling
 
 **Rincian harga**:

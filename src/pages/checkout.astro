@@ -667,7 +667,7 @@ const helpHref = `https://wa.me/${contact.whatsappNumber}?text=${encodeURICompon
     if (!course) return;
     const q = quote(course, offers, selected().map((o) => o.slug));
     const { saving, total } = q;
-    const lines = q.lines.map((l, i) => ({ ...l, note: i === 0 ? '' : 'Add-on' }));
+    const lines = q.lines.map((l, i) => ({ ...l, note: i === 0 ? '' : 'Tambahan bundling' }));
 
     const template = document.querySelector<HTMLTemplateElement>('#co-sum-item')!;
     $('[data-sum-items]').replaceChildren(
@@ -685,8 +685,7 @@ const helpHref = `https://wa.me/${contact.whatsappNumber}?text=${encodeURICompon
       }),
     );
 
-    // Its <dt> already says "Harga normal".
-    $('[data-sum-normal]').textContent = rupiah(q.normal);
+    $('[data-sum-normal]').innerHTML = `<span class="sr-only">Sebelumnya </span>${rupiah(q.normal)}`;
     $('[data-sum-save]').textContent = rupiah(saving);
     $('[data-sum-normal-row]').hidden = saving <= 0;
     $('[data-sum-save-row]').hidden = saving <= 0;
