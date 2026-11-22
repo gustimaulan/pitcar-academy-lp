@@ -134,7 +134,7 @@ DB_PASSWORD=<password kuat>
 # Hanya origin yang benar-benar memanggil API. Tanpa localhost di produksi.
 LEAD_ALLOWED_ORIGINS=https://academy.pitcar.co.id
 
-LEAD_FALLBACK_CONSULTANT_WHATSAPP=6285742228865
+LEAD_FALLBACK_CONSULTANT_WHATSAPP=6285190950381
 LEAD_SCORING_VERSION=2026-03
 LEAD_RATE_LIMIT_PER_IP=10
 LEAD_RATE_LIMIT_PER_WHATSAPP=3
@@ -310,7 +310,7 @@ Landing page dibangun oleh GitHub Actions, jadi nilainya masuk sebagai
 
 ```dotenv
 PUBLIC_LEAD_API_BASE_URL=https://api-academy.pitcar.co.id
-PUBLIC_EDUCATION_CONSULTANT_WHATSAPP=6285742228865
+PUBLIC_EDUCATION_CONSULTANT_WHATSAPP=6285190950381
 PUBLIC_GA_ID=G-FNT01JRZN7
 SITE_URL=https://academy.pitcar.co.id
 ```
