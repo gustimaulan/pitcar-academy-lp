@@ -2,7 +2,6 @@
 
 namespace App\Filament\Analytics;
 
-use Carbon\CarbonImmutable;
 use Filament\Widgets\ChartWidget;
 
 class VisitorsSalesChart extends ChartWidget
@@ -12,17 +11,21 @@ class VisitorsSalesChart extends ChartWidget
     // Sums over the whole range; once a minute is fresh enough and spares the database.
     protected ?string $pollingInterval = '60s';
 
-    protected static ?int $sort = 2;
+    protected static ?int $sort = 3;
 
     protected int|string|array $columnSpan = 'full';
 
-    protected ?string $heading = 'Pengunjung dan penjualan per hari';
-
     protected ?string $maxHeight = '320px';
+
+    public function getHeading(): string
+    {
+        return 'Pengunjung dan penjualan '.$this->perUnit();
+    }
 
     protected function getData(): array
     {
-        $days = $this->report()->daily();
+        $report = $this->report();
+        $days = $report->series();
 
         return [
             'datasets' => [
@@ -47,7 +50,7 @@ class VisitorsSalesChart extends ChartWidget
                     'order' => 2,
                 ],
             ],
-            'labels' => array_map(fn ($d) => CarbonImmutable::parse($d)->locale('id')->translatedFormat('d M'), array_keys($days)),
+            'labels' => array_map($report->label(...), array_keys($days)),
         ];
     }
 

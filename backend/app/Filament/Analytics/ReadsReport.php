@@ -12,17 +12,32 @@ trait ReadsReport
 
     private ?OnlineReport $report = null;
 
+    private ?string $reportKey = null;
+
     protected function report(): OnlineReport
     {
-        $range = $this->pageFilters['range'] ?? '30';
+        $filters = [
+            'range' => $this->pageFilters['range'] ?? '30',
+            'from' => $this->pageFilters['from'] ?? null,
+            'until' => $this->pageFilters['until'] ?? null,
+        ];
+        $key = implode('|', $filters);
 
-        if ($this->report === null || $this->reportRange !== $range) {
-            $this->report = OnlineReport::forPreset($range);
-            $this->reportRange = $range;
+        if ($this->report === null || $this->reportKey !== $key) {
+            $this->report = OnlineReport::forFilters($filters);
+            $this->reportKey = $key;
         }
 
         return $this->report;
     }
 
-    private ?string $reportRange = null;
+    /** "per hari", "per minggu" or "per bulan", matching how the charts group the range. */
+    protected function perUnit(): string
+    {
+        return match ($this->report()->unit()) {
+            'week' => 'per minggu',
+            'month' => 'per bulan',
+            default => 'per hari',
+        };
+    }
 }

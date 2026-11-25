@@ -10,7 +10,9 @@ use App\Models\ScalevPurchase;
 use App\Support\TrafficSource;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonPeriod;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Figures for the online-class analytics page over a range of days in the
@@ -32,7 +34,27 @@ class OnlineReport
         $this->to = $to->setTimezone($tz)->endOfDay();
     }
 
-    /** "7", "30", "90", "this_month" or "last_month", relative to today. */
+    /**
+     * The analytics page filter: a preset, "all" for everything on record, or
+     * "custom" with from and until as Y-m-d dates.
+     */
+    public static function forFilters(?array $filters): self
+    {
+        $filters ??= [];
+        $range = $filters['range'] ?? '30';
+
+        if ($range !== 'custom') {
+            return self::forPreset($range);
+        }
+
+        $today = CarbonImmutable::now(config('app.display_timezone'));
+        $until = self::parseDate($filters['until'] ?? null) ?? $today;
+        $from = self::parseDate($filters['from'] ?? null) ?? $until->subDays(29);
+
+        return new self($from->min($until), $from->max($until));
+    }
+
+    /** "7", "30", "90", "this_month", "last_month" or "all", relative to today. */
     public static function forPreset(?string $preset): self
     {
         $today = CarbonImmutable::now(config('app.display_timezone'));
@@ -42,8 +64,37 @@ class OnlineReport
             '90' => new self($today->subDays(89), $today),
             'this_month' => new self($today->startOfMonth(), $today),
             'last_month' => new self($today->subMonthNoOverflow()->startOfMonth(), $today->subMonthNoOverflow()->endOfMonth()),
+            'all' => new self(self::firstRecord() ?? $today, $today),
             default => new self($today->subDays(29), $today),
         };
+    }
+
+    /** The day of the oldest visit, sale or ad spend, in the display timezone. */
+    private static function firstRecord(): ?CarbonImmutable
+    {
+        $tz = config('app.display_timezone');
+
+        return collect([
+            Order::query()->where('status', OrderStatus::Paid)->min('paid_at'),
+            ScalevPurchase::query()->min('purchased_at'),
+        ])
+            ->filter()
+            // Timestamps are stored in UTC; the day they fall on is a Jakarta day.
+            ->map(fn ($at) => CarbonImmutable::parse($at, 'UTC')->setTimezone($tz))
+            ->concat(collect([
+                PageVisit::query()->min('visit_date'),
+                AdSpendDaily::query()->min('date'),
+            ])->filter()->map(fn ($day) => CarbonImmutable::parse($day, $tz)))
+            ->min();
+    }
+
+    private static function parseDate(mixed $value): ?CarbonImmutable
+    {
+        if (! is_string($value) || ! preg_match('/^\d{4}-\d{2}-\d{2}/', $value)) {
+            return null;
+        }
+
+        return CarbonImmutable::createFromFormat('Y-m-d', substr($value, 0, 10), config('app.display_timezone')) ?: null;
     }
 
     public function summary(): array
@@ -75,35 +126,111 @@ class OnlineReport
     /** @return array<string, array{visitors: int, sales: int, revenue: int, spend: float}> keyed by Y-m-d */
     public function daily(): array
     {
-        $days = collect(CarbonPeriod::create($this->from->toDateString(), $this->to->toDateString()))
-            ->mapWithKeys(fn ($d) => [$d->toDateString() => ['visitors' => 0, 'sales' => 0, 'revenue' => 0, 'spend' => 0.0]])
-            ->all();
+        return array_map(fn (array $b) => Arr::only($b, ['visitors', 'sales', 'revenue', 'spend']), $this->buckets('day'));
+    }
 
-        $this->visits()->selectRaw('visit_date, count(distinct visitor_id) as n')->groupBy('visit_date')->get()
-            ->each(function ($row) use (&$days) {
-                $key = CarbonImmutable::parse($row->visit_date)->toDateString();
-                if (isset($days[$key])) {
-                    $days[$key]['visitors'] = (int) $row->n;
+    /**
+     * How the charts group this range so they stay readable: days up to about
+     * three months, weeks (from Monday) up to a year, months beyond that.
+     */
+    public function unit(): string
+    {
+        $days = (int) $this->from->diffInDays($this->to) + 1;
+
+        return match (true) {
+            $days <= 93 => 'day',
+            $days <= 371 => 'week',
+            default => 'month',
+        };
+    }
+
+    /**
+     * Totals per day, week or month (see unit()), keyed by the first day of
+     * each period as Y-m-d. Visitors are counted once per period.
+     *
+     * @return array<string, array{visitors: int, sales: int, revenue: int, revenue_doku: int, revenue_scalev: int, spend: float}>
+     */
+    public function series(): array
+    {
+        return $this->buckets($this->unit());
+    }
+
+    /** A chart label for a series() key. */
+    public function label(string $key): string
+    {
+        $day = CarbonImmutable::parse($key)->locale('id');
+        $acrossYears = $this->from->year !== $this->to->year;
+
+        return match ($this->unit()) {
+            'month' => $day->translatedFormat('M Y'),
+            default => $day->translatedFormat($acrossYears ? 'd M y' : 'd M'),
+        };
+    }
+
+    private function buckets(string $unit): array
+    {
+        $key = fn (CarbonImmutable $day) => match ($unit) {
+            'week' => $day->startOfWeek(CarbonImmutable::MONDAY)->toDateString(),
+            'month' => $day->startOfMonth()->toDateString(),
+            default => $day->toDateString(),
+        };
+        $tz = config('app.display_timezone');
+
+        $buckets = [];
+        foreach (CarbonPeriod::create($this->from->toDateString(), $this->to->toDateString()) as $day) {
+            $buckets[$key(CarbonImmutable::parse($day->toDateString(), $tz))] ??= [
+                'visitors' => 0, 'sales' => 0, 'revenue' => 0, 'revenue_doku' => 0, 'revenue_scalev' => 0, 'spend' => 0.0,
+            ];
+        }
+
+        // Distinct visitors per period, so a visitor back on three days of a week is one visitor that week.
+        $period = $this->periodStart('visit_date', $unit);
+        $this->visits()->selectRaw("{$period} as period, count(distinct visitor_id) as n")->groupByRaw($period)->get()
+            ->each(function ($row) use (&$buckets) {
+                $k = CarbonImmutable::parse($row->period)->toDateString();
+                if (isset($buckets[$k])) {
+                    $buckets[$k]['visitors'] = (int) $row->n;
                 }
             });
 
         foreach ($this->sales() as $sale) {
-            $key = $sale['at']->toDateString();
-            if (isset($days[$key])) {
-                $days[$key]['sales']++;
-                $days[$key]['revenue'] += $sale['amount'];
+            $k = $key($sale['at']);
+            if (isset($buckets[$k])) {
+                $buckets[$k]['sales']++;
+                $buckets[$k]['revenue'] += $sale['amount'];
+                $buckets[$k]['revenue_'.$sale['via']] += $sale['amount'];
             }
         }
 
         $this->ads()->selectRaw('date, sum(spend) as spend')->groupBy('date')->get()
-            ->each(function ($row) use (&$days) {
-                $key = CarbonImmutable::parse($row->date)->toDateString();
-                if (isset($days[$key])) {
-                    $days[$key]['spend'] = (float) $row->spend;
+            ->each(function ($row) use (&$buckets, $key, $tz) {
+                $k = $key(CarbonImmutable::parse($row->date, $tz));
+                if (isset($buckets[$k])) {
+                    $buckets[$k]['spend'] += (float) $row->spend;
                 }
             });
 
-        return $days;
+        return $buckets;
+    }
+
+    /** SQL for the first day of the week (Monday) or month a date column falls in. */
+    private function periodStart(string $column, string $unit): string
+    {
+        $driver = DB::connection()->getDriverName();
+
+        return match ($unit) {
+            'week' => match ($driver) {
+                'sqlite' => "date({$column}, '-' || ((cast(strftime('%w', {$column}) as integer) + 6) % 7) || ' days')",
+                'pgsql' => "cast(date_trunc('week', {$column}) as date)",
+                default => "date_sub({$column}, interval weekday({$column}) day)",
+            },
+            'month' => match ($driver) {
+                'sqlite' => "strftime('%Y-%m-01', {$column})",
+                'pgsql' => "cast(date_trunc('month', {$column}) as date)",
+                default => "date_format({$column}, '%Y-%m-01')",
+            },
+            default => $column,
+        };
     }
 
     /** The most visited pages, with time on page per visitor. */
@@ -192,17 +319,17 @@ class OnlineReport
             ->whereBetween('paid_at', [$this->from->utc(), $this->to->utc()]);
     }
 
-    /** @return Collection<int, array{at: CarbonImmutable, amount: int}> in the display timezone */
+    /** @return Collection<int, array{at: CarbonImmutable, amount: int, via: string}> in the display timezone */
     private function sales(): Collection
     {
         $tz = config('app.display_timezone');
 
         return $this->salesCache ??= $this->dokuOrders()->get(['paid_at', 'amount'])
-            ->map(fn (Order $o) => ['at' => CarbonImmutable::parse($o->paid_at)->setTimezone($tz), 'amount' => (int) $o->amount])
+            ->map(fn (Order $o) => ['at' => CarbonImmutable::parse($o->paid_at)->setTimezone($tz), 'amount' => (int) $o->amount, 'via' => 'doku'])
             ->concat(ScalevPurchase::query()
                 ->whereBetween('purchased_at', [$this->from->utc(), $this->to->utc()])
                 ->get(['purchased_at', 'amount'])
-                ->map(fn (ScalevPurchase $p) => ['at' => CarbonImmutable::parse($p->purchased_at)->setTimezone($tz), 'amount' => (int) $p->amount]))
+                ->map(fn (ScalevPurchase $p) => ['at' => CarbonImmutable::parse($p->purchased_at)->setTimezone($tz), 'amount' => (int) $p->amount, 'via' => 'scalev']))
             ->values();
     }
 }

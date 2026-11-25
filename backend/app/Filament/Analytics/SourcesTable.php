@@ -14,7 +14,7 @@ class SourcesTable extends TableWidget
     // Full width: four numeric columns plus a two-line label do not fit beside another table.
     protected int|string|array $columnSpan = 'full';
 
-    protected static ?int $sort = 5;
+    protected static ?int $sort = 6;
 
     public function table(Table $table): Table
     {
