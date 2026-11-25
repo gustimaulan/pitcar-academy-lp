@@ -9,6 +9,7 @@ use App\Models\Course;
 use App\Models\Enrollment;
 use App\Models\Order;
 use App\Models\Student;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -18,7 +19,7 @@ class EnrollmentGrant
      * Opens a course for a student. Safe to call twice: a second call for the
      * same student and course reuses the row, and reopens it if it was revoked.
      */
-    public function grant(Student $student, Course $course, EnrollmentSource $source, ?Order $order = null): Enrollment
+    public function grant(Student $student, Course $course, EnrollmentSource $source, ?Order $order = null, ?User $by = null): Enrollment
     {
         $enrollment = Enrollment::firstOrNew(['student_id' => $student->id, 'course_id' => $course->id]);
 
@@ -26,6 +27,7 @@ class EnrollmentGrant
             $enrollment->fill([
                 'source' => $source,
                 'order_id' => $order?->id,
+                'granted_by' => $by?->id,
                 'granted_at' => now(),
                 'revoked_at' => null,
             ])->save();

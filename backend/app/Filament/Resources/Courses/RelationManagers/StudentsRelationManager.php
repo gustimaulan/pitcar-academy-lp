@@ -3,10 +3,13 @@
 namespace App\Filament\Resources\Courses\RelationManagers;
 
 use App\Enums\EnrollmentSource;
+use App\Filament\Actions\GiveInternalAccess;
 use App\Models\CourseReview;
 use App\Models\Enrollment;
 use App\Models\LessonProgress;
+use App\Services\Lms\InternalAccess;
 use Filament\Actions\Action;
+use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
@@ -16,8 +19,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Who has this class, how far they got, and what they thought of it. Read only:
- * access is granted by payment or from the order list, never edited here.
+ * Who has this class, how far they got, and what they thought of it. Paid access
+ * is granted by payment or from the order list; admins can also open the class
+ * for the team for free, and take that free access back.
  */
 class StudentsRelationManager extends RelationManager
 {
@@ -50,7 +54,7 @@ class StudentsRelationManager extends RelationManager
             ->description($lessonIds->isEmpty() ? 'Kelas ini belum punya video, jadi progres belum bisa dihitung.' : null)
             ->modifyQueryUsing(fn (Builder $query) => $query
                 ->whereNull('revoked_at')
-                ->with('student')
+                ->with(['student', 'grantedBy'])
                 ->addSelect([
                     'watched_total' => $progress()->selectRaw('coalesce(sum(watched_percent), 0)'),
                     'videos_done' => $progress()->whereNotNull('completed_at')->selectRaw('count(*)'),
@@ -95,12 +99,9 @@ class StudentsRelationManager extends RelationManager
                 TextColumn::make('source')
                     ->label('Sumber')
                     ->badge()
-                    ->formatStateUsing(fn (EnrollmentSource $state) => match ($state) {
-                        EnrollmentSource::Doku => 'DOKU',
-                        EnrollmentSource::Scalev => 'Scalev',
-                        EnrollmentSource::Manual => 'Manual',
-                    })
-                    ->color('gray')
+                    ->formatStateUsing(fn (EnrollmentSource $state) => $state->label())
+                    ->color(fn (EnrollmentSource $state) => $state === EnrollmentSource::Internal ? 'info' : 'gray')
+                    ->tooltip(fn (Enrollment $record) => $record->grantedBy ? 'Dibuka oleh '.$record->grantedBy->name : null)
                     ->toggleable(),
 
                 TextColumn::make('granted_at')
@@ -116,11 +117,10 @@ class StudentsRelationManager extends RelationManager
 
                 SelectFilter::make('source')
                     ->label('Sumber')
-                    ->options([
-                        EnrollmentSource::Doku->value => 'DOKU',
-                        EnrollmentSource::Scalev->value => 'Scalev',
-                        EnrollmentSource::Manual->value => 'Manual',
-                    ]),
+                    ->options(EnrollmentSource::options()),
+            ])
+            ->headerActions([
+                GiveInternalAccess::make($course),
             ])
             ->recordActions([
                 Action::make('chat')
@@ -129,6 +129,20 @@ class StudentsRelationManager extends RelationManager
                     ->color('gray')
                     ->url(fn (Enrollment $record) => 'https://wa.me/'.$record->student->whatsapp, shouldOpenInNewTab: true)
                     ->visible(fn (Enrollment $record) => filled($record->student->whatsapp)),
+
+                Action::make('revokeInternal')
+                    ->label('Cabut akses')
+                    ->icon('heroicon-o-no-symbol')
+                    ->color('danger')
+                    ->visible(fn (Enrollment $record) => $record->source === EnrollmentSource::Internal && (auth()->user()?->isAdmin() ?? false))
+                    ->requiresConfirmation()
+                    ->modalHeading(fn (Enrollment $record) => 'Cabut akses '.$record->student->name.'?')
+                    ->modalDescription('Kelas ini langsung tertutup untuk akun tersebut. Progres belajarnya tetap tersimpan kalau akses dibuka lagi.')
+                    ->modalSubmitActionLabel('Cabut')
+                    ->action(function (Enrollment $record) {
+                        app(InternalAccess::class)->revoke($record);
+                        Notification::make()->success()->title('Akses '.$record->student->email.' dicabut')->send();
+                    }),
             ]);
     }
 }

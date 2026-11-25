@@ -1,6 +1,8 @@
 Halo {{ $student->name }},
 
-@if ($course)
+@if ($course && $free)
+Kamu mendapat akses gratis ke {{ $title ?? $course->title }} dari tim Pitcar Academy. Kelasnya sudah terbuka.
+@elseif ($course)
 Pembayaranmu sudah kami terima dan {{ $title ?? $course->title }} sudah terbuka.
 @else
 Ini tautan untuk masuk ke kelasmu.

@@ -26,16 +26,19 @@ class LoginLink
         return $token;
     }
 
-    /** Mails a link. With a course, the mail announces that the class is open. */
-    public function send(Student $student, ?Course $course = null, ?string $title = null): void
+    /**
+     * Mails a link. With a course, the mail announces that the class is open:
+     * after payment, or as free access from the team when $free.
+     */
+    public function send(Student $student, ?Course $course = null, ?string $title = null, bool $free = false): void
     {
         $minutes = (int) config($course ? 'lms.purchase_link_minutes' : 'lms.login_link_minutes');
         $url = config('lms.frontend_url').'/belajar/masuk/?token='.$this->issue($student, $minutes);
 
         try {
-            Mail::to($student->email)->send(new LoginLinkMail($student, $url, $minutes, $course, $title));
+            Mail::to($student->email)->send(new LoginLinkMail($student, $url, $minutes, $course, $title, $free));
         } catch (Throwable $e) {
-            // A mail outage must not undo a payment; the buyer can ask for a new link.
+            // A mail outage must not undo a payment or a grant; the student can ask for a new link.
             report($e);
         }
     }

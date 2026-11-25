@@ -4,7 +4,9 @@
   <div style="max-width:520px;margin:0 auto">
     <p style="margin:0 0 20px;font-weight:700;font-size:18px">Pitcar Academy</p>
     <p style="margin:0 0 12px">Halo {{ $student->name }},</p>
-    @if ($course)
+    @if ($course && $free)
+      <p style="margin:0 0 12px">Kamu mendapat akses gratis ke <strong>{{ $title ?? $course->title }}</strong> dari tim Pitcar Academy. Kelasnya sudah terbuka.</p>
+    @elseif ($course)
       <p style="margin:0 0 12px">Pembayaranmu sudah kami terima dan <strong>{{ $title ?? $course->title }}</strong> sudah terbuka.</p>
     @else
       <p style="margin:0 0 12px">Ini tautan untuk masuk ke kelasmu.</p>
