@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Enums\CourseStatus;
+use App\Enums\EnrollmentSource;
 use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreCheckoutRequest;
@@ -86,9 +87,13 @@ class CheckoutController extends Controller
 
         $offers = $course->offers()->available()->with('offerCourse')->get();
 
-        // Shown on the sales page as "bergabung dengan N siswa lain". Asked on
-        // every visit, so it is counted at most once a minute.
-        $students = Cache::remember('course-students:'.$course->id, 60, fn () => $course->enrollments()->whereNull('revoked_at')->count());
+        // Shown on the sales page as "bergabung dengan N siswa lain": buyers
+        // only, not the team's free access. Asked on every visit, so it is
+        // counted at most once a minute.
+        $students = Cache::remember('course-students:'.$course->id, 60, fn () => $course->enrollments()
+            ->whereNull('revoked_at')
+            ->where('source', '!=', EnrollmentSource::Internal)
+            ->count());
 
         return response()->json([
             'course' => self::coursePayload($course) + ['students' => $students],

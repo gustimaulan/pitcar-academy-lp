@@ -2,6 +2,7 @@
 
 namespace App\Services\Ai;
 
+use App\Enums\EnrollmentSource;
 use App\Enums\OrderStatus;
 use App\Models\Course;
 use App\Models\CourseReview;
@@ -87,7 +88,9 @@ class BusinessTools
             'title' => $c->title,
             'status' => $c->status?->value ?? $c->status,
             'price' => (int) $c->price,
-            'students' => $c->enrollments()->whereNull('revoked_at')->count(),
+            // Buyers; free access for the team is counted apart.
+            'students' => $c->enrollments()->whereNull('revoked_at')->where('source', '!=', EnrollmentSource::Internal)->count(),
+            'team_access' => $c->enrollments()->whereNull('revoked_at')->where('source', EnrollmentSource::Internal)->count(),
             'videos' => $c->lessons()->count(),
             'rating' => ($avg = CourseReview::where('course_id', $c->id)->avg('rating')) ? round((float) $avg, 2) : null,
             'ratings' => CourseReview::where('course_id', $c->id)->count(),

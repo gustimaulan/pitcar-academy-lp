@@ -11,7 +11,7 @@ use Illuminate\Mail\Mailables\Envelope;
 class LoginLinkMail extends Mailable
 {
     /** With a course, this is the "your class is open" mail sent after payment. */
-    public function __construct(public Student $student, public string $url, public int $minutes, public ?Course $course = null, public ?string $title = null) {}
+    public function __construct(public Student $student, public string $url, public int $minutes, public ?Course $course = null, public ?string $title = null, public bool $free = false) {}
 
     public function envelope(): Envelope
     {

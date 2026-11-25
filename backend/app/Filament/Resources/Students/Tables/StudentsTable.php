@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Students\Tables;
 
+use App\Enums\EnrollmentSource;
 use App\Models\Course;
 use App\Models\LessonProgress;
 use App\Models\Student;
@@ -80,6 +81,11 @@ class StudentsTable
                     ->options(fn () => Course::query()->orderBy('title')->pluck('title', 'id')->all())
                     ->query(fn (Builder $query, array $data) => $query->when($data['value'] ?? null, fn (Builder $q, $id) => $q
                         ->whereHas('enrollments', fn (Builder $e) => $e->where('course_id', $id)->whereNull('revoked_at')))),
+
+                Filter::make('internal')
+                    ->label('Akses gratis tim internal')
+                    ->query(fn (Builder $query) => $query->whereHas('enrollments', fn (Builder $e) => $e
+                        ->where('source', EnrollmentSource::Internal)->whereNull('revoked_at'))),
 
                 // Paid, got access, never came in: the first ones to message.
                 Filter::make('never_logged_in')
