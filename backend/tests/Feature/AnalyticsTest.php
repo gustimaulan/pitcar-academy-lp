@@ -9,6 +9,7 @@ use App\Filament\Analytics\AnalyticsStats;
 use App\Filament\Analytics\CampaignsTable;
 use App\Filament\Analytics\LiveVisitors;
 use App\Filament\Analytics\PagesTable;
+use App\Filament\Analytics\RevenueChart;
 use App\Filament\Analytics\SourcesTable;
 use App\Filament\Pages\MetaAdsSettings;
 use App\Filament\Pages\OnlineAnalytics;
@@ -191,6 +192,88 @@ class AnalyticsTest extends TestCase
         $this->assertSame(1, $sources['meta']['sales']);
     }
 
+    public function test_all_time_reaches_back_to_the_oldest_sale(): void
+    {
+        $this->seedPeriod();
+
+        $report = OnlineReport::forFilters(['range' => 'all']);
+        $s = $report->summary();
+
+        // The Scalev order from 40 days ago is outside "30 days" but inside all time.
+        $this->assertSame(3, $s['sales']);
+        $this->assertSame(397000, $s['revenue']);
+        $this->assertSame(CarbonImmutable::now('Asia/Jakarta')->subDays(40)->toDateString(), $report->from->toDateString());
+    }
+
+    public function test_all_time_with_nothing_on_record_is_today(): void
+    {
+        $report = OnlineReport::forFilters(['range' => 'all']);
+
+        $this->assertSame(CarbonImmutable::now('Asia/Jakarta')->toDateString(), $report->from->toDateString());
+        $this->assertSame([0], array_column($report->series(), 'revenue'));
+    }
+
+    public function test_a_custom_range_counts_only_its_days(): void
+    {
+        $this->seedPeriod();
+        $day = CarbonImmutable::now('Asia/Jakarta')->subDays(40);
+
+        $report = OnlineReport::forFilters(['range' => 'custom', 'from' => $day->subDay()->toDateString(), 'until' => $day->addDay()->toDateString()]);
+        $this->assertSame(1, $report->summary()['sales']);
+        $this->assertSame(149000, $report->summary()['revenue']);
+
+        // Dates picked the wrong way round are swapped rather than giving an empty range.
+        $swapped = OnlineReport::forFilters(['range' => 'custom', 'from' => $day->addDay()->toDateString(), 'until' => $day->subDay()->toDateString()]);
+        $this->assertSame($report->from->toDateString(), $swapped->from->toDateString());
+        $this->assertSame($report->to->toDateString(), $swapped->to->toDateString());
+
+        // A half-filled custom range still shows something sensible.
+        $this->assertCount(30, OnlineReport::forFilters(['range' => 'custom'])->daily());
+    }
+
+    public function test_long_ranges_are_charted_per_week_or_month(): void
+    {
+        $this->travelTo(CarbonImmutable::parse('2026-11-25 10:00', 'Asia/Jakarta')); // a Wednesday
+        $tz = 'Asia/Jakarta';
+        $visitor = (string) Str::uuid();
+        // The same person on Monday and Wednesday of one week is one visitor that week.
+        foreach (['2026-11-23', '2026-11-25'] as $date) {
+            PageVisit::create(['id' => (string) Str::uuid(), 'visitor_id' => $visitor, 'visit_date' => $date, 'path' => '/', 'source' => 'direct', 'device' => 'mobile', 'duration_seconds' => 10, 'started_at' => now()]);
+        }
+        PageVisit::create(['id' => (string) Str::uuid(), 'visitor_id' => (string) Str::uuid(), 'visit_date' => '2026-11-22', 'path' => '/', 'source' => 'direct', 'device' => 'mobile', 'duration_seconds' => 10, 'started_at' => now()]);
+
+        $course = Course::create(['title' => 'Kelas AC', 'slug' => 'kelas-online-ac', 'price' => 99000, 'status' => CourseStatus::Published]);
+        $student = Student::create(['name' => 'Budi', 'email' => 'budi@example.test']);
+        // 23:30 WIB on Sunday the 22nd is 16:30 UTC: it belongs to the week of the 16th.
+        Order::create(['number' => 'PA0000000000SUN1', 'student_id' => $student->id, 'course_id' => $course->id, 'amount' => 99000, 'status' => OrderStatus::Paid, 'paid_at' => CarbonImmutable::parse('2026-11-22 23:30', $tz)->utc()]);
+        Order::create(['number' => 'PA0000000000MON1', 'student_id' => $student->id, 'course_id' => $course->id, 'amount' => 99000, 'status' => OrderStatus::Paid, 'paid_at' => CarbonImmutable::parse('2026-11-23 08:00', $tz)->utc()]);
+        ScalevPurchase::create(['order_id' => 'SC1', 'customer_name' => 'Sari', 'amount' => 149000, 'purchased_at' => CarbonImmutable::parse('2026-11-24 12:00', $tz)->utc()]);
+        ScalevPurchase::create(['order_id' => 'SC0', 'customer_name' => 'Lama', 'amount' => 149000, 'purchased_at' => CarbonImmutable::parse('2025-06-10 12:00', $tz)->utc()]);
+        AdSpendDaily::create(['date' => '2026-11-23', 'campaign_id' => '1', 'campaign_name' => 'AC', 'spend' => 1000, 'link_clicks' => 1, 'purchases' => 0]);
+        AdSpendDaily::create(['date' => '2026-11-24', 'campaign_id' => '1', 'campaign_name' => 'AC', 'spend' => 2000, 'link_clicks' => 1, 'purchases' => 0]);
+
+        $weekly = OnlineReport::forFilters(['range' => 'custom', 'from' => '2026-01-01', 'until' => '2026-11-25']);
+        $this->assertSame('week', $weekly->unit());
+        $series = $weekly->series();
+        $this->assertSame('2025-12-29', array_key_first($series)); // the Monday of the week holding 1 January
+        $this->assertSame(['visitors' => 1, 'sales' => 2, 'revenue' => 248000, 'revenue_doku' => 99000, 'revenue_scalev' => 149000, 'spend' => 3000.0], $series['2026-11-23']);
+        $this->assertSame(1, $series['2026-11-16']['visitors']);
+        $this->assertSame(99000, $series['2026-11-16']['revenue_doku']);
+
+        $monthly = OnlineReport::forFilters(['range' => 'all']);
+        $this->assertSame('month', $monthly->unit());
+        $series = $monthly->series();
+        $this->assertSame('2025-06-01', array_key_first($series));
+        $this->assertSame(2, $series['2026-11-01']['visitors']);
+        $this->assertSame(347000, $series['2026-11-01']['revenue']);
+        $this->assertSame('Jun 2025', $monthly->label('2025-06-01'));
+
+        Livewire::test(RevenueChart::class, ['pageFilters' => ['range' => 'all']])
+            ->assertSee('Pendapatan per bulan')
+            ->assertSee('Total Rp496.000')
+            ->assertSee('tertinggi Nov 2026 (Rp347.000)');
+    }
+
     public function test_meta_spend_is_pulled_per_campaign_per_day(): void
     {
         AppSetting::put(MetaAds::ACCOUNT, '1234567890');
@@ -254,6 +337,8 @@ class AnalyticsTest extends TestCase
         Livewire::test(PagesTable::class, ['pageFilters' => ['range' => '30']])->assertSee('Kelas AC mobil');
         Livewire::test(SourcesTable::class, ['pageFilters' => ['range' => '30']])->assertSee('Facebook / Instagram');
         Livewire::test(CampaignsTable::class, ['pageFilters' => ['range' => '30']])->assertSee('AC November');
+        Livewire::test(RevenueChart::class, ['pageFilters' => ['range' => '30']])->assertSee('Pendapatan per hari')->assertSee('Total Rp248.000');
+        Livewire::test(RevenueChart::class, ['pageFilters' => ['range' => 'custom', 'from' => now()->subDays(50)->toDateString(), 'until' => now()->toDateString()]])->assertSee('Total Rp397.000');
     }
 
     public function test_the_admin_connects_meta_from_the_panel(): void

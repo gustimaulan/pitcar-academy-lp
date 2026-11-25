@@ -7,15 +7,18 @@ use App\Filament\Analytics\AnalyticsStats;
 use App\Filament\Analytics\CampaignsTable;
 use App\Filament\Analytics\LiveVisitors;
 use App\Filament\Analytics\PagesTable;
+use App\Filament\Analytics\RevenueChart;
 use App\Filament\Analytics\SourcesTable;
 use App\Filament\Analytics\VisitorsSalesChart;
 use App\Models\AppSetting;
 use App\Services\Analytics\MetaAds;
 use BackedEnum;
 use Carbon\CarbonImmutable;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Pages\Dashboard;
 use Filament\Pages\Dashboard\Concerns\HasFiltersForm;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use UnitEnum;
@@ -56,9 +59,20 @@ class OnlineAnalytics extends Dashboard
                     '90' => '90 hari terakhir',
                     'this_month' => 'Bulan ini',
                     'last_month' => 'Bulan lalu',
+                    'all' => 'Sepanjang waktu',
+                    'custom' => 'Pilih tanggal',
                 ])
                 ->default('30')
                 ->selectablePlaceholder(false),
+            DatePicker::make('from')
+                ->label('Dari')
+                ->maxDate(fn (Get $get) => $get('until') ?: now(config('app.display_timezone')))
+                ->visible(fn (Get $get) => $get('range') === 'custom'),
+            DatePicker::make('until')
+                ->label('Sampai')
+                ->minDate(fn (Get $get) => $get('from'))
+                ->maxDate(now(config('app.display_timezone')))
+                ->visible(fn (Get $get) => $get('range') === 'custom'),
         ]);
     }
 
@@ -87,6 +101,7 @@ class OnlineAnalytics extends Dashboard
         return [
             LiveVisitors::class,
             AnalyticsStats::class,
+            RevenueChart::class,
             VisitorsSalesChart::class,
             AdSpendChart::class,
             PagesTable::class,

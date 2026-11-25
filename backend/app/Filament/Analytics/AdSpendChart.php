@@ -3,7 +3,6 @@
 namespace App\Filament\Analytics;
 
 use App\Services\Analytics\MetaAds;
-use Carbon\CarbonImmutable;
 use Filament\Widgets\ChartWidget;
 
 class AdSpendChart extends ChartWidget
@@ -13,13 +12,16 @@ class AdSpendChart extends ChartWidget
     // Sums over the whole range; once a minute is fresh enough and spares the database.
     protected ?string $pollingInterval = '60s';
 
-    protected static ?int $sort = 3;
+    protected static ?int $sort = 4;
 
     protected int|string|array $columnSpan = 'full';
 
-    protected ?string $heading = 'Biaya iklan Meta dan penjualan per hari';
-
     protected ?string $maxHeight = '320px';
+
+    public function getHeading(): string
+    {
+        return 'Biaya iklan Meta dan penjualan '.$this->perUnit();
+    }
 
     public function getDescription(): ?string
     {
@@ -30,7 +32,8 @@ class AdSpendChart extends ChartWidget
 
     protected function getData(): array
     {
-        $days = $this->report()->daily();
+        $report = $this->report();
+        $days = $report->series();
 
         return [
             'datasets' => [
@@ -55,7 +58,7 @@ class AdSpendChart extends ChartWidget
                     'order' => 2,
                 ],
             ],
-            'labels' => array_map(fn ($d) => CarbonImmutable::parse($d)->locale('id')->translatedFormat('d M'), array_keys($days)),
+            'labels' => array_map($report->label(...), array_keys($days)),
         ];
     }
 
